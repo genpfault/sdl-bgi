@@ -1,0 +1,33 @@
+README
+------
+
+This is SDL_bgi, a graphics library based on SDL 1.2 and SDL_gfx.
+
+SDL_bgi is largely compatible with BGI, the Borland Graphics Interface
+that was the de-facto standard in PC graphics back in DOS days. It's
+very easy to use, and it also provides extensions for RGB colours and
+mouse support. It should run on any platform supported by SDL (only
+tested in Linux).
+
+Unlike other BGI-compatible libraries, the purpose of SDL_bgi is not
+full compatibility with BGI. Rather, it is meant to be an easy
+introduction to SDL-based graphics: SDL and BGI commands can be mixed
+together. Some functions are purposely not implemented for performance
+reasons: for instance, setactivepage()/setvisualpage().
+
+You must have SDL and SDL_gfx to compile programs with SDL_bgi. Please
+see examples in src/test/ directory. Time permitting, future releases
+will be based on SDL only, or SDL2 only when it becomes less buggy.
+
+Links:
+
+0. http://www.cs.colorado.edu/~main/cs1300/doc/bgi/
+1. https://www.libsdl.org/
+2. http://cms.ferzkopp.net/index.php/software/13-sdl-gfx
+3. https://en.wikipedia.org/wiki/Borland_Graphics_Interface
+4. http://libxbgi.sourceforge.net/
+
+This library is licensed under the Zlib license; please see the file
+LICENSE.
+
+Brought to you by Guido Gonzato, PhD <guido.gonzato at gmail.com>

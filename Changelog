@@ -1,0 +1,14 @@
+SDL_bgi Changelog
+-----------------
+
+v. 1.0.0, 2014-11-07
+- Initial release.
+
+v. 1.0.1, 2014-12-09
+- Fixed minor bugs in putpixel() (reported by Angelo Graziosi)
+- changed getimage()/putimage() to include width, heigth info
+  in saved bitmap
+- changed getimage()/putimage() to include viewport info
+- fixed MAXCOLOR value (reported by Angelo Graziosi)
+- fixed kbhit() behaviour (reported by Angelo Graziosi) - but breaks
+  mouseclick() as a result. To be fixed later.

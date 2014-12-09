@@ -1,0 +1,94 @@
+Test programs for SDL_bgi
+-------------------------
+By Guido Gonzato, PhD
+
+
+1. 'bgidemo' is Borland's demo program for Turbo/Borland C. It
+compiles unmodified, but some parts don't work as expected. Dummy
+dos.h and conio.h are needed by this program.
+
+2. 'cellular.c' is a cellular automaton program. For more information,
+please see http://mathworld.wolfram.com/CellularAutomaton.html
+
+3. 'dla.c' is a diffusion limited aggregation program; please see
+http://en.wikipedia.org/wiki/Diffusion-limited_aggregation
+
+4. 'f90_test' show how to use SDL_bgi in Fortran programs. Kindly
+provided by Angelo Graziosi.
+
+5. 'fern' is a famous IFS system; please see
+http://en.wikipedia.org/wiki/Iterated_function_system
+
+6. 'floodfilltest.c' demonstrates the speed of the new floodfill()
+routine.
+
+7. 'hopalong' is an implementation of Barry Martin's algorithm,
+presented in the September 1986 issue of Scientific American. Run it
+as ./hopalong <seed>, where <seed> is an integer number.
+
+8. 'life.c' is an implementation of Conway's Game of Life. Run it as
+./life [number], where [number] is the percentage of living cells.
+
+9. 'mandelbrot.c' is a simple, non-optimised program to display the
+Mandelbrot set. It shows how to setup and use RGB colour mode. Press
+'1', '2', '3' to change palette; left click to zoom in on a point;
+right click to zoom out; middle click to restore the initial boundary.
+
+10. 'mousetest.c' shows how to detect and use mouse clicks. Click
+around using all buttons and mouse wheel.
+
+11. 'moveit.c' shows how to use movement keys.
+
+12. 'simple.c' displays simple shapes to test SDL_bgi's speed.
+'simple-fast.c' is the same program written in a way that makes it
+faster.
+
+13. 'turtledemo.c' uses a simple yet powerful turtle graphics
+implementation to draw fractals and simple shapes.
+
+
+Notes on Turtle Graphics
+------------------------
+
+Turtle graphics is based on polar coordinates: you draw lines
+specifying a distance in pixels and an angle in degrees, called
+"heading" (0-359). Heading is the same as the bearing of a compass: it
+starts from 0 ("North") and increases clockwise.
+
+For a thorough explanation, please read:
+http://en.wikipedia.org/wiki/Turtle_Graphics
+
+Commands available are:
+
+void back (int);              move the turtle backwards by <int> pixels
+void forwd (int);             move the turtle forwards by <int> pixels
+int  heading (void);          get the turtle heading (0-359)
+void hideturtle (void);       hide the turtle
+void home (void);             move the turtle to the screen centre
+                              and set the heading to 0
+void pendown (void);          activate drawing (put the pen down)
+void penup (void);            suspend drawing (lift the pen)
+void setheading (int);        set the turtle heading to <int> (0-359)
+void setposition (int, int);  move the turtle to <x>, <y>
+void showturtle (void);       show the turtle
+void turnleft (int);          turn the turtle left by <int> degrees
+void turnright (int);         turn the turns right by <int> degrees
+void wrap (void);             wrap around the window
+void nowrap (void);           don't wrap around the window
+int  xcor (void);             get the turtle's X coordinate
+int  ycor (void);             get the turtle's Y coordinate
+
+By default, the turtle is not visible, the pen is down, and the
+heading is 0.
+
+Constants:
+
+T_TRUE       1
+T_FALSE      0
+T_NORTH      0
+T_EAST      90
+T_SOUTH    180
+T_WEST     270
+
+Please read turtle.h for more details.
+

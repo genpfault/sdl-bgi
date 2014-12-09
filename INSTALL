@@ -1,0 +1,26 @@
+Installing SDL_bgi
+------------------
+
+Please make sure you have SDL 1.2 and SDL_gfx. On Ubuntu and similar
+distributions, please install the packages libsdl1.2-dev,
+libsdl2-gfx-dev, and their dependencies.
+
+To compile and install the SDL_bgi library:
+
+  cd src
+  make
+  sudo make install
+
+which will copy SDL_bgi.h to /usr/include/SDL/, and libSDL_bgi.so to
+/usr/lib.
+
+To compile some test programs:
+
+  make test
+
+To remove the library, do:
+
+  cd src
+  sudo make uninstall
+
+Enjoy!

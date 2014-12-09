@@ -1,0 +1,183 @@
+Compiling programs with SDL_bgi
+-------------------------------
+
+Unlike other BGI-compatible libraries, the main purpose of SDL_bgi is
+not to provide a drop-in replacement for Borland BGI. While
+compatibility with old BGI is very important, a few minor differences
+were introduced to take advantage of modern SDL graphics.
+
+To port an old BGI program to SDL_bgi, in many cases all you have to
+do is change the line that reads:
+
+  #include <graphics.h>
+
+to
+
+  #include "SDL_bgi.h"
+
+but you could also do:
+
+  sudo ln -s /usr/include/SDL/SDL_bgi.h /usr/include/graphics.h
+
+which lets you leave old programs untouched - unless they also include
+dos.h and conio.h, which you'll have to remove.
+
+The only real difference is how the screen is refreshed. To actually
+display graphics after drawing it, you must call the refresh()
+command, which calls SDL_Flip(). This is the major difference between
+old BGI and modern graphics: in the former, every graphics command was
+immediately followed by a screen refresh. This was very inefficient.
+
+You can choose whether to open the graphics system using initgraph(),
+which toggles BGI compatibility and forces a refresh after every
+graphics command, or initwindow() that leaves you in charge of
+refreshing the screen when needed. The second method is much faster.
+
+Documentation and sample BGI programs are available at this address:
+http://www.cs.colorado.edu/~main/cs1300/doc/bgi/
+Most programs can be compiled with SDL_bgi.
+
+To compile a program:
+
+  gcc -o program program.c -lSDL_bgi -lSDL_gfx -lSDL
+
+Most old programs that use the original BGI library should compile
+with no modification. For instance,
+
+  int gd = DETECT, gm;
+  initgraph (&gd, &gm, "");
+
+will open a 800x600 window (mimicking SVGA graphics). To specify the
+window size, you can use the new X11 driver:
+
+  gd = X11;
+  gm = <mode>;
+
+where <mode> can be one of the following:
+
+  X11_640x480     640x480
+  X11_800x600     800x600
+  X11_1024x768    1024x768
+  X11_1152x900    1152x900
+  X11_1280x1024   1280x1024
+  X11_1366x768    1366x768
+  X11_FULLSCREEN  full screen
+
+You may want to use initwindow(int width, int height) instead.
+
+
+Differences
+-----------
+
+- The following functions are present but not implemented (i.e. they
+may be called but do nothing):
+
+  _graphfreemem       - unneeded; not used by floodfill()
+  _graphgetmem        - unneeded; not used by floodfill()
+  installuserdriver   - it makes no sense in SDL
+  installuserfont
+  registerbgidriver   - it makes no sense in SDL
+  registerbgifont     - it makes no sense in SDL
+  restorecrtmode      - it just clears the window
+  setactivepage
+  setvisualpage
+  setgraphbufsize     - unneeded; not used by floodfill()
+  setgraphmode        - it just returns to the open window
+
+- line drawing only supports COPY_PUT.
+
+- floodfill() only uses SOLID_FILL.
+
+- setpalette() only affects future drawing. That is, you can't
+implement a "rotating palette animation" as in Turbo C.
+
+- bitmap fonts are included, and they correspond to the BGI fonts as
+follows:
+
+  8x8   -> DEFAULT_FONT
+  7x13  -> TRIPLEX_FONT
+  5x8   -> SMALL_FONT
+  9x18  -> SANSSERIF_FONT
+  10x20 -> GOTHIC_FONT
+  10x20 -> BIG_FONT (addition)
+
+
+Additions
+---------
+
+Some functions and macros were added to add functionality in a manner
+compatible with other BGI implementations like Xbgi.
+
+- void initwindow(int width, int height) lets you open a window
+specifying its dimensions.
+
+- void detectgraph(int *gd, int *gm) detects X11, X11_FULLSCREEN.
+
+- void setrgbpalette(int color, int r, int g, int b) sets an
+additional palette containing RGB colours (up to MAXRGBCOLORS + 1).
+See example in test/mandelbrot.c.
+
+- void setrgbcolor(int col) and void setbkrgbcolor(int col) are the
+RGB equivalent of setcolor(int col) and setbkcolor(int col). 'col' is
+an allocated colour entry in the RGB palette.
+
+- COLOR(int r, int g, int b) can be used as an argument for
+setcolor(int col) and setbkcolor(int col), as an alternative to 
+setrgbcolor(int col) and setbkrgbcolor(int col). Allocating colours
+with setrgbpalette() and using setrgbcolor() is much faster, though.
+
+- IS_BGI_COLOR(int c) and IS_RGB_COLOR(int c) return 1 if the current
+colour is standard BGI or RGB, respectively.
+
+- RED_VALUE(int c), GREEN_VALUE(int c), and BLUE_VALUE(int c) return
+the R, G, B component of an RGB colour.
+
+- void _putpixel (int x, int y) is equivalent to putpixel (int x, int
+y, int col), but uses the current drawing colour.
+
+- random(range) is defined as macro: rand()%range
+
+- int kbhit(), provided by conio.h in Turbo C/Borland C++, returns 1
+when any key is pressed, including Shift, Alt, and so on.
+
+- int getch() waits for a key and returns its ASCII code. Special keys
+are also reported, please see SDL_bgi.h.
+
+- void delay(msec) waits for msec milliseconds.
+
+- int mouseclick(void) returns the code of the mouse button that was
+clicked, or 0 if none was clicked. Mouse buttons are defined in
+SDL_bgi.h:
+
+  WM_LBUTTONDOWN  1
+  WM_MBUTTONDOWN  2
+  WM_RBUTTONDOWN  3
+  WM_WHEELUP      4
+  WM_WHEELDOWN    5
+
+- int mousex(void) and int mousey(void) return the mouse coordinates
+of the last click.
+
+- int ismouseclick (int kind) returns 1 if the 'kind' mouse button was
+clicked.
+
+- void getmouseclick (int kind, int&x, int&y) sets the x, y
+coordinates of the last button click expected by ismouseclick().
+
+- int getevent(void) waits for a keypress or mouse click, and returns the
+code of the mouse button or key that was pressed.
+
+- int event(void) is a non-blocking version of getevent().
+
+
+Bugs & Issues
+-------------
+
+kbhit() gets all events from the event queue. As a result,
+mouseclick() won't work correctly; see floodfilltest.c.
+
+Colours don't have the same RGB values as the original BGI colours.
+But they look better (IMHO).
+
+Probably, this documentation is not 100% accurate. Your feedback is
+more than welcome.
