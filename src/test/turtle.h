@@ -2,7 +2,7 @@
  * turtle.h	-*- C -*-
  * 
  * turtle graphics for BGI-compatible libraries
- * Tested with xbgi and grx
+ * Tested with xbgi, SDL_bgi and grx
  * 
  * By Guido Gonzato <guido.gonzato at gmail.com>
  * January 2013
@@ -34,7 +34,7 @@ void setheading (int);        /* set the turtle heading */
 void setposition (int, int);  /* move the turtle to new coordinates */
 void showturtle (void);       /* show the turtle */
 void turnleft (int);          /* turs the turtle left */
-void turnright (int);         /* turn the turns right */
+void turnright (int);         /* turn the turtle right */
 void wrap (void);             /* wrap around the window */
 void nowrap (void);           /* don't wrap around the window */
 int  xcor (void);             /* return the turtle's X */
@@ -48,4 +48,4 @@ int  ycor (void);             /* return the turtle's Y */
 #define  T_SOUTH 180
 #define  T_WEST  270
 
-/* End of turtle.h */
+// ----- end of file turtle.h

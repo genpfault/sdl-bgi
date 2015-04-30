@@ -1,12 +1,12 @@
 /* life.c  -*- C -*-
  * 
  * To compile:
- * gcc -o life life.c SDL_bgi.c -lSDL -lSDL_gfx -lm
+ * gcc -o life life.c -lSDL_bgi -lSDL2
  * 
  * Simple cellular automata, as described at
  * http://mathworld.wolfram.com/ElementaryCellularAutomaton.html
  * 
- * By Guido Gonzato, September 2014.
+ * By Guido Gonzato, May 2015.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
 #define SIZE 500
 #define ALIVE 1
@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
   
   closegraph ();
   
-}
+} // main(void) ()
 
 // -----
 
@@ -91,7 +91,7 @@ void print_cells (char cells[SIZE][SIZE])
 	color = BLUE;
       putpixel (x, y, color);
     }
-}
+} // print_cells ()
 
 // -----
 
@@ -130,4 +130,6 @@ void evolve_cells (char old[SIZE][SIZE], char new[SIZE][SIZE])
           new[x][y] = old[x][y];
     }
   
-}
+} // evolve_cells ()
+
+// ----- end of file life.c

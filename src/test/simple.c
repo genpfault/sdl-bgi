@@ -1,9 +1,9 @@
 /* simple.c  -*- C -*-
  * 
  * To compile:
- * gcc -o simple simple.c SDL_bgi.c -lSDL -lSDL_gfx -lm
+ * gcc -o simple simple.c -lSDL_bgi -lSDL2
  * 
- * By Guido Gonzato, March 2013.
+ * By Guido Gonzato, May 2015.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,77 +23,135 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
-/* ----- */
+int i, stop, maxx, maxy;
 
-int main ()
+// -----
+
+void message (char *str)
 {
-
-  int i, col, gd, gm, x, y, stop = 0;
-  
-  gd = X11;
-  gm = X11_1024x768;
-  initgraph (&gd, &gm, "");
-  
-  setbkcolor (BLACK);
   cleardevice ();
-  x = getmaxx ();
-  y = getmaxy ();
+  settextstyle (DEFAULT_FONT, HORIZ_DIR, 2);
+  settextjustify (CENTER_TEXT, CENTER_TEXT);
+  setcolor (RED);
+  outtextxy (maxx / 2, maxy / 2, str);
+  settextstyle (DEFAULT_FONT, HORIZ_DIR, 1);
+  setcolor (YELLOW);
+  outtextxy (maxx / 2, maxy - 20, "Press a key to continue");
+  getch ();
+  cleardevice ();
+  settextjustify (LEFT_TEXT, TOP_TEXT);
 
-  /* circles */
+} // message ()
+
+// -----
+
+void circles (void)
+{
+  stop = 0;
+  
+  while (! stop) {
+    setcolor (YELLOW);
+    outtextxy (0, 0, "Press a key to continue");
+    for (i = 0; i < 300; i++) {
+      setcolor (BLACK + random (MAXCOLORS));
+      circle  (random (maxx), random(maxy), random (100));
+    }
+    refresh ();
+    delay (1000);
+    cleardevice ();
+    if (kbhit ())
+      stop = 1;
+  } // while
+
+} // circles ()
+
+// ---
+
+void lines (void)
+{
+  stop = 0;
+  
   while (! stop) {
     setcolor (YELLOW);
     outtextxy (0, 0, "Press a key to continue");
     for (i = 0; i < 500; i++) {
-      setcolor (1 + random (15));
-      circle  (random(x), random(y), random (100));
+      setlinestyle (SOLID_LINE, 0, NORM_WIDTH);
+      setcolor (BLACK + random (MAXCOLORS));
+      line (random(maxx), random(maxy), random(maxx), random(maxy));
     }
-    sleep (1);
+    refresh ();
+    delay (1000);
     cleardevice ();
     if (kbhit ())
       stop = 1;
-  }
+  } // while
+
+} // lines ()
+
+// -----
+
+void pixels (void)
+{
+  int col;
   stop = 0;
   
-  /* lines */
   while (! stop) {
     setcolor (YELLOW);
     outtextxy (0, 0, "Press a key to continue");
-    for (i = 0; i < 500; i++) {
-      setlinestyle (SOLID_LINE, 0, 1 + random(THICK_WIDTH));
-      setcolor (1 + random (15));
-      line (random(x), random(y), random(x), random(y));
+    srand (2015);
+    for (i = 0; i < 300; i++) {
+      col = BLACK + random (MAXCOLORS);
+      putpixel (random(maxx), random(maxy), col);
     }
-    sleep (1);
-    cleardevice ();
-    if (kbhit ())
-      stop = 1;
-  }
-  stop = 0;
-  
-  /* pixels */
-  while (! stop) {
-    setcolor (YELLOW);
-    outtextxy (0, 0, "Press a key to exit");
-    srand (2014);
-    for (i = 0; i < 1000; i++) {
-      col = 1 + random (MAXCOLORS);
-      putpixel (random(x), random(y), col);
-    }
-    sleep (1);
-    srand (2014);
-    for (i = 0; i < 1000; i++) {
+    refresh ();
+    delay (1000);
+    srand (2015);
+    for (i = 0; i < 300; i++) {
       col = 1 + random (MAXCOLORS); /* keep random () in sync */
-      putpixel (random(x), random(y), BLACK);
+      putpixel (random(maxx), random(maxy), BLACK);
       if (kbhit ())
 	stop = 1;
     }
-    sleep (1);
+    refresh ();
+    delay (1000);
     cleardevice ();
-  }
+  } // while
+ 
+} // pixels ()
+
+// -----
+
+int main (void)
+{
+
+  int gd, gm;
   
+  gd = DETECT;
+  initgraph (&gd, &gm, "");
+  maxx = getmaxx ();
+  maxy = getmaxy ();
+  setbkcolor (BLACK);
+  cleardevice ();
+  
+  message ("Drawing in SLOW mode:");
+  bgislow ();
+
+  circles ();
+  lines ();
+  pixels ();
+  
+  message ("Drawing in FAST mode:");
+  bgifast ();
+  
+  circles ();
+  lines ();
+  pixels ();
+  
+  getch ();
   closegraph ();
-  return 0;
   
 }
+
+// ----- end of file simple.c

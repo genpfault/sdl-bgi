@@ -26,26 +26,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
 #include "turtle.h"
 
-/* ----- */
+// -----
 
-static int t_x = 0, t_y = 0;           /* turtle coordinates */
-static int t_heading = 0;              /* turtle heading */
+static int t_x = 0, t_y = 0;           // turtle coordinates
+static int t_heading = 0;              // turtle heading
 
-static int t_show_turtle = T_FALSE;    /* draw the turtle? */
-static int t_pen_down = T_TRUE;        /* draw? */
-static int t_turtle_drawn = T_TRUE;    /* has the turtle been drawn? */
-static int t_turtle_wrap = T_FALSE;    /* wrap around the window? */
+static int t_show_turtle = T_FALSE;    // draw the turtle?
+static int t_pen_down = T_TRUE;        // draw?
+static int t_turtle_drawn = T_TRUE;    // has the turtle been drawn?
+static int t_turtle_wrap = T_FALSE;    // wrap around the window?
 
 static void draw_turtle (void);
 static void undraw_turtle (void);
 
-/* sine and cosine tables for polar graphics. The angle
- * starts at pi/2 and increases clockwise: -(angle-90)
- */
+// sine and cosine tables for polar graphics. The angle
+// starts at pi/2 and increases clockwise: -(angle-90)
+
 
 static double t_sin[360] =
 {1.000000,  0.999848,  0.999391,  0.998630,  0.997564,  
@@ -120,7 +120,7 @@ static double t_sin[360] =
   0.965926,  0.970296,  0.974370,  0.978148,  0.981627,  
   0.984808,  0.987688,  0.990268,  0.992546,  0.994522,  
   0.996195,  0.997564,  0.998630,  0.999391,  0.999848 };
-/* t_sin[360] */
+// t_sin[360]
   
 static double t_cos[360] =
 {0.000000,  0.017452,  0.034899,  0.052336,  0.069756,  
@@ -195,23 +195,23 @@ static double t_cos[360] =
   -0.258819,  -0.241922,  -0.224951,  -0.207912,  -0.190809,  
   -0.173648,  -0.156434,  -0.139173,  -0.121869,  -0.104528,  
   -0.087156,  -0.069756,  -0.052336,  -0.034899,  -0.017452};
-/* t_cos[360] */
+// t_cos[360]
 
-/* ----- */
+// -----
 
 void setheading (int angle)
 {
-  t_heading = angle % 360; /* avoid overflows */
+  t_heading = angle % 360; // avoid overflows
 }
 
-/* ----- */
+// -----
 
 int heading (void)
 {
   return (t_heading);
 }
 
-/* ----- */
+// -----
 
 void home (void)
 {
@@ -220,29 +220,20 @@ void home (void)
   setheading (0);
 }
 
-/* ----- */
+// -----
 
 void forwd (int n)
 {
-#if __GNUC__
-  short int newx, newy;
-#else
   int newx, newy;
-#endif
-  /* why short int instead of int? I noticed a strange bug 
-   * that occurs when compiling with gcc 4.6.3 on my Linux Mint 13.
-   * Compiling with tcc or clang produces no errors. xvertext
-   * memory leak in xbgi-ptoc, maybe?
-   */
   
   newx = (int) ((double) n * t_cos[t_heading]);
   newy = (int) ((double) n * t_sin[t_heading]);
   
-  /* is the turtle visible? */
+  // is the turtle visible?
   if (t_show_turtle && t_turtle_drawn)
     undraw_turtle ();
   
-  /* should we draw? */
+  // should we draw?
   if (t_pen_down)
     line (t_x, t_y, t_x + newx, t_y - newy);
 
@@ -252,24 +243,22 @@ void forwd (int n)
   if (t_show_turtle)
     draw_turtle ();
   
-  /* is wrapping active? */
+  // is wrapping active?
   if (t_turtle_wrap) {
     if (t_x < 0)
       t_x = getmaxx () - t_x;
     if (t_x > getmaxx ())
       t_x = t_x - getmaxx ();
     
-    /* BUG HERE! using gcc, and defining t_y as integer, 
-     * sometimes it overflows and turns < 0 */
     if (t_y < 0)
       t_y = getmaxy () - t_y;
     if (t_y > getmaxy ())
       t_y = t_y - getmaxy ();
   }
   
-} /* forwd */
+} // forwd
 
-/* ----- */
+// -----
 
 void back (int n)
 {
@@ -278,21 +267,21 @@ void back (int n)
   turnleft (180);
 }
 
-/* ----- */
+// -----
 
 void pendown (void)
 {
   t_pen_down = T_TRUE;
 }
 
-/* ----- */
+// -----
 
 void penup (void)
 {
   t_pen_down = T_FALSE;
 }
 
-/* ----- */
+// -----
 
 void turnleft (int n)
 {
@@ -301,7 +290,7 @@ void turnleft (int n)
     t_heading += 360;
 }
 
-/* ----- */
+// -----
 
 void turnright (int n)
 {
@@ -310,34 +299,34 @@ void turnright (int n)
     t_heading -= 360;
 }
 
-/* ----- */
+// -----
 
 int xcor (void)
 {
   return (t_x);
 }
 
-/* ----- */
+// -----
 
 int ycor (void)
 {
   return (t_y);
 }
 
-/* ----- */
+// -----
 
 void draw_turtle (void)
 {
-  setwritemode(XOR_PUT);
+  setwritemode (XOR_PUT);
   
-  /* maybe too simple but convenient :-) */
+  // maybe too simple but convenient :-)
   circle (t_x, t_y, 10);
   
-  setwritemode(COPY_PUT);
+  setwritemode (COPY_PUT);
   t_turtle_drawn = T_TRUE;
 }
 
-/* ----- */
+// -----
 
 void undraw_turtle (void)
 {
@@ -345,7 +334,7 @@ void undraw_turtle (void)
   t_turtle_drawn = T_FALSE;
 }
 
-/* ----- */
+// -----
 
 void showturtle (void)
 {
@@ -353,7 +342,7 @@ void showturtle (void)
   t_show_turtle = T_TRUE;
 }
 
-/* ----- */
+// -----
 
 void hideturtle (void)
 {
@@ -361,7 +350,7 @@ void hideturtle (void)
   t_show_turtle = T_FALSE;
 }
 
-/* ----- */
+// -----
 
 void setposition (int x, int y)
 {
@@ -369,18 +358,18 @@ void setposition (int x, int y)
   t_y = y;
 }
 
-/* ----- */
+// -----
 
 void wrap (void)
 {
   t_turtle_wrap = T_TRUE;
 }
 
-/* ----- */
+// -----
 
 void nowrap (void)
 {
   t_turtle_wrap = T_FALSE;
 }
 
-/* ----- End of turtle.c */
+// ----- end of file turtle.c

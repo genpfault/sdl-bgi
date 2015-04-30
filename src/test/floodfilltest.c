@@ -1,9 +1,9 @@
-/* mousetest.c  -*- C -*-
+/* floodfilltest.c  -*- C -*-
  * 
  * To compile:
- * gcc -o mousetest mousetest.c SDL_bgi.c -lSDL -lSDL_gfx -lm
+ * gcc -o floodfilltest floodfilltest.c -lSDL_bgi -lSDL2
  * 
- * By Guido Gonzato, October 2013.
+ * By Guido Gonzato, May 2015.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,18 +23,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
-/* ----- */
+// -----
 
-int main ()
+int main (void)
 {
 
-  int stop = 0, gd, gm, c, p, x, y;
+  int
+    stop = 0,
+    c, p,
+    x, y;
   
-  gd = X11;
-  gm = X11_800x600;
-  initgraph (&gd, &gm, "");
+  initwindow (800, 600);
   setbkcolor (BLACK);
   setcolor (RED);
   cleardevice ();
@@ -62,7 +63,8 @@ int main ()
       }
       else 
 	if (WM_RBUTTONDOWN == p) {
-	  setcolor (random (MAXCOLORS));
+	  // setcolor (random (MAXCOLORS));
+	  setcolor (COLOR (random (255), random (255), random (255)));
 	  floodfill (mousex (), mousey (), YELLOW);
 	  // added!
 	  refresh ();
@@ -77,3 +79,5 @@ int main ()
   return 0;
   
 }
+
+// ----- end of file floodfilltest.c

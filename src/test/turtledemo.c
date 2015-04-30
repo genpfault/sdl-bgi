@@ -6,7 +6,7 @@
  * 
  * To compile this program:
  * 
- * gcc -o turtledemo turtledemo.c turtle.c SDL_bgi.c -lSDL -lSDL_gfx -lm
+ * gcc -o turtledemo turtledemo.c turtle.c -lSDL_bgi -lSDL2
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
 #include "turtle.h"
 
-/* ----- */
+// -----
 
 void koch (int len, int level)
 {
@@ -50,9 +50,10 @@ void koch (int len, int level)
     turnleft (60);
     koch (newlen, level - 1);
   }
-}
 
-/* ----- */
+} // koch ()
+
+// -----
 
 void tree (int len, int level)
 {
@@ -71,9 +72,10 @@ void tree (int len, int level)
     forwd (len);
     pendown ();
   }
-}
 
-/* ----- */
+} // tree ()
+
+// -----
 
 void sq_koch (int len, int level)
 {
@@ -97,9 +99,10 @@ void sq_koch (int len, int level)
     turnright (90);
     sq_koch (len / 4, level - 1);
   }
-}
 
-/* ----- */
+} // sq_koch ()
+
+// -----
 
 void star (int len)
 {
@@ -108,9 +111,9 @@ void star (int len)
     forwd (len);
     turnright (144);
   }
-}
+} // star ()
 
-/* ----- */
+// -----
 
 void star_6 (int len)
 {
@@ -121,9 +124,9 @@ void star_6 (int len)
     forwd (len);
     turnleft (60);
   }
-}
+} // star_6
 
-/* ----- */
+// -----
 
 void star_20 (int len)
 {
@@ -132,14 +135,14 @@ void star_20 (int len)
     forwd (len);
     turnright (162);
   }
-}
+} // star_20
 
-/* ----- */
+// -----
 
 void hilbert_left (int, int);
 void hilbert_right (int, int);
 
-/* ----- */
+// -----
 
 void hilbert_left (int len, int level)
 {
@@ -176,9 +179,9 @@ void hilbert_left (int len, int level)
     
   }
   
-} /* hilbert_left () */
+} // hilbert_left ()
 
-/* ----- */
+// -----
 
 void hilbert_right (int len, int level)
 {
@@ -215,9 +218,9 @@ void hilbert_right (int len, int level)
     
   }
 
-}
+} // hilbert_right ()
 
-/* ----- */
+// -----
 
 int powerof2 (int ex)
 {
@@ -225,22 +228,20 @@ int powerof2 (int ex)
   for (i = 0; i < ex; i++)
     n *= 2;
   return (n);
-}
+} // powerof2 ()
 
-/* ----- */
+// -----
 
-int main ()
+int main (void)
 {
-  int i, l, x, y, xc, gd, gm;
+  int i, l, x, y, xc;
   char s[32];
 
-  gd = X11;
-  gm = X11_1024x768;
-  initgraph (&gd, &gm, "");
+  initwindow (0, 0);
 
   setbkcolor (BLACK);
 
-  /* Koch */
+  // Koch
   for (i = 0; i < 6; i++) {
     cleardevice ();
     setcolor (GREEN);
@@ -251,13 +252,13 @@ int main ()
     koch (getmaxx () + 1, i);
     // added!
     refresh ();
-    usleep (500000);
+    delay (200);
   }
   setcolor (YELLOW);
   outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
   getch ();
 
-  /* fractal tree */
+  // fractal tree
   for (i = 0; i < 14; i++) {
     cleardevice ();
     setcolor (YELLOW);
@@ -267,13 +268,13 @@ int main ()
     tree (getmaxy () / 3, i);
     // added!
     refresh ();
-    usleep (500000);
+    delay (200);
   }
   setcolor (YELLOW);
   outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
   getch ();
 
-  /* square Koch */
+  // square Koch
   for (i = 0; i < 6; i++) {
     cleardevice ();
     setcolor (RED);
@@ -284,13 +285,13 @@ int main ()
     sq_koch (getmaxx () + 1, i);
     // added!
     refresh ();
-    usleep (500000);
+    delay (200);
   }
   setcolor (YELLOW);
   outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
   getch ();
 
-  /* rotating square */
+  // rotating square
   cleardevice ();
   setcolor (RED);
   outtextxy (0, 0, "Rotating square:");
@@ -312,7 +313,7 @@ int main ()
   outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
   getch ();
 
-  /* Hilbert */
+  // Hilbert
   setbkcolor (WHITE);
   cleardevice ();
   xc = getmaxx () / 2;
@@ -336,8 +337,9 @@ int main ()
   }
   outtextxy (0, 0, "PRESS A KEY TO EXIT:");
   
-  /* stars */
-  while (! kbhit ()) {
+  int stop = 0;
+  // stars
+  while (! stop) {
     setposition (random (getmaxx ()), random (getmaxy ()));
     setheading (random (360));
     setcolor (1 + random (15));
@@ -346,10 +348,15 @@ int main ()
     star_20 (random (40));
     // added!
     refresh ();
-    usleep (50000);
+    delay (200);
+    if (kbhit ())
+      stop = 1;
   }
   
   closegraph ();
   return (0);
   
-}
+} // main ()
+
+// ----- end of file turtledemo.c
+

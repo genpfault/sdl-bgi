@@ -12,6 +12,10 @@ void bar (int left, int top, int right, int bottom);
 
 int BLUE_VALUE (int color);
 
+// void bgifast (void);
+
+// void bgislow (void);
+
 void circle (int x, int y, int radius);
 
 void cleardevice (void);
@@ -22,7 +26,7 @@ void closegraph (void);
 
 int COLOR(int r, int g, int b);
 
-void delay(int millisec) (macro)
+void delay(int millisec)
 
 void detectgraph (int *graphdriver, int *graphmode);
 
@@ -37,6 +41,8 @@ void fillellipse (int x, int y, int xradius, int yradius);
 void fillpoly (int numpoints, int *polypoints);
 
 void floodfill (int x, int y, int border);
+
+int  getactivepage (void);
 
 void getarccoords (struct arccoordstype *arccoords);
 
@@ -87,6 +93,8 @@ unsigned int getpixel (int x, int y);
 void gettextsettings (struct textsettingstype *texttypeinfo);
 
 void getviewsettings (struct viewporttype *viewport);
+
+int  getvisualpage (void);
 
 int getx (void);
 
@@ -148,6 +156,8 @@ void putpixel (int x, int y, int color);
 
 int random (int range) (macro)
 
+void readimagefile (char *, int, int, int, int);
+
 void rectangle (int left, int top, int right, int bottom);
 
 int RED_VALUE (int color);
@@ -162,7 +172,7 @@ void restorecrtmode (void);
 
 void sector (int x, int y, int stangle, int endangle, int xradius, int yradius);
 
-// void setactivepage (int page);
+void setactivepage (int page);
 
 void setallpalette (struct palettetype *palette); 
 
@@ -198,9 +208,11 @@ void setusercharsize (int multx, int divx, int multy, int divy);
 
 void setviewport (int left, int top, int right, int bottom, int clip);
 
-/// void setvisualpage (int page);
+void setvisualpage (int page);
 
 void setwritemode (int mode);
+
+void swapbuffers (void);
 
 int textheight (char *textstring);
 

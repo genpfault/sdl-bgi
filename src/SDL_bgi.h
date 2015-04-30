@@ -1,30 +1,35 @@
-/* SDL_bgi.h	-*- C -*-
- * 
- * A BGI-like graphics library based on SDL and SDL_gfx.
- * Easy to use and useful for porting old programs.
- * Guido Gonzato, December 2014.
- *
- */
+// SDL_bgi.h	-*- C -*-
+ 
+// A BGI-like graphics library based on SDL2.
+// Easy to use and useful for porting old programs.
+// Guido Gonzato, April 2015.
 
-#include <unistd.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_gfxPrimitives.h>
-#include <SDL/SDL_rotozoom.h>
+#include <SDL2/SDL.h>
+
+// everything gets drawn here
+
+extern SDL_Window   *bgi_window;
+extern SDL_Renderer *bgi_renderer;
+extern SDL_Texture  *bgi_texture;
+
+// available visual pages
+
+#define VPAGES 2
 
 // BGI fonts
 
 #define DEFAULT_FONT     0 // 8x8
-#define TRIPLEX_FONT     1 // 7x13
-#define SMALL_FONT       2 // 5x8
-#define SANSSERIF_FONT   3 // 9x18
-#define GOTHIC_FONT      4 // 10x20
-#define BIG_FONT         5 // 16x26
-#define SCRIPT_FONT      6 // 10x20
-#define SIMPLEX_FONT     7 // 10x20
-#define TRIPLEX_SCR_FONT 8 // 10x20
-#define COMPLEX_FONT     9 // 10x20
-#define EUROPEAN_FONT    10 // 10x20
-#define BOLD_FONT        11 // 10x20
+#define TRIPLEX_FONT     1
+#define SMALL_FONT       2
+#define SANSSERIF_FONT   3
+#define GOTHIC_FONT      4
+#define BIG_FONT         5
+#define SCRIPT_FONT      6
+#define SIMPLEX_FONT     7
+#define TRIPLEX_SCR_FONT 8
+#define COMPLEX_FONT     9
+#define EUROPEAN_FONT    10
+#define BOLD_FONT        11
 
 #define HORIZ_DIR      0
 #define VERT_DIR       1
@@ -95,8 +100,8 @@
 #define WM_LBUTTONDOWN  SDL_BUTTON_LEFT
 #define WM_MBUTTONDOWN  SDL_BUTTON_MIDDLE
 #define WM_RBUTTONDOWN  SDL_BUTTON_RIGHT
-#define WM_WHEELUP      SDL_BUTTON_WHEELUP
-#define WM_WHEELDOWN    SDL_BUTTON_WHEELDOWN
+#define WM_WHEELUP      SDL_MOUSEWHEEL
+#define WM_WHEELDOWN    SDL_MOUSEWHEEL
 #define WM_MOUSEMOVE    SDL_MOUSEMOTION
 
 #define PALETTE_SIZE    4096
@@ -142,34 +147,30 @@
 
 #define DETECT          0
 #define grOk            0
-#define X11_CGALO       0
-#define X11_CGAHI       1
+#define SDL_CGALO       0
+#define SDL_CGAHI       1
 #define EGA             2
+#define EGAHI           2
 #define EGALO           2
-#define X11_EGA         2
-#define X11             3
+#define SDL_EGA         2
+#define SDL             3
 #define VGA             3
-#define X11_VGA         3
-#define X11_640x480     3
-#define X11_HERC        4
-#define X11_PC3270      5
-#define X11_SVGALO      6
-#define X11_800x600     6
-#define X11_SVGAMED1    7
-#define X11_1024x768    7
-#define X11_SVGAMED2    8
-#define X11_1152x900    8
-#define X11_SVGAHI      9
-#define X11_1280x1024   9
-#define X11_WXGA        10
-#define X11_1366x768    10
-#define X11_USER        11
-#define X11_FULLSCREEN  12
-
-// everything gets drawn here
-
-extern SDL_Surface *BGI;
-extern int button;
+#define SDL_VGA         3
+#define SDL_640x480     3
+#define SDL_HERC        4
+#define SDL_PC3270      5
+#define SDL_SVGALO      6
+#define SDL_800x600     6
+#define SDL_SVGAMED1    7
+#define SDL_1024x768    7
+#define SDL_SVGAMED2    8
+#define SDL_1152x900    8
+#define SDL_SVGAHI      9
+#define SDL_1280x1024   9
+#define SDL_WXGA        10
+#define SDL_1366x768    10
+#define SDL_USER        11
+#define SDL_FULLSCREEN  12
 
 // structs
 
@@ -220,12 +221,6 @@ struct viewporttype {
   int clip;
 };
 
-struct bgi_info {
-  int colour_index;
-  char *colour_name;
-  unsigned long pixel_value;
-};
-
 // prototypes
 
 void arc (int, int, int, int, int);
@@ -237,7 +232,7 @@ void cleardevice ();
 void clearviewport ();
 void closegraph (void);
 int  COLOR (int, int, int);
-#define delay(msec)   (usleep (msec*1000))
+void delay (int msec);
 void detectgraph (int *, int *);
 void drawpoly (int, int *);
 void ellipse (int, int, int, int, int, int);
@@ -246,6 +241,7 @@ void fillellipse (int, int, int, int);
 void fillpoly (int, int *);
 void floodfill (int, int, int);
 void freeimage (void *);
+int  getactivepage (void);
 void getarccoords (struct arccoordstype *);
 void getaspectratio (int *, int *);
 int  getbkcolor (void);
@@ -271,6 +267,7 @@ int  getpalettesize (struct palettetype *);
 unsigned int getpixel (int, int);
 void gettextsettings (struct textsettingstype *);
 void getviewsettings (struct viewporttype *);
+int  getvisualpage (void);
 int  getx (void);
 int  gety (void);
 void graphdefaults ();
@@ -301,12 +298,15 @@ void _putpixel (int, int);
 void putimage (int, int, void *, int);
 void putpixel (int, int, int);
 #define random(range) (rand() % (range))
+void readimagefile (char *, int, int, int, int);
 void rectangle (int, int, int, int);
 int  RED_VALUE (int );
 void refresh (void);
 int  registerbgidriver (void *);
 int  registerbgifont (void *);
 void restorecrtmode (void);
+void sdlbgifast (void);
+void sdlbgislow (void);
 void sector (int, int, int, int, int, int);
 void setactivepage (int);
 void setallpalette (struct palettetype *);
@@ -314,6 +314,7 @@ void setaspectratio (int, int);
 void setbkcolor (int);
 void setbkrgbcolor (int);
 void setcolor (int);
+void setalpha (int, Uint8);
 void setfillpattern (char *, int); 
 void setfillstyle (int, int);
 unsigned int setgraphbufsize (unsigned int);
@@ -328,8 +329,9 @@ void settextjustify (int, int);
 void settextstyle (int, int, int);
 void setusercharsize (int, int, int, int);
 void setviewport (int, int, int, int, int);
-void setvisualpage (int); // TODO
+void setvisualpage (int);
 void setwritemode (int);
+void swapbuffers (void);
 int  textheight (char *);
 int  textwidth (char *);
 

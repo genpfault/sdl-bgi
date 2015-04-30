@@ -1,16 +1,10 @@
 TODO
 ----
 
-SDL_BGI is basically a wrapper to SDL_gfx, which is an excellent
-graphics library that provides most graphics functions. Unfortunately,
-its pixel-level routines don't implement some features, such as XOR
-plotting and line/fill patterns.
+- a few BGI functions are missing, as explained in Using.txt.
 
-To make SDL_bgi a standalone library, the following should be done:
+- other functions are not optimally implemented: filled curves and
+polygons ought to use Bresenham-based algorithms.
 
-- write a putpixel() function that supports logical operators. All
-graphics routines will be based on the new putpixel().
-
-- reimplement routines like line(), circle(), ellipse(), ...
-
-- implement some code for simple font handling.
+Got little time and lots of things to do. Please feel free to
+contribute!

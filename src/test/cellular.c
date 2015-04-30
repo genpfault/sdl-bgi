@@ -1,12 +1,12 @@
 /* cellular.c  -*- C -*-
  * 
  * To compile:
- * gcc -o cellular cellular.c SDL_bgi.c -lSDL -lSDL_gfx -lm
+ * gcc -o cellular cellular.c -lSDL_bgi -lSDL2
  * 
  * Simple cellular automata, as described at
  * http://mathworld.wolfram.com/ElementaryCellularAutomaton.html
  * 
- * By Guido Gonzato, September 2013.
+ * By Guido Gonzato, May 2015.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,16 +26,19 @@
 
 #include <stdio.h>
 #include <math.h>
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
-/* ----- */
-
-// this program is intentionally inefficient, since getpixel () is slow.
+// -----
 
 void run_rule (int rule)
 {
   int i, x, y, maxx, maxy, pixel;
+  
   maxx = getmaxx ();
+
+  // for an explanation about rules, please see
+  // http://mathworld.wolfram.com/CellularAutomaton.html
+  
   maxy = getmaxy ();
   
   for (y = 20; y < 20 + maxx / 2; y++)
@@ -53,10 +56,10 @@ void run_rule (int rule)
 	  if (pixel == 7 - i)
 	    putpixel (x, y, RED);
 	  
-    } /* for x */
+    } // for
 }
 
-/* ----- */
+// -----
 
 int main (int argc, char **argv)
 {
@@ -81,10 +84,9 @@ int main (int argc, char **argv)
     outtextxy (0, 0, s);
     putpixel (getmaxx () / 2, 20, RED);
     run_rule (rule);
-    // added!
     refresh ();
-    sleep (2);
-    if (event ())
+    delay (2000);
+    if (kbhit ()) // warning - keep key pressed
       stop = 1;
     cleardevice ();
   }
@@ -92,3 +94,5 @@ int main (int argc, char **argv)
   closegraph ();
   return 0;
 }
+
+// ----- end of file cellular.c

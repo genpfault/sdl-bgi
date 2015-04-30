@@ -1,8 +1,10 @@
-SDL_bgi Changelog
------------------
+Changelog
+---------
 
-v. 1.0.0, 2014-11-07
-- Initial release.
+
+v. 2.0.0, 2015-04-30
+- rewritten to use SDL2 only.
+- added readimagefile (), logical plotting (XOR, etc.).
 
 v. 1.0.1, 2014-12-09
 - Fixed minor bugs in putpixel() (reported by Angelo Graziosi)
@@ -12,3 +14,6 @@ v. 1.0.1, 2014-12-09
 - fixed MAXCOLOR value (reported by Angelo Graziosi)
 - fixed kbhit() behaviour (reported by Angelo Graziosi) - but breaks
   mouseclick() as a result. To be fixed later.
+
+v. 1.0.0, 2014-11-07
+- Initial release.

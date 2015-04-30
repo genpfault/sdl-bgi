@@ -1,9 +1,9 @@
 /* moveit.c  -*- C -*-
  * 
  * To compile:
- * gcc -o moveit moveit.c SDL_bgi.c -lSDL -lSDL_gfx -lm
+ * gcc -o moveit moveit.c -lSDL_bgi -lSDL2
  * 
- * By Guido Gonzato, March 2013.
+ * By Guido Gonzato, May 2015.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,18 +25,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
-/* ----- */
+// -----
 
-int main ()
+int main (void)
 {
 
   int c, gd, gm, x, y;
   
-  gd = X11;
-  gm = X11_1024x768;
+  gd = SDL;
+  gm = SDL_1024x768;
   initgraph (&gd, &gm, "");
+  
   setbkcolor (BLACK);
   setcolor (YELLOW);
   cleardevice ();
@@ -99,4 +100,7 @@ int main ()
   closegraph ();
   return 0;
   
-}
+} // main ()
+
+// ----- end of file moveit.c
+

@@ -1,11 +1,11 @@
 /* dla.c  -*- C -*-
  * 
  * To compile:
- * gcc -o dla dla.c SDL_bgi.c -lSDL -lSDL_gfx -lm
+ * gcc -o dla dla.c -lSDL_bgi -lSDL2
  * 
  * Diffusion limited aggregation.
  * 
- * By Guido Gonzato, October 2014.
+ * By Guido Gonzato, May 2015.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
-#define SIZE1 1024
-#define SIZE2 768
+#define SIZE1 800
+#define SIZE2 600
 #define ALIVE 1
 #define DEAD  0
 
@@ -40,7 +40,7 @@ unsigned long iterations;
 
 // -----
 
-int main ()
+int main (void)
 {
   int x, y, stop = 0;
   unsigned int percent;
@@ -55,23 +55,24 @@ int main ()
   for (x = 0; x < 10; x++) 
     screen[random(SIZE1)][random(SIZE2)] = 1; // initial seeds
   
-  gd = X11;
-  gm = X11_1024x768;
+  gd = SDL;
+  gm = SDL_800x600;
   initgraph (&gd, &gm, "");
   
   setbkcolor (BLACK);
   cleardevice ();
-  refresh ();
   iterations = 0;
   
   while (! stop) {
     
     // lay a particle
     random_walk ();
+    refresh ();
     
-    if (iterations % 1000)
+    if (iterations % 5000) {
       if (kbhit ())
 	stop = 1;
+    }
   }
   
   closegraph ();
@@ -157,9 +158,10 @@ void random_walk (void)
     
   } while (! done);
   
-  color = iterations % 50000;
+  color = 1 + iterations % 5000;
+  // setcolor (COLOR (128 + color, 255 - color, 128 + color) );
   putpixel (x, y, COLOR (128 + color, 255 - color, 128 + color) );
   
 }
 
-// end of file
+// ----- end of file dla.c

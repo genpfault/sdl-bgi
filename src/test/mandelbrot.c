@@ -1,9 +1,9 @@
 /* mandelbrot.c  -*- C -*-
  * 
  * To compile:
- * gcc -o mandelbrot mandelbrot.c SDL_bgi.c -lSDL -lSDL_gfx -lm
+ * gcc -o mandelbrot mandelbrot.c -lSDL_bgi -lSDL2
  * 
- * By Guido Gonzato, March 2013.
+ * By Guido Gonzato, May 2015
  * 
  * This is an unoptimised, simple but effective program for plotting
  * the Mandelbrot set. Left click to zoom in on a point, right click
@@ -28,7 +28,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
 int max_iter = 100;
 int maxx, maxy;
@@ -39,7 +39,7 @@ void amber_palette (void);
 void blue_palette (void);
 void purple_palette (void);
 
-/* ----- */
+// -----
 
 void mandelbrot (double x1, double y1, double x2, double y2)
 {
@@ -83,9 +83,10 @@ void mandelbrot (double x1, double y1, double x2, double y2)
     x += dx;
     
   } // x
-}
 
-/* ----- */
+} // mandelbrot ()
+
+// -----
 
 void amber_palette (void)
 {
@@ -95,9 +96,10 @@ void amber_palette (void)
   for (c = 0; c < max_iter; c++)
     setrgbpalette (c, max_iter - c, 50 + 2 * c, c);
   setrgbpalette (max_iter, 0x30, 0, 0x30); // the Mandelbrot set is purple
-}
 
-/* ----- */
+} // amber_palette ()
+
+// -----
 
 void purple_palette (void)
 {
@@ -106,9 +108,10 @@ void purple_palette (void)
   for (c = 0; c < max_iter; c++)
     setrgbpalette (c, 50 + 2 * c, c, max_iter - c);
   setrgbpalette (max_iter, 0, 0, 0); // the Mandelbrot set is black
-}
 
-/* ----- */
+} // purple_palette ()
+
+// -----
 
 void blue_palette (void)
 {
@@ -117,21 +120,25 @@ void blue_palette (void)
   for (c = 0; c < max_iter; c++)
     setrgbpalette (c, 0, c, 50 + 2 * c);
   setrgbpalette (max_iter, 0, 0, 0); // the Mandelbrot set is black
-}
 
-/* ----- */
+} // blue_palette ()
+
+// -----
 
 int click (void)
 {
   int p = mouseclick ();
   return (p > 0 && p < WM_MOUSEMOVE);
-}
+} // click ()
 	
 // -----
 
 void explain (void)
 {
-  int i = 0, inc = 1, c;
+  int
+    i = 0,
+    inc = 5,
+    c;
   
   setbkcolor (COLOR (0, 0, 32)); // don't use a palette
   cleardevice ();
@@ -143,7 +150,7 @@ void explain (void)
   // cleardevice ();
   // alternatively, use setrgbcolor() or setbkrgbcolor()
 
-  settextstyle (GOTHIC_FONT, HORIZ_DIR, 1);
+  settextstyle (GOTHIC_FONT, HORIZ_DIR, 2);
   settextjustify (CENTER_TEXT, CENTER_TEXT);
   c = textheight ("H");
   outtextxy (maxx / 2, maxy / 2 - 3*c,
@@ -165,29 +172,28 @@ void explain (void)
     outtextxy (maxx / 2, maxy / 2 + 4*c, "PRESS A KEY OR CLICK TO BEGIN");
     i += inc;
     if (255 == i)
-      inc = -1;
+      inc = -5;
     if (0 == i)
-      inc = 1;
+      inc = 5;
     delay(1);
+    refresh ();
   }
   cleardevice ();
   
   settextstyle (DEFAULT_FONT, HORIZ_DIR, 1);
   settextjustify (LEFT_TEXT, TOP_TEXT);
   
-}
+} // explain ()
 
-/* ----- */
+// -----
 
-int main ()
+int main (void)
 {
   int palette, c, init, redraw, flag;
   double xm, ym, xstep, ystep, x1, y1, x2, y2;
   char s[20];
   
-  initwindow (0, 0);
-  // int gd = DETECT, gm = X11_FULLSCREEN;
-  // initgraph (&gd, &gm, "");
+  initwindow (0, 0); // fullscreen
   
   maxx = getmaxx ();
   maxy = getmaxy ();
@@ -237,7 +243,6 @@ int main ()
       break;
       
     case WM_RBUTTONDOWN:
-    case WM_WHEELDOWN:
       xstep *= 2;
       ystep *= 2;
       init = 0;
@@ -302,4 +307,7 @@ int main ()
 
   return 0;
   
-}
+} // main(void) ()
+
+// ----- end of file mandelbrot.c
+

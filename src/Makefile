@@ -3,12 +3,12 @@
 SRC = SDL_bgi.c
 OBJ = SDL_bgi.o
 LIB = libSDL_bgi.so
-INC_DIR = /usr/include/SDL/
+INC_DIR = /usr/include/SDL2/
 LIB_DIR = /usr/lib/
 
 # C compiler: tested with gcc and clang
 CC = gcc
-CFLAGS = -O2 -g -c -Wall -fpic
+CFLAGS = -O2 -g -c -Wall -fpic -lm
 
 .PHONY : all
 all: $(LIB)

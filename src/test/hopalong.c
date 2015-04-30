@@ -1,9 +1,9 @@
 /* hopalong.c  -*- C -*-
  * 
  * To compile:
- * gcc -o hopalong hopalong.c SDL_bgi.c -lSDL -lSDL_gfx -lm
+ * gcc -o hopalong hopalong.c -lSDL_bgi -lSDL2
  * 
- * By Guido Gonzato, March 2013.
+ * By Guido Gonzato, May 2015.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,16 +25,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
-/* ----- */
+// -----
 
 int sgn (float n)
 {
   return (n < 0) ? -1: 1;
 }
 
-/* ----- */
+// -----
 
 int main (int argc, char **argv)
 {
@@ -44,22 +44,21 @@ int main (int argc, char **argv)
   float j, k, x, y, xx, xp, yp, r, xoffs, yoffs;
   
   if (argc == 2)
-    seed = atoi (argv [1]); /* no checks! */
+    seed = atoi (argv [1]); // no checks!
   else {  
     printf ("Seed: ");
     j = scanf ("%d", &seed);
   }
   srand (seed);
   
-  // gd = X11;
-  // gm = getmaxmode ();
-  detectgraph (&gd, &gm);
+  gd = SDL;
+  gm = getmaxmode ();
   initgraph(&gd, &gm, "");
   
   setbkcolor (BLACK);
   cleardevice ();
   setcolor (YELLOW);
-  outtextxy (0, 0, "Press a key or right click to exit: ");
+  outtextxy (0, 0, "Press a key or click to exit: ");
   
   xoffs = getmaxx () / 2;
   yoffs = getmaxy () / 3;
@@ -77,6 +76,7 @@ int main (int argc, char **argv)
     yp = y * 2 + yoffs;
     _putpixel (xp, yp);
     if (++counter == 50000) {
+      refresh ();
       counter = 0;
       setcolor (COLOR (random (256), random (256), random (256)));
       refresh ();
@@ -88,3 +88,5 @@ int main (int argc, char **argv)
   closegraph ();
   return 0;
 }
+
+// ----- end of file hopalong.c

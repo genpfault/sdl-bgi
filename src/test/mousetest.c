@@ -1,9 +1,9 @@
 /* mousetest.c  -*- C -*-
  * 
  * To compile:
- * gcc -o mousetest mousetest.c /usr/lib/libXbgi.a -lX11 -lm
+ * gcc -o mousetest mousetest.c -lSDL_bgi -lSDL2
  * 
- * By Guido Gonzato, August 2013.
+ * By Guido Gonzato, May 2015
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,19 +23,19 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "SDL_bgi.h"
+#include <SDL2/SDL_bgi.h>
 
-/* ----- */
+// -----
 
-int main ()
+int main (void)
 {
 
   int gd, gm, c, p, x, y;
   char s[] = "Click around (or here to exit)";
   int len;
   
-  gd = X11;
-  gm = X11_1024x768;
+  gd = SDL;
+  gm = SDL_1024x768;
   initgraph (&gd, &gm, "");
   setbkcolor (BLACK);
   setcolor (RED);
@@ -84,4 +84,7 @@ int main ()
   closegraph ();
   return 0;
   
-}
+} // main ()
+
+// ----- end of file mousetest.c
+
