@@ -1,6 +1,6 @@
 Summary:    BGI-compatible 2D graphics C library
 Name:       SDL_bgi
-Version:    2.0.0
+Version:    2.0.1
 Release:    1
 License:    ZLib
 Group:      Libraries
@@ -14,7 +14,7 @@ BuildRoot:  %{_tmppath}/%{name}-%{version}-buildroot
 This package contains a Borland Graphics Interface (BGI) emulation
 library based on SDL2. This library strictly emulates most BGI
 functions, making it possible to compile SDL versions of programs
-written for Turbo/Borland C. RGB extensions and basic mouse support
+written for Turbo/Borland C. ARGB extensions and basic mouse support
 are also implemented.
 
 %prep
@@ -45,7 +45,9 @@ else
 fi
 
 %%postun
-echo "Warning - /usr/include/graphics.h not deleted."
+if [ -r /usr/include/graphics.h ]; then
+  echo "Warning - /usr/include/graphics.h not deleted."
+fi
 
 %files
 %defattr(644,root,root,755)
@@ -55,6 +57,9 @@ echo "Warning - /usr/include/graphics.h not deleted."
 %attr(644,root,root) %{_includedir}/SDL2/*
 
 %changelog
+* Tue May 12 2015 Guido Gonzato <guido.gonzato at gmail.com>
+Version 2.0.1.
+
 * Thu Apr 30 2015 Guido Gonzato <guido.gonzato at gmail.com>
 Version 2.0.
 

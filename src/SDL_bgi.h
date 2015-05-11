@@ -2,9 +2,11 @@
  
 // A BGI-like graphics library based on SDL2.
 // Easy to use and useful for porting old programs.
-// Guido Gonzato, April 2015.
+// Guido Gonzato PhD, May 2015.
 
 #include <SDL2/SDL.h>
+
+#define SDL_BGI_VERSION 2.0.1
 
 // everything gets drawn here
 
@@ -171,6 +173,29 @@ extern SDL_Texture  *bgi_texture;
 #define SDL_1366x768    10
 #define SDL_USER        11
 #define SDL_FULLSCREEN  12
+
+// libXbgi compatibility
+
+#define X11_CGALO       SDL_CGALO
+#define X11_CGAHI       SDL_CGAHI
+#define X11_EGA         SDL_EGA
+#define X11             SDL
+#define X11_VGA         SDL_VGA
+#define X11_640x480     SDL_640x480
+#define X11_HERC        SDL_HERC
+#define X11_PC3270      SDL_PC3270
+#define X11_SVGALO      SDL_SVGALO
+#define X11_800x600     SDL_800x600
+#define X11_SVGAMED1    SDL_SVGAMED1
+#define X11_1024x768    SDL_1024x768
+#define X11_SVGAMED2    SDL_SVGAMED2
+#define X11_1152x900    SDL_1152x900
+#define X11_SVGAHI      SDL_SVGAHI
+#define X11_1280x1024   SDL_1280x1024
+#define X11_WXGA        SDL_WXGA
+#define X11_1366x768    SDL_1366x768
+#define X11_USER        SDL_USER
+#define X11_FULLSCREEN  SDL_FULLSCREEN
 
 // structs
 

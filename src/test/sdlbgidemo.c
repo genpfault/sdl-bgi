@@ -25,7 +25,9 @@
 
 #define PI_CONV (3.1415926 / 180.0)
 
-int maxx, maxy;
+int 
+  maxx, maxy,
+  width, height;
 
 int gd, gm;
 
@@ -91,7 +93,7 @@ void init_sdlbgi (void)
 {
   detectgraph (&gd, &gm);
   initgraph (&gd, &gm, "");
-  bgifast ();
+  sdlbgifast ();
   maxx = getmaxx ();
   maxy = getmaxy ();
 } // initgraph ()
@@ -124,6 +126,8 @@ void mainwindow (void)
   setbkcolor (COLOR (0, 0, 20));
   clearviewport ();
   refresh ();
+  width = viewport.right - viewport.left + 1;
+  height = viewport.bottom - viewport.top + 1;
 }
 
 // -----
@@ -584,6 +588,57 @@ void ellipsedemo (void)
 
 // -----
 
+static int is_in_range (int x, int x1, int x2)
+{
+  return ( x >= x1 && x <= x2);
+}
+
+// -----
+
+void floodfilldemo (void)
+{
+  int
+    i, j,
+    p, stop = 0;
+  
+  message ("floodfill() Demonstration (click around!)");
+  mainwindow ();
+  
+  setcolor (RED);
+  // draw something to fill
+  for (j = 25; j < maxy; j += 20)
+    for (i = 0; i < maxx; i += 50) {
+      line (i, j, i + 25, j - 25);
+      line (i + 25, j - 25, i + 50, j);
+    }
+  refresh ();
+  
+  while (! stop) {
+  
+    if ((p = mouseclick ())) {
+      
+      if ( (WM_LBUTTONDOWN == p) &&
+	   (is_in_range (mousex (), 0, width)) &&
+	   (is_in_range (mousey (), 0, height)) ) {
+        setcolor (COLOR (random (255), random (255), random (255)));
+        floodfill (mousex (), mousey (), RED);
+	refresh ();
+      }
+      else 
+        if (WM_RBUTTONDOWN == p) 
+          stop = 1;
+    }
+    
+  } // while
+  
+  refresh ();
+  if (! stop)
+    get_click ();
+  
+} // ellipsedemo ()
+
+// -----
+
 void alphademo (void)
 {
   int
@@ -858,7 +913,7 @@ void theend (void)
   while (! stop) {
     
     for (col = 0; col < 256; col += 5) {
-      setcolor (COLOR (col, 0, 0));
+      setcolor (COLOR (0, col, 0));
       outtextxy (xm, ym, "That's all, folks!");
       refresh ();
       if (ismouseclick (WM_RBUTTONDOWN)) {
@@ -927,7 +982,7 @@ void pagedemo (void)
   
   pause ();
 
-} // theend ()
+} // pagedemo ()
 
 // -----
 
@@ -943,6 +998,7 @@ int main (void)
   boxdemo ();
   circledemo ();
   ellipsedemo ();
+  floodfilldemo ();
   alphademo ();
   loadimagedemo ();
   putimagedemo ();

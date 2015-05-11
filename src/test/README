@@ -4,40 +4,39 @@ Test programs for SDL_bgi
 By Guido Gonzato, PhD
 
 
-1. 'cellular.c' is a cellular automaton program. For more information,
+- 'cellular.c' is a cellular automaton program. For more information,
 please see http://mathworld.wolfram.com/CellularAutomaton.html
 
-2. 'dla.c' is a diffusion limited aggregation program; please see
+- 'dla.c' is a diffusion limited aggregation program; please see
 http://en.wikipedia.org/wiki/Diffusion-limited_aggregation
 
-3. 'fern' is a famous IFS system; please see
+- 'fern' is a famous IFS system; please see
 http://en.wikipedia.org/wiki/Iterated_function_system
 
-4. 'floodfilltest.c' demonstrates the speed of the new floodfill()
-routine.
+- 'floodfilltest.c' shows the speed of the new floodfill() routine.
 
-5. 'hopalong' is an implementation of Barry Martin's algorithm,
+- 'hopalong' is an implementation of Barry Martin's algorithm,
 presented in the September 1986 issue of Scientific American. Run it
 as ./hopalong <seed>, where <seed> is an integer number.
 
-6. 'life.c' is an implementation of Conway's Game of Life. Run it as
+- 'life.c' is an implementation of Conway's Game of Life. Run it as
 ./life [number], where [number] is the percentage of living cells.
 
-7. 'mandelbrot.c' is a simple, non-optimised program to display the
+- 'mandelbrot.c' is a simple, non-optimised program to display the
 Mandelbrot set. It shows how to setup and use RGB colour mode. Press
 '1', '2', '3' to change the palette; left click to zoom in on a point;
 right click to zoom out; middle click to restore the initial boundary.
 
-8. 'mousetest.c' shows how to detect and use mouse clicks. Click
+- 'mousetest.c' shows how to detect and use mouse clicks. Click
 around using all buttons and mouse wheel.
 
-9. 'moveit.c' shows how to use movement keys.
+- 'moveit.c' shows how to use movement keys.
 
-10. 'sdlbgidemo' shows how to use some of SDL_bgi's features.
+- 'sdlbgidemo' shows how to use some of SDL_bgi's features.
 
-11. 'simple.c' displays simple shapes to test SDL_bgi's speed.
+- 'simple.c' displays simple shapes to test SDL_bgi's speed.
 
-12. 'turtledemo.c' uses a simple yet powerful turtle graphics
+- 'turtledemo.c' uses a simple yet powerful turtle graphics
 implementation to draw fractals and simple shapes.
 
 Besides, 'f90_test' shows how to use SDL_bgi in Fortran programs.
@@ -57,23 +56,23 @@ http://en.wikipedia.org/wiki/Turtle_Graphics
 
 Commands available are:
 
-void back (int);              move the turtle backwards by <int> pixels
-void forwd (int);             move the turtle forwards by <int> pixels
-int  heading (void);          get the turtle heading (0-359)
-void hideturtle (void);       hide the turtle
-void home (void);             move the turtle to the screen centre
-                              and set the heading to 0
-void pendown (void);          activate drawing (put the pen down)
-void penup (void);            suspend drawing (lift the pen)
-void setheading (int);        set the turtle heading to <int> (0-359)
-void setposition (int, int);  move the turtle to <x>, <y>
-void showturtle (void);       show the turtle
-void turnleft (int);          turn the turtle left by <int> degrees
-void turnright (int);         turn the turns right by <int> degrees
-void wrap (void);             wrap around the window
-void nowrap (void);           don't wrap around the window
-int  xcor (void);             get the turtle's X coordinate
-int  ycor (void);             get the turtle's Y coordinate
+void back (int);              moves the turtle backwards by <int> pixels
+void forwd (int);             moves the turtle forwards by <int> pixels
+int  heading (void);          gets the turtle heading (0-359)
+void hideturtle (void);       hides the turtle
+void home (void);             moves the turtle to the screen centre
+                              and sest the heading to 0
+void pendown (void);          activates drawing (put the pen down)
+void penup (void);            suspends drawing (lift the pen)
+void setheading (int);        sets the turtle heading to <int> (0-359)
+void setposition (int, int);  moves the turtle to <x>, <y>
+void showturtle (void);       shows the turtle
+void turnleft (int);          turns the turtle left by <int> degrees
+void turnright (int);         turns the turns right by <int> degrees
+void wrap (void);             wraps around the window
+void nowrap (void);           stops wrapping around the window
+int  xcor (void);             gets the turtle's X coordinate
+int  ycor (void);             gets the turtle's Y coordinate
 
 By default, the turtle is not visible, the pen is down, and the
 heading is 0.
@@ -88,4 +87,3 @@ T_SOUTH    180
 T_WEST     270
 
 Please read turtle.h for more details.
-

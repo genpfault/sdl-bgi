@@ -1,10 +1,12 @@
 TODO
 ----
 
-- a few BGI functions are missing, as explained in Using.txt.
+- floodfill () fill patterns.
 
-- other functions are not optimally implemented: filled curves and
-polygons ought to use Bresenham-based algorithms.
+- fillpoly () generic polygon, and fill patterns.
 
-Got little time and lots of things to do. Please feel free to
+- other functions are not optimally implemented: filled curves ought
+to use Bresenham-based algorithms.
+
+I've got little time and lots of things to do. Please feel free to
 contribute!

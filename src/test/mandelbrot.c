@@ -224,6 +224,7 @@ int main (void)
 	sprintf (s, "%d", max_iter);
 	outtextxy (0, 0, s);
 	flag = 0;
+	refresh ();
       }
       redraw = 0;
     }

@@ -39,14 +39,18 @@ int main (void)
   initgraph (&gd, &gm, "");
   setbkcolor (BLACK);
   setcolor (RED);
-  cleardevice ();
+  setviewport (10, 10, getmaxx() - 10, getmaxy() - 10, 1);
+  
+  clearviewport ();
   settextjustify (CENTER_TEXT, CENTER_TEXT);
   outtextxy (getmaxx() / 2, getmaxy () / 2, 
 	     "Click the RIGHT button to begin");
+  
   while (!ismouseclick (WM_RBUTTONDOWN))
     ;
   getmouseclick(WM_RBUTTONDOWN, &x, &y);
-  cleardevice ();
+  clearviewport ();
+  rectangle (0, 0, getmaxx () - 20, getmaxy () - 20);
   
   len = strlen(s) * 8; // assumes an 8x8 font
   rectangle (0, 0, len, 16);

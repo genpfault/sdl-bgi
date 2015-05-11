@@ -136,14 +136,14 @@ int main (void)
   cleardevice ();
   
   message ("Drawing in SLOW mode:");
-  bgislow ();
+  sdlbgislow ();
 
   circles ();
   lines ();
   pixels ();
   
   message ("Drawing in FAST mode:");
-  bgifast ();
+  sdlbgifast ();
   
   circles ();
   lines ();

@@ -12,9 +12,9 @@ void bar (int left, int top, int right, int bottom);
 
 int BLUE_VALUE (int color);
 
-// void bgifast (void);
+void sdlbgifast (void);
 
-// void bgislow (void);
+void sdlbgislow (void);
 
 void circle (int x, int y, int radius);
 

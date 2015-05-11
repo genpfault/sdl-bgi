@@ -1,6 +1,6 @@
-% xbgi-quickref.tex
+% sdl_bgi-quickref.tex
 %
-% Guido Gonzato, May 6, 2015
+% Guido Gonzato, May 11, 2015
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -72,8 +72,8 @@ It is much simpler (but obviously, less powerful) than SDL, OpenGL and
 the like. Teachers may find \SDLbgi{} a useful tool for introductory
 computer graphics courses.
 
-For example, this is a minimal program that opens a graphics window
-and draws 1000 random lines:
+For example, this is a minimal program that opens a window and draws
+1000 random lines:
 
 \begin{small}
 \begin{verbatim}
@@ -100,12 +100,12 @@ int main (void)
 
 The program includes the header file \F{SDL\_bgi.h}, which contains
 all necessary definitions. The call to \func{initgraph()} opens a
-graphics window; from now on, graphics functions may be called.
+window; from now on, graphics functions may be called.
 \func{closegraph()} closes the window.
  
-Within the graphics window, pixel coordinates range from (0, 0), the
-upper left corner, to (\func{getmaxx()}, \func{getmaxy()}), the lower
-right corner.
+Within the window, pixel coordinates range from (0, 0), the upper left
+corner, to (\func{getmaxx()}, \func{getmaxy()}), the lower right
+corner.
 
 Some graphic functions set the coordinates of the last drawing
 position, defined as CP (Current Position). At any given moment, a
@@ -172,6 +172,12 @@ extern SDL_Texture  *bgi_texture;
 
 #define NORM_WIDTH      1
 #define THICK_WIDTH     3
+
+#define SOLID_LINE      0
+#define DOTTED_LINE     1
+#define CENTER_LINE     2
+#define DASHED_LINE     3
+#define USERBIT_LINE    4
 
 #define COPY_PUT        0
 #define XOR_PUT         1
@@ -978,9 +984,14 @@ Shows the window that was hidden by \func{restorecrtmode()}. The
 \end{bgi}
 
 Sets the line width and style for all lines drawn by \func{line()},
-\func{lineto()}, \func{rectangle()}, \func{drawpoly()}, etc. As of the
-current release, the line style can only be \T{SOLID\_LINE}. The line
-thickness can be set with \T{NORM\_WIDTH} or \T{THICK\-\_WIDTH}.
+\func{lineto()}, \func{rectangle()}, \func{drawpoly()}, etc. The line
+style can be \T{SOLID\_LINE}, \T{DOTTED\_LINE}, \T{CENTER\_LINE},
+\T{DASHED\_LINE}, or \T{USERBIT\_LINE}; in the latter case, the user
+provides a 16-bit number (\A{upattern}) whose bits set to 1 will be
+plotted as pixels.
+
+The line thickness can be set with \T{NORM\_WIDTH} or
+\T{THICK\-\_WIDTH}.
 
 Arcs, circles, ellipses, and pieslices are not affected by
 \A{linestyle}, but are affected by \A{thickness}.
@@ -1335,3 +1346,5 @@ setting colors with \func{setcolor()} with a \func{COLOR()} argument.
 % -----
 
 \end{document}
+
+% ----- end of file sdl_bgi-quickref.tex

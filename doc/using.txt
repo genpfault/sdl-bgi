@@ -2,10 +2,9 @@ Using SDL_bgi
 =============
 
 
-First of all: unlike other BGI-compatible libraries, the main purpose
-of SDL_bgi is not to provide a drop-in replacement for old Borland
-BGI. While compatibility with old BGI is important, a few minor
-differences were introduced to take advantage of modern SDL graphics.
+Although SDL_bgi is highly compatible with the original BGI library, a
+few minor differences were introduced to take advantage of modern SDL
+graphics. You don't want a slow library!
 
 
 Compiling programs
@@ -22,10 +21,12 @@ to
 
 but you could also do:
 
-  sudo ln -s /usr/include/SDL2/SDL_bgi.h /usr/include/graphics.h
+  $ sudo ln -s /usr/include/SDL2/SDL_bgi.h /usr/include/graphics.h
 
 which lets you leave old programs untouched - unless they also include
-dos.h and conio.h, which you'll have to remove or replace.
+dos.h and conio.h, which you'll have to remove or replace. The link
+graphics.h must be created manually, since other software packages
+provide it (e.g. Allegro, wx, and others).
 
 Then, to compile a program:
 
@@ -37,7 +38,7 @@ unmodified. For instance,
   int gd = DETECT, gm;
   initgraph (&gd, &gm, "");
 
-will open an 800x600 window (mimicking SVGA graphics). To specify the
+will open an 800x600 window, mimicking SVGA graphics. To specify the
 window size, you can use the new SDL driver:
 
   gd = SDL;
@@ -45,13 +46,13 @@ window size, you can use the new SDL driver:
 
 where <mode> can be one of the following:
 
-  X11_640x480     640x480
-  X11_800x600     800x600
-  X11_1024x768    1024x768
-  X11_1152x900    1152x900
-  X11_1280x1024   1280x1024
-  X11_1366x768    1366x768
-  X11_FULLSCREEN  full screen
+  SDL_640x480     640x480
+  SDL_800x600     800x600
+  SDL_1024x768    1024x768
+  SDL_1152x900    1152x900
+  SDL_1280x1024   1280x1024
+  SDL_1366x768    1366x768
+  SDL_FULLSCREEN  full screen
 
 You may want to use initwindow (int width, int height) instead.
 
@@ -84,20 +85,18 @@ Differences
 - The following functions are present but not implemented (i.e. they
 may be called but do nothing):
 
-  _graphfreemem       - unneeded; not used by floodfill()
-  _graphgetmem        - unneeded; not used by floodfill()
+  _graphfreemem       - unneeded
+  _graphgetmem        - unneeded
   getfillpattern
   installuserdriver   - it makes no sense in SDL
   installuserfont
   registerbgidriver   - it makes no sense in SDL
   registerbgifont     - it makes no sense in SDL
-  restorecrtmode      - it just clears the window
   setfillpattern
   setgraphbufsize     - unneeded; not used by floodfill()
-  setgraphmode        - it just returns to the previous window
-  setlinestyle        - only sets thickness
 
-- floodfill () only uses SOLID_FILL.
+- floodfill () only uses SOLID_FILL. Fill patterns will be soon
+implemented.
 
 - setpalette() only affects future drawing. That is, you can't get a
 "rotating palette animation" as in Turbo C.
@@ -107,6 +106,11 @@ to other BGI fonts (e.g. TRIPLEX_FONT, and others) make no effect:
 consider using SDL_ttf!
 
 - fillpoly () only works correctly when the polygon is convex.
+
+- kbhit () (provided by conio.h in Turbo C/Borland C++) returns 1 when
+any key is pressed, including Shift, Ctrl, etc.
+
+- Key presses may not be detected during a delay ().
 
 
 Additions
@@ -118,7 +122,7 @@ compatible with other BGI implementations (namely, Xbgi and WinBGIm):
 - void initwindow (int width, int height) lets you open a window
 specifying its size.
 
-- void detectgraph(int *gd, int *gm) detects X11, X11_FULLSCREEN.
+- void detectgraph(int *gd, int *gm) returns SDL, SDL_FULLSCREEN.
 
 - void setrgbpalette (int color, int r, int g, int b) sets an
 additional palette containing RGB colours (up to MAXRGBCOLORS + 1).
@@ -148,9 +152,6 @@ y, int col), but uses the current drawing colour and the pixel is not
 refreshed in slow mode.
 
 - random (range) is defined as macro: rand()%range
-
-- int kbhit (), provided by conio.h in Turbo C/Borland C++, returns 1
-when any key is pressed, including Shift, Alt, and so on.
 
 - int getch () waits for a key and returns its ASCII code. Special keys
 are also reported; please see SDL_bgi.h.
