@@ -244,6 +244,7 @@ int main (void)
       break;
       
     case WM_RBUTTONDOWN:
+    case WM_WHEELDOWN:
       xstep *= 2;
       ystep *= 2;
       init = 0;

@@ -1,6 +1,6 @@
 % sdl_bgi-quickref.tex
 %
-% Guido Gonzato, May 11, 2015
+% Guido Gonzato, May 20, 2015
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -16,6 +16,7 @@
 \setlength{\parskip}{3pt}
 
 \newcommand{\SDLbgi}{SDL\_bgi}
+\newcommand{\version}{2.0.2}
 
 \newcommand{\V}{\texttt{void}}      % void
 \newcommand{\I}{\texttt{int}}       % int
@@ -45,7 +46,7 @@
 
 \begin{document}
 
-\title{\SDLbgi{} Quick Reference}
+\title{\SDLbgi{} \version{} Quick Reference}
 
 \author{Guido Gonzato, PhD}
 
@@ -63,7 +64,7 @@
 
 \SDLbgi{} is an SDL2-based implementation of Borland Graphics
 Interface (BGI), a graphics library that was part of Turbo/Borland C
-compilers for DOS. It represented a \emph{de facto} standard for
+compilers for DOS. It represented the \emph{de facto} standard for
 computer graphics in the late eighties--early nineties, especially in
 education.
 
@@ -104,14 +105,14 @@ window; from now on, graphics functions may be called.
 \func{closegraph()} closes the window.
  
 Within the window, pixel coordinates range from (0, 0), the upper left
-corner, to (\func{getmaxx()}, \func{getmaxy()}), the lower right
+corner, to (\func{get\-maxx()}, \func{getmaxy()}), the lower right
 corner.
 
 Some graphic functions set the coordinates of the last drawing
 position, defined as CP (Current Position). At any given moment, a
-foreground colour, background colour, line style, line thickness, fill
-pattern, and fill colour, are defined. A viewport (subwindow) may also
-be defined, with or without clipping. All of these parameters can be
+foreground, background and fill colour, line style, line thickness,
+and fill pattern, are defined. A viewport (subwindow) may also be
+defined, with or without clipping. All of these parameters can be
 changed using appropriate functions.
 
 % -----
@@ -195,6 +196,8 @@ extern SDL_Texture  *bgi_texture;
 #define WM_LBUTTONDOWN  SDL_BUTTON_LEFT
 #define WM_MBUTTONDOWN  SDL_BUTTON_MIDDLE
 #define WM_RBUTTONDOWN  SDL_BUTTON_RIGHT
+#define WM_WHEELUP      4 // SDL_MOUSEWHEEL no longer exists
+#define WM_WHEELDOWN    5 // ditto
 #define WM_MOUSEMOVE    SDL_MOUSEMOTION
 
 #define PALETTE_SIZE    4096
@@ -336,9 +339,9 @@ used.
 \A{bottom});
 \end{bgi}
 
-Draws a filled-in rectangle (bar), using the current fill colour. The
-bar is not outlined; to draw an outlined two-dimensional bar, use
-\func{bar3d()} with \A{depth} equal to 0.
+Draws a filled-in rectangle (bar), using the current fill colour and
+fill pattern. The bar is not outlined; to draw an outlined
+two-dimensional bar, use \func{bar3d()} with \A{depth} equal to 0.
 
 % -----
 
@@ -348,9 +351,10 @@ bar is not outlined; to draw an outlined two-dimensional bar, use
 \end{bgi}
 
 Draws a three-dimensional, filled-in rectangle (bar), using the
-current fill colour. The three-dimensional outline of the bar is drawn
-in the current line style and color. The bar's depth, in pixels, is
-given by \A{depth}. If \A{topflag} is nonzero, a top is put on.
+current fill colour and fill pattern. The three-dimensional outline of
+the bar is drawn in the current line style and color. The bar's depth,
+in pixels, is given by \A{depth}. If \A{topflag} is nonzero, a top is
+put on.
 
 % -----
 
@@ -429,7 +433,7 @@ Draws an elliptical arc centered at (\A{x}, \A{y}), with axes given by
 
 Draws an ellipse centered at (\A{x}, \A{y}), with axes given by
 \A{xradius} and \A{yradius}, and fills it using the current fill
-color.
+color and fill pattern.
 
 % -----
 
@@ -441,7 +445,7 @@ Draws a polygon of \A{numpoints} vertices and fills it using the
 current fill color.
 
 \textbf{Note}: as of the current release, only convex polygons are
-correctly filled.
+correctly filled, and only using SOLID\_FILL.
 
 % -----
 
@@ -513,10 +517,8 @@ graphics driver.
 \V{} \func{getfillpattern} (\C{} \A{pattern}); 
 \end{bgi}
 
-% Copies the user-defined fill pattern, as set by setfillpattern, into
-% the 8-byte area pointed to by pattern.
-
-Unimplemented.
+Copies the user-defined fill pattern, as set by setfillpattern, into
+the 8-byte area pointed to by pattern.
 
 % -----
 
@@ -563,9 +565,8 @@ with information about the current line style, pattern, and thickness.
 \I{} \func{getmaxcolor} (\V{});
 \end{bgi}
 
-Returns the maximum color value available. Using the standard BGI
-palette, it's \T{MAXCOLORS}; using the RGB palette, it's
-\T{MAXRGBCOLORS}.
+Returns the maximum color value available (\T{MAXCOLORS}). If RGB
+colors are being used, it returns \T{PALETTE\_SIZE}.
 
 % -----
 
@@ -823,7 +824,12 @@ Outputs \A{textstring} at (\A{x}, \A{y}).
 \end{bgi}
 
 Draws and fills a pie slice centered at (\A{x}, \A{y}), with a radius
-given by \A{radius}, traveling from \A{stangle} to \A{endangle}.
+given by \A{radius}, traveling from \A{stangle} to \A{endangle}. The
+pie slice is filled using the current fill colour.
+
+\textbf{Note}: as of the current release, the pie slice is filled only
+using SOLID\_FILL.
+
 
 % -----
 
@@ -897,6 +903,9 @@ Draws and fills an elliptical pie slice centered at (\A{x}, \A{y}),
 horizontal and vertical radii given by \A{xradius} and \A{yradius},
 traveling from \A{stangle} to \A{endangle}.
 
+\textbf{Note}: as of the current release, the sector is filled only
+using SOLID\_FILL.
+
 % -----
 
 \begin{bgi}
@@ -944,20 +953,19 @@ Sets the current drawing color using the default palette.
 \V{} \func{setfillpattern} (\C{}\A{upattern}, \I{} \A{color}); 
 \end{bgi}
 
-Unimplemented.
-
-% Sets a user-defined fill pattern. \A{upattern} is a pointer to a
-% sequence of 8 bytes; each byte corresponds to 8 pixels in the pattern;
-% each bit set to 1 is plotted as a pixel.
+Sets a user-defined fill pattern. \A{upattern} is a pointer to a
+sequence of 8 bytes; each byte corresponds to 8 pixels in the pattern;
+each bit set to 1 is plotted as a pixel.
 
 % -----
 
 \begin{bgi}
-\V{} \func{setfillstyle} (\I{} \A{pattern}, \I{} \A{color}); 
+\V{} \func{setfillstyle} (\I{} \A{upattern}, \I{} \A{color}); 
 \end{bgi}
 
-Sets the fill pattern and fill color. As of the current release,
-\A{pattern} can only be \T{EMPTY\_FILL} or \T{SOLID\-\_FILL}.
+Sets the fill pattern and fill color. \A{upattern} is a pointer to a
+sequence of 8 bytes, with each byte corresponding to 8 pixels in the
+pattern.
 
 % -----
 
@@ -1273,10 +1281,10 @@ displayed.
 \I{} \A{x2}, \I{} \A{y2});
 \end{bgi}
 
-Reads a \F{.bmp} file and displays it immediately at (\A{x1}, \A{y1}),
-irrespective of the viewport. If (\A{x2}, \A{y2}) are not 0, the
-bitmap is stretched to fit the rectangle \A{x1}, \A{y1} -- \A{x2},
-\A{y2}.
+Reads a \F{.bmp} file and displays it immediately at (\A{x1}, \A{y1}).
+If (\A{x2}, \A{y2}) are not 0, the bitmap is stretched to fit the
+rectangle \A{x1},\A{y1}---\A{x2},\A{y2}; otherwise, the bitmap is
+clipped as necessary.
 
 % -----
 
@@ -1336,14 +1344,22 @@ setting colors with \func{setcolor()} with a \func{COLOR()} argument.
 
 % -----
 
-% \begin{bgi}
-% \I{} \func{xkbhit} (\V{});
-% \end{bgi}
+\begin{bgi}
+\V{} \func{writeimagefile} (\C{} \A{filename}, \I{} \A{left}, \I{}
+\A{top}, \I{} \A{right}, \I{} \A{bottom});
+\end{bgi}
 
-% Returns 1 when any key is pressed, including Ctrl, Shift, Alt, and so
-% on.
+Writes a \F{.bmp} file from the screen rectangle defined by
+\A{left},\A{top}---\A{right},\A{bottom}.
 
 % -----
+
+\bigskip
+
+\rule{\linewidth}{0.2pt}
+
+This document is a free manual, released under the GNU Free
+Documentation License (FDL) v. 1.3 or later.
 
 \end{document}
 

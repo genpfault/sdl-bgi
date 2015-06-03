@@ -44,7 +44,7 @@ void mainwindow (void);
 
 void get_click (void)
 {
-  
+  // wait for a mouse click
   while (! ismouseclick (WM_LBUTTONDOWN))
     ;
   while (ismouseclick (WM_LBUTTONDOWN))
@@ -56,6 +56,7 @@ void get_click (void)
 
 void get_key (void)
 {
+  // wait for a key press
   int 
     ch = getch ();
   
@@ -70,6 +71,7 @@ void get_key (void)
 
 void pause (void)
 {
+  // pause and exit if right click
   int
     stop = 0;
   
@@ -91,6 +93,7 @@ void pause (void)
 
 void init_sdlbgi (void)
 {
+  // initialise SDL_bgi system
   detectgraph (&gd, &gm);
   initgraph (&gd, &gm, "");
   sdlbgifast ();
@@ -102,6 +105,7 @@ void init_sdlbgi (void)
 
 void message (char *str)
 {
+  // output a message at the screen bottom
   setviewport (0, 0, maxx, maxy, 0);
   setbkcolor (COLOR (40, 0, 0));
   cleardevice ();
@@ -120,9 +124,12 @@ void message (char *str)
 
 void mainwindow (void)
 {
+  // set up main window
   setcolor (WHITE);
+  setviewport (0, 0, maxx, maxy, 1);
   rectangle (39, 19, maxx - 39, maxy - 19);
   setviewport (40, 20, maxx - 40, maxy - 20, 1);
+  getviewsettings (&viewport);
   setbkcolor (COLOR (0, 0, 20));
   clearviewport ();
   refresh ();
@@ -134,6 +141,7 @@ void mainwindow (void)
 
 void sdlbgi_info (void)
 {
+  // display information on SDL_bgi settings
   char
     str[1024];
   
@@ -154,35 +162,34 @@ void sdlbgi_info (void)
 
   message ("Information on SDL_bgi Graphics");
   mainwindow ();
-  
   setcolor (RED);
   settextstyle (DEFAULT_FONT, HORIZ_DIR, 2);
-  settextjustify (LEFT_TEXT, TOP_TEXT);
+  settextjustify (RIGHT_TEXT, TOP_TEXT);
   
-  getviewsettings (&viewport);
-  getlinesettings (&lineinfo);
-  getfillsettings (&fillinfo);
-  gettextsettings (&textinfo);
+  getviewsettings (&viewport); // get viewport info
+  getlinesettings (&lineinfo); // line style info
+  getfillsettings (&fillinfo); // fill style info
+  gettextsettings (&textinfo); // text style info
   getpalette (&palette );
   driver = getdrivername ();
   mode = getmodename (gm);
   
-  x = 150;
+  x = width / 2; // screen centre
   y = 40; 
   dy = textheight ("X") * 3;
   
-  outtextxy (x, y += dy, "Graphics device:");
-  outtextxy (x, y += dy, "Graphics mode:");
-  outtextxy (x, y += dy, "Screen resolution:");
-  outtextxy (x, y += dy, "Current viewport:");
-  outtextxy (x, y += dy, "Viewport clipping:");
-  outtextxy (x, y += dy, "Current background colour:");
-  outtextxy (x, y += dy, "Current foreground colour:");
-  outtextxy (x, y += dy, "Current fill colour:");
-  outtextxy (x, y += dy, "Character size:");
-  outtextxy (x, y += dy, "Available pages:");
+  outtextxy (x, y += dy, "Graphics device: ");
+  outtextxy (x, y += dy, "Graphics mode: ");
+  outtextxy (x, y += dy, "Screen resolution: ");
+  outtextxy (x, y += dy, "Current viewport: ");
+  outtextxy (x, y += dy, "Viewport clipping: ");
+  outtextxy (x, y += dy, "Current background colour: ");
+  outtextxy (x, y += dy, "Current foreground colour: ");
+  outtextxy (x, y += dy, "Current fill colour: ");
+  outtextxy (x, y += dy, "Character size: ");
+  outtextxy (x, y += dy, "Available pages: ");
   
-  x = 150 + textwidth ("Current background colour:   ");
+  settextjustify (LEFT_TEXT, TOP_TEXT);
   y = 40;
   
   setcolor (COLOR (240, 240, 0));
@@ -198,17 +205,17 @@ void sdlbgi_info (void)
   outtextxy (x, y += dy, str);
   sprintf (str, "%s", viewport.clip ? "ON" : "OFF");
   outtextxy (x, y += dy, str);
-  sprintf (str, "%02X %02X %02X", 
+  sprintf (str, "0x%02X%02X%02X", 
 	   RED_VALUE (getbkcolor ()),
 	   GREEN_VALUE (getbkcolor ()),
 	   BLUE_VALUE (getbkcolor ()));
   outtextxy (x, y += dy, str);
-  sprintf (str, "%02X %02X %02X", 
+  sprintf (str, "0x%02X%02X%02X", 
 	   RED_VALUE (getcolor ()),
 	   GREEN_VALUE (getcolor ()),
 	   BLUE_VALUE (getcolor ()));
   outtextxy (x, y += dy, str);
-  sprintf (str, "%02X %02X %02X", 
+  sprintf (str, "0x%02X%02X%02X", 
 	   RED_VALUE (fillinfo.color),
 	   GREEN_VALUE (fillinfo.color),
 	   BLUE_VALUE (fillinfo.color));
@@ -227,6 +234,7 @@ void sdlbgi_info (void)
 
 void colordemo (void)
 {
+  // show RGB colours
   int
     stop = 0,
     i, x, y,
@@ -236,7 +244,6 @@ void colordemo (void)
   
   message ("setcolor(COLOR(r,g,b)) Demonstration");
   mainwindow ();
-  
   getviewsettings (&viewport);
   x = (viewport.right - viewport.left) / 2 - (256 * 3) / 2;
   y = (viewport.bottom - viewport.top) / 2;
@@ -249,6 +256,7 @@ void colordemo (void)
     
     for (col3 = 0; col3 < 256; col3++) {
       setcolor (COLOR (col1, col2, col3));
+      // draw lines
       for (i = 0; i < 3; i++) {
 	line (x, y - maxy / 3, x, y + maxy / 3);
 	x++;
@@ -283,6 +291,7 @@ void colordemo (void)
 
 void pixeldemo (void)
 {
+  // plot pixels quickly
   int
     stop = 0,
     cnt = 0;
@@ -294,9 +303,11 @@ void pixeldemo (void)
     
     setcolor (COLOR (random (256), random (256), random (256)));
     putpixel (random (maxx), random (maxy), getcolor ());
+    // or: _putpixel (random (maxx), random (maxy));
     cnt++;
     
-   if (0 == cnt % 5000)
+    // refresh the screen every 5000 pixels plotted
+    if (0 == cnt % 5000)
       refresh ();
     
     if (ismouseclick (WM_LBUTTONDOWN))
@@ -318,6 +329,7 @@ void pixeldemo (void)
 
 void linedemo (void)
 {
+  // draw lines and rectangles
   int
     stop = 0,
     x1, y1, x2, y2,
@@ -335,6 +347,7 @@ void linedemo (void)
     switch (rnd) {
       
     case 0:
+      // the line is clipped anyway
       line (random (maxx), random (maxy),
 	    random (maxx), random (maxy));
       break;
@@ -375,6 +388,7 @@ void linedemo (void)
 
 void linereldemo (void)
 {
+  // show how to use line styles and relative lines
   int
     stop = 0,
     x, y,
@@ -389,8 +403,8 @@ void linereldemo (void)
     step;
   
   message ("setlinestyle(), moveto(), lineto() Demonstration");
-  mainwindow ();
   
+  mainwindow ();
   width = viewport.right - viewport.left + 1;
   height = viewport.bottom - viewport.top + 1;
   x = width / 2;
@@ -399,10 +413,11 @@ void linereldemo (void)
   
   while (! stop) {
 
+    // create a polygon, at least 5 sides
     npoints = 5 + random (MAXPOINTS - 5 + 1);
-    if (npoints % 2)
+    if (npoints % 2) // even number of sides
       setlinestyle (0, 0, THICK_WIDTH);
-    else
+    else // odd number of sides
       setlinestyle (0, 0, NORM_WIDTH);
     clearviewport ();
     setcolor (BLUE + random (MAXCOLORS - 1));
@@ -410,6 +425,7 @@ void linereldemo (void)
     angle = 0.0;
     step = 360.0 / npoints;
     
+    // evaluate polygon vertices
     for (i= 0; i < npoints; i++) {
       pts_x[i] = x + (int)(cos (angle * PI_CONV) * radius);
       pts_y[i] = y - (int)(sin (angle * PI_CONV) * radius);
@@ -418,6 +434,7 @@ void linereldemo (void)
 
     circle (x, y, radius );
 
+    // draw diagonals
     for (i = 0; i < npoints; i++) {
       for (j = i; j < npoints; j++) {
 	moveto (pts_x[i], pts_y[i]);
@@ -448,6 +465,7 @@ void linereldemo (void)
 
 void boxdemo (void)
 {
+  // draw filled bars
   int
     stop = 0,
     x = maxx / 2,
@@ -461,17 +479,18 @@ void boxdemo (void)
   while (! stop) {
     
     // fill colour
-    setfillstyle (0, COLOR (random (256), random (256), random (256)));
+    setfillstyle (random (USER_FILL),
+		  COLOR (random (256), random (256), random (256)));
     x1 = random (maxx);
     y1 = random (maxx);
     x2 = x1 + random (maxx / 4);
     y2 = y1 + random (maxy / 4);
     // outline colour
     setcolor (COLOR (random (256), random (256), random (256)));
-    bar3d (x1, y1, x2, y2, 0, 0);
+    bar3d (x1, y1, x2, y2, 0, 0); // outlined bars
     
     cnt++;
-    if (0 == cnt % 200)
+    if (0 == cnt % 200) // refresh every 200 bars
       refresh ();
   
     if (ismouseclick (WM_LBUTTONDOWN))
@@ -493,6 +512,7 @@ void boxdemo (void)
 
 void circledemo (void)
 {
+  // draw arcs and ellipses
   int
     stop = 0,
     x = maxx / 2,
@@ -551,6 +571,7 @@ void circledemo (void)
 
 void ellipsedemo (void)
 {
+  // draw filled ellipses
   int
     stop = 0,
     x = maxx / 2,
@@ -563,7 +584,8 @@ void ellipsedemo (void)
   
   while (! stop) {
     
-    setfillstyle (0, COLOR (random (256), random (256), random (256)));
+    setfillstyle (random (USER_FILL), 
+		  COLOR (random (256), random (256), random (256)));
     fillellipse (random (maxx), random (maxy),
 		 random (r), random (r));
     
@@ -597,11 +619,12 @@ static int is_in_range (int x, int x1, int x2)
 
 void floodfilldemo (void)
 {
+  // show how to use floodfill ()
   int
     i, j,
     p, stop = 0;
   
-  message ("floodfill() Demonstration (click around!)");
+  message ("floodfill() Demonstration (click around, middle click to exit)");
   mainwindow ();
   
   setcolor (RED);
@@ -621,14 +644,16 @@ void floodfilldemo (void)
 	   (is_in_range (mousex (), 0, width)) &&
 	   (is_in_range (mousey (), 0, height)) ) {
         setcolor (COLOR (random (255), random (255), random (255)));
+	setfillstyle (SOLID_FILL,
+		      COLOR (random (255), random (255), random (255)));
         floodfill (mousex (), mousey (), RED);
 	refresh ();
       }
       else 
-        if (WM_RBUTTONDOWN == p) 
-          stop = 1;
-    }
-    
+	if (WM_MBUTTONDOWN == p) 
+	  stop = 1;
+    } // if
+
   } // while
   
   refresh ();
@@ -653,14 +678,15 @@ void alphademo (void)
   while (! stop) {
     
     setcolor (COLOR (random (256), random (256), random (256)));
-    setalpha (getcolor (), random (64));
+    setalpha (getcolor (), random (64)); // alpha component of ARGB
 
-    setfillstyle (0, getcolor ());
+    setfillstyle (SOLID_FILL, getcolor ());
     x1 = random (maxx);
     y1 = random (maxx);
     x2 = x1 + random (maxx / 4);
     y2 = y1 + random (maxy / 4);
     bar (x1, y1, x2, y2);
+    // alpha is applied ONLY when refresh () is called
     refresh ();
     
     if (ismouseclick (WM_LBUTTONDOWN))
@@ -682,6 +708,7 @@ void alphademo (void)
 
 void loadimagedemo (void)
 {
+  // load a .bmp file
   int
     stop = 0,
     cnt = 0,
@@ -722,6 +749,8 @@ void loadimagedemo (void)
 
 void putimagedemo (void)
 {
+  // show how to use old-style image "blitting";
+  // you'll want to use native SDL functions instead!
   int
     stop = 0,
     x, y, width, height,
@@ -739,15 +768,15 @@ void putimagedemo (void)
   y = height / 2;
   
   // draw something, 200x100 px
-  setfillstyle (0, COLOR (240, 0, 0));
+  setfillstyle (SOLID_FILL, COLOR (240, 0, 0));
   fillellipse (x, y, 100, 50);
-  setfillstyle (0, COLOR (180, 0, 0));
+  setfillstyle (SOLID_FILL, COLOR (180, 0, 0));
   fillellipse (x, y, 70, 40);
-  setfillstyle (0, COLOR (120, 0, 0));
+  setfillstyle (SOLID_FILL, COLOR (120, 0, 0));
   fillellipse (x, y, 50, 30);
-  setfillstyle (0, COLOR (80, 0, 0));
+  setfillstyle (SOLID_FILL, COLOR (80, 0, 0));
   fillellipse (x, y, 30, 20);
-  setfillstyle (0, COLOR (40, 0, 0));
+  setfillstyle (SOLID_FILL, COLOR (40, 0, 0));
   fillellipse (x, y, 10, 10);
   
   size = imagesize (x - 100, y - 50, x + 100, y + 50);
@@ -764,7 +793,7 @@ void putimagedemo (void)
   
   while (! stop) {
     
-    // draw it
+    // draw it in XOR mode
     putimage (x, y, image, XOR_PUT);
     putimage (width - x, y - 150, image, XOR_PUT);
     putimage (width - x, y + 150, image, XOR_PUT);
@@ -774,7 +803,7 @@ void putimagedemo (void)
     
     delay (10);
     
-    // erase it
+    // erase it by redrawing it
     putimage (x, y, image, XOR_PUT);
     putimage (width - x, y - 150, image, XOR_PUT);
     putimage (width - x, y + 150, image, XOR_PUT);
@@ -799,14 +828,88 @@ void putimagedemo (void)
   
   refresh ();
   get_click ();
-  free (image);
+  free (image); // remember to free the image eventually
 
 } // putimagedemo ()
 
 // -----
 
+void sdlmixdemo (void)
+{
+  // show how to use SDL native functions along with SDL_bgi
+  int 
+    i, inc, stop = 0;
+  SDL_Surface
+    *src, *dest;
+  SDL_Texture
+    *bm_texture;
+  SDL_Rect
+    rect1, rect2;    
+    
+  message ("SDL_BGI and SDL2 Native Functions Demonstration");
+  mainwindow ();
+  line (0, height / 2, width, height / 2);
+  line (width / 2, 0, width / 2, height);
+  refresh ();
+  
+  // load a bitmap from file
+  src = SDL_LoadBMP ("./plasma.bmp"); // 600 x 600
+  if (NULL == src) {
+    fprintf (stderr, "Can't load bitmap\n");
+    exit (1);
+  }
+
+  // source rect
+  rect1.x = 0;
+  rect1.y = 0;
+  rect1.w = 300;
+  rect1.h = 300;
+  
+  // destination - twice as big
+  rect2.x = getmaxx () / 2 - 300;
+  rect2.y = getmaxy () / 2 - 300;
+  rect2.w = 600;
+  rect2.h = 600;
+  
+  i = 0;
+  inc = 1;
+  
+  while (!stop) {
+    
+    // pan the image
+    
+    rect1.x += inc;
+    rect1.y += inc;
+    
+    // bgi_renderer, along with bgi_window and bgi_texture,
+    // can be accessed by the programmer
+    
+    bm_texture = SDL_CreateTextureFromSurface (bgi_renderer, src);
+    SDL_RenderCopy (bgi_renderer, bm_texture, &rect1, &rect2);
+    SDL_RenderPresent (bgi_renderer);
+    
+    if (300 == ++i) {
+      i = 0;
+      inc = -inc;
+    }
+    if (ismouseclick (WM_LBUTTONDOWN))
+      stop = 1;
+    if (ismouseclick (WM_RBUTTONDOWN)) {
+      closegraph ();
+      exit (1);
+    }
+  
+  } // while
+    
+  get_click ();
+
+} // sdlmixdemo ()
+
+// -----
+
 void textdemo (void)
 {
+  // show how to use text styles
   int
     xm, ym;
   
@@ -891,65 +994,15 @@ void textdemo (void)
 
 // -----
 
-void theend (void)
-{
-  int
-    stop = 0,
-    xm, ym,
-    col;
-
-  struct viewporttype
-    viewport;
-  
-  message ("This is the end");
-  mainwindow ();
-  
-  getviewsettings (&viewport);
-  xm = (viewport.right - viewport.left) / 2;
-  ym = (viewport.bottom - viewport.top ) / 2;
-  settextstyle (DEFAULT_FONT, HORIZ_DIR, 5);
-  settextjustify (CENTER_TEXT, CENTER_TEXT);
-  
-  while (! stop) {
-    
-    for (col = 0; col < 256; col += 5) {
-      setcolor (COLOR (0, col, 0));
-      outtextxy (xm, ym, "That's all, folks!");
-      refresh ();
-      if (ismouseclick (WM_RBUTTONDOWN)) {
-	closegraph ();
-	exit (1);
-      }
-    }
-    
-    if (ismouseclick (WM_LBUTTONDOWN))
-      stop = 1;
-    
-    if (ismouseclick (WM_RBUTTONDOWN)) {
-      closegraph ();
-      exit (1);
-    }
-  
-  } // while
-  
-  refresh ();
-  closegraph ();
-
-} // theend ()
-
-// -----
-
 void pagedemo (void)
 {
+  // show how to use visual pages
   int
     stop = 0,
     xm, ym,
     col;
 
-  struct viewporttype
-    viewport;
-  
-  message ("This is the end");
+  message ("setactivepage() / setvisualpage () Demonstration");
   mainwindow ();
   
   getviewsettings (&viewport);
@@ -986,10 +1039,74 @@ void pagedemo (void)
 
 // -----
 
+void theend (void)
+{
+  // the end of the game
+  int
+    stop = 0,
+    xm, ym,
+    col,
+    r, maxr;
+
+  struct viewporttype
+    viewport;
+  
+  message ("That's All Folks!");
+  mainwindow ();
+
+  // draw the red circles
+  
+  xm = width / 2;
+  ym = height / 2;
+  maxr = sqrt (width*width/4 + height*height/4);
+  col = 0;
+  for (r = 200; r < maxr; r++) {
+    setcolor (COLOR(256 - col, 40, 0));
+    circle (xm, ym, r);
+    col += 4;
+    if (col > 200)
+      col = 0;
+  }
+  
+  settextstyle (DEFAULT_FONT, HORIZ_DIR, 6);
+  settextjustify (CENTER_TEXT, CENTER_TEXT);
+  
+  // draw the flashing string
+  
+  while (! stop) {
+    
+    for (col = 0; col < 256; col += 7) {
+      setcolor (COLOR (col, col, col));
+      outtextxy (xm, ym, "That's all, folks!");
+      refresh ();
+      if (ismouseclick (WM_RBUTTONDOWN)) {
+	closegraph ();
+	exit (1);
+      }
+    }
+    
+    if (ismouseclick (WM_LBUTTONDOWN))
+      stop = 1;
+    
+    if (ismouseclick (WM_RBUTTONDOWN)) {
+      closegraph ();
+      exit (1);
+    }
+  
+  } // while
+  
+  refresh ();
+  closegraph ();
+
+} // theend ()
+
+// -----
+
 int main (void)
 {
   
   init_sdlbgi ();
+  
   sdlbgi_info ();
   colordemo ();
   pixeldemo ();
@@ -1002,6 +1119,7 @@ int main (void)
   alphademo ();
   loadimagedemo ();
   putimagedemo ();
+  sdlmixdemo ();
   textdemo ();
   pagedemo ();
   theend ();

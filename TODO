@@ -1,9 +1,9 @@
 TODO
 ----
 
-- floodfill () fill patterns.
+- implement fill patterns for floodfill()
 
-- fillpoly () generic polygon, and fill patterns.
+- implement generic polygon for fillpoly() 
 
 - other functions are not optimally implemented: filled curves ought
 to use Bresenham-based algorithms.

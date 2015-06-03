@@ -29,10 +29,7 @@
 
 // -----
 
-int sgn (float n)
-{
-  return (n < 0) ? -1: 1;
-}
+#define sgn(n) ((n < 0) ? -1: 1)
 
 // -----
 
@@ -51,7 +48,7 @@ int main (int argc, char **argv)
   }
   srand (seed);
   
-  gd = SDL;
+  gd = DETECT;
   gm = getmaxmode ();
   initgraph(&gd, &gm, "");
   

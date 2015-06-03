@@ -1,5 +1,5 @@
-Installing SDL_bgi
-------------------
+Installing SDL_bgi from sources
+-------------------------------
 
 Please make sure you have SDL2 development packages. On Debian, Ubuntu
 and similar distributions, please install 'libsdl2-dev' and its

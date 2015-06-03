@@ -8,7 +8,7 @@ LIB_DIR = /usr/lib/
 
 # C compiler: tested with gcc and clang
 CC = gcc
-CFLAGS = -O2 -g -c -Wall -fpic -lm
+CFLAGS = -O2 -g -c -Wall -fpic
 
 .PHONY : all
 all: $(LIB)

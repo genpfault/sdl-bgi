@@ -1,15 +1,22 @@
 Changelog
 ---------
 
+v 2.0.2, 2015-06-03
+- fill patterns (not for floodfill())
+- setfillpattern() / getfillpattern () implemented
+- writeimagefile() added
+- documentation updates
+- test programs updates
 
 v 2.0.1, 2015-05-11
-- line patterns.
-- floodfill improvements.
-- documentation updates.
+- line patterns implemented
+- floodfill improvements
+- readimagefile() added
+- documentation updates
 
 v. 2.0.0, 2015-04-30
-- major release: rewritten to use SDL2 only.
-- added readimagefile () and logical plotting (XOR, etc.).
+- major release: rewritten to use SDL2 only
+- added readimagefile () and logical plotting (XOR, etc.)
 
 v. 1.0.1, 2014-12-09
 - Fixed minor bugs in putpixel() (reported by Angelo Graziosi)

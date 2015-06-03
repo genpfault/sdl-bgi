@@ -8,6 +8,9 @@
 
 #define SDL_BGI_VERSION 2.0.1
 
+#define NOPE 0
+#define YEAH 1
+
 // everything gets drawn here
 
 extern SDL_Window   *bgi_window;
@@ -21,7 +24,7 @@ extern SDL_Texture  *bgi_texture;
 // BGI fonts
 
 #define DEFAULT_FONT     0 // 8x8
-#define TRIPLEX_FONT     1
+#define TRIPLEX_FONT     1 // all other fonts are not implemented
 #define SMALL_FONT       2
 #define SANSSERIF_FONT   3
 #define GOTHIC_FONT      4
@@ -102,8 +105,8 @@ extern SDL_Texture  *bgi_texture;
 #define WM_LBUTTONDOWN  SDL_BUTTON_LEFT
 #define WM_MBUTTONDOWN  SDL_BUTTON_MIDDLE
 #define WM_RBUTTONDOWN  SDL_BUTTON_RIGHT
-#define WM_WHEELUP      SDL_MOUSEWHEEL
-#define WM_WHEELDOWN    SDL_MOUSEWHEEL
+#define WM_WHEELUP      4 // SDL_MOUSEWHEEL no longer exists
+#define WM_WHEELDOWN    5 // ditto
 #define WM_MOUSEMOVE    SDL_MOUSEMOTION
 
 #define PALETTE_SIZE    4096
@@ -302,7 +305,7 @@ int  GREEN_VALUE (int);
 unsigned imagesize (int, int, int, int);
 void initgraph (int *, int *, char *);
 void initwindow (int, int);
-int  installuserdriver (char *, int *);
+int  installuserdriver (char *name, int (*detect)(void));
 int  installuserfont (char *);
 int  IS_BGI_COLOR (int color);
 int  ismouseclick (int);
@@ -327,8 +330,8 @@ void readimagefile (char *, int, int, int, int);
 void rectangle (int, int, int, int);
 int  RED_VALUE (int );
 void refresh (void);
-int  registerbgidriver (void *);
-int  registerbgifont (void *);
+int  registerbgidriver (void (*driver)(void));
+int  registerbgifont (void (*font)(void));
 void restorecrtmode (void);
 void sdlbgifast (void);
 void sdlbgislow (void);
@@ -342,7 +345,7 @@ void setcolor (int);
 void setalpha (int, Uint8);
 void setfillpattern (char *, int); 
 void setfillstyle (int, int);
-unsigned int setgraphbufsize (unsigned int);
+unsigned setgraphbufsize (unsigned);
 void setgraphmode (int); 
 void setlinestyle (int, unsigned, int);
 void setallpalette (struct palettetype *); 
@@ -359,5 +362,6 @@ void setwritemode (int);
 void swapbuffers (void);
 int  textheight (char *);
 int  textwidth (char *);
+void writeimagefile (char *, int, int, int, int);
 
 // --- End of file SDL_bgi.h

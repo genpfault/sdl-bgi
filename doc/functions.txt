@@ -1,8 +1,7 @@
 SDL_bgi functions and macros
 ----------------------------
 
-This is a list of functions provided by SDL_bgi. Unimplemented
-functions are commented out with //.
+This is a list of functions provided by SDL_bgi.
 
 void arc (int x, int y, int stangle, int endangle, int radius);
 
@@ -156,7 +155,7 @@ void putpixel (int x, int y, int color);
 
 int random (int range) (macro)
 
-void readimagefile (char *, int, int, int, int);
+void readimagefile (char *filename, int left, int top, int right, int bottom);
 
 void rectangle (int left, int top, int right, int bottom);
 
@@ -184,7 +183,7 @@ void setbkrgbcolor (int color);
 
 void setcolor (int color);
 
-// void setfillpattern (char *upattern, int color); 
+void setfillpattern (char *upattern, int color); 
 
 void setfillstyle (int pattern, int color); 
 
@@ -217,3 +216,5 @@ void swapbuffers (void);
 int textheight (char *textstring);
 
 int textwidth (char *textstring);
+
+void writeimagefile (char *filename, int left, int top, int right, int bottom);
