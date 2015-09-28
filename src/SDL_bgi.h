@@ -2,11 +2,11 @@
  
 // A BGI-like graphics library based on SDL2.
 // Easy to use and useful for porting old programs.
-// Guido Gonzato PhD, May 2015.
+// Guido Gonzato PhD, September 2015.
 
 #include <SDL2/SDL.h>
 
-#define SDL_BGI_VERSION 2.0.1
+#define SDL_BGI_VERSION 2.0.3
 
 #define NOPE 0
 #define YEAH 1

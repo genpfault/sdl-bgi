@@ -1,6 +1,6 @@
 % sdl_bgi-quickref.tex
 %
-% Guido Gonzato, May 20, 2015
+% Guido Gonzato, September 22, 2015
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -1101,7 +1101,8 @@ Returns the height in pixels of a string.
 \V{} \func{delay} (\I{} \A{millisec});
 \end{bgi}
 
-Waits for \A{millisec} milliseconds.
+Waits for \A{millisec} milliseconds. In ``slow mode'', a screen
+refresh is performed.
 
 % -----
 
@@ -1109,7 +1110,8 @@ Waits for \A{millisec} milliseconds.
 \I{} \func{getch} (\V{});
 \end{bgi}
 
-Waits for a key and returns its ASCII code.
+Waits for a key and returns its ASCII code. In ``slow mode'', a screen
+refresh is performed.
 
 % -----
 
@@ -1118,7 +1120,7 @@ Waits for a key and returns its ASCII code.
 \end{bgi}
 
 Returns 1 when a key is pressed, including Ctrl, Shift, Alt, and so
-on.
+on. In ``slow mode'', a screen refresh is performed.
 
 % -----
 

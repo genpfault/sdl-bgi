@@ -1,6 +1,6 @@
 Summary:    BGI-compatible 2D graphics C library
 Name:       SDL_bgi
-Version:    2.0.2
+Version:    2.0.3
 Release:    1
 License:    ZLib
 Group:      Libraries
@@ -10,12 +10,13 @@ Requires:   libsdl2-dev
 Prefix:     %{_prefix}
 BuildRoot:  %{_tmppath}/%{name}-%{version}-buildroot
 
-%description
+%description 
 This package contains a Borland Graphics Interface (BGI) emulation
 library based on SDL2. This library strictly emulates most BGI
 functions, making it possible to compile SDL versions of programs
 written for Turbo/Borland C. ARGB extensions and basic mouse support
-are also implemented.
+are also implemented; further, native SDL2 functions may be used in
+SDL_bgi programs.
 
 %prep
 %setup -q -n %{name}-%{version}

@@ -1,7 +1,8 @@
 SDL_bgi functions and macros
 ----------------------------
 
-This is a list of functions provided by SDL_bgi.
+This is a list of functions and macros provided by SDL_bgi.
+
 
 void arc (int x, int y, int stangle, int endangle, int radius);
 

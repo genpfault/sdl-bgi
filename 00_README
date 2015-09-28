@@ -24,11 +24,11 @@ SDL_bgi.
 
 Links:
 
-0. WinBGIm, a BGI Windows port:
-   http://www.cs.colorado.edu/~main/cs1300/doc/bgi/
-
-1. The SDL library:
+0. The SDL library:
    https://www.libsdl.org/
+
+1. WinBGIm, a BGI Windows port:
+   http://www.cs.colorado.edu/~main/cs1300/doc/bgi/
 
 2. SDL_gfx, graphics drawing primitives and more:
    http://cms.ferzkopp.net/index.php/software/13-sdl-gfx

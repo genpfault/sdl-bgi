@@ -87,7 +87,7 @@ int main (void)
       if (kbhit ())
 	    stop = 1;
     }
-    if (10000000 == counter)
+    if (10000000 == counter) // 10 millions
       break;
   }
   setcolor (GREEN);

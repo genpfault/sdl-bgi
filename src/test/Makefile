@@ -1,16 +1,19 @@
 # Makefile for test SDL_bgi programs
-
-SDL2_bgi = ../libSDL_bgi.so
+# Please note that f90_test.f90 is not included
 
 # C compiler: gcc or clang
 CC = gcc
 CFLAGS = -std=c99 -O2 -g -I.. -L..
 LIBS = -lSDL2
+SDL2_bgi = ../libSDL_bgi.so
 
 PROGRAMS = cellular dla fern floodfilltest hopalong life \
-mandelbrot mousetest moveit sdlbgidemo simple turtledemo
+mandelbrot mousetest moveit sdlbgidemo simple turtledemo pixels
 
 all: $(PROGRAMS)
+
+../libSDL_bgi.so:
+	cd ..; make
 
 sdlbgidemo: sdlbgidemo.c $(SDL2_bgi)
 	$(CC) $(CFLAGS) -I. -o sdlbgidemo sdlbgidemo.c $(SDL2_bgi) $(LIBS) -lm
@@ -44,6 +47,9 @@ moveit: moveit.c $(SDL2_bgi)
 
 simple: simple.c $(SDL2_bgi)
 	$(CC) $(CFLAGS) -o simple simple.c $(SDL2_bgi) $(LIBS)
+
+pixels: pixels.c $(SDL2_bgi)
+	$(CC) $(CFLAGS) -o pixels pixels.c $(SDL2_bgi) $(LIBS)
 
 turtledemo: turtledemo.c turtle.c $(SDL2_bgi)
 	$(CC) $(CFLAGS) -o turtledemo turtledemo.c turtle.c $(SDL2_bgi) $(LIBS) -lm

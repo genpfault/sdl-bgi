@@ -1008,8 +1008,11 @@ void pagedemo (void)
   getviewsettings (&viewport);
   xm = (viewport.right - viewport.left) / 2;
   ym = (viewport.bottom - viewport.top ) / 2;
-  settextstyle (DEFAULT_FONT, HORIZ_DIR, 2);
+  settextstyle (DEFAULT_FONT, HORIZ_DIR, 6);
   settextjustify (CENTER_TEXT, CENTER_TEXT);
+  setcolor (GREEN);
+  outtextxy (xm, ym/2, "P A G E   0");
+  settextstyle (DEFAULT_FONT, HORIZ_DIR, 2);
   setcolor (YELLOW);
   
   outtextxy (xm, ym, "This is active page (and visual page) #0");
@@ -1022,6 +1025,10 @@ void pagedemo (void)
   setbkcolor (RED);
   clearviewport ();
   
+  setcolor (BLUE);
+  settextstyle (DEFAULT_FONT, HORIZ_DIR, 6);
+  outtextxy (xm, ym/2, "P A G E   1");
+  settextstyle (DEFAULT_FONT, HORIZ_DIR, 2);
   outtextxy (xm, ym, "This is active page (and visual page) #1");
   outtextxy (xm, ym + 30, "Press a key to go back to page #0");
   refresh ();

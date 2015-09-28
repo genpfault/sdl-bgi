@@ -2,7 +2,7 @@
 
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, and useful for porting old programs.
-// Guido Gonzato PhD, May 2015.
+// Guido Gonzato PhD, September 2015.
 
 #include <math.h>
 #include "SDL_bgi.h"
@@ -217,10 +217,10 @@ void arc (int x, int y, int stangle, int endangle, int radius)
   bgi_last_arc.yend = y - (radius * sin (endangle * PI_CONV));
   
   for (angle = stangle; angle < endangle; angle++)
-    line_fast (x + (radius * cos (angle * PI_CONV)),
-	       y - (radius * sin (angle * PI_CONV)),
-	       x + (radius * cos ((angle+1) * PI_CONV)),
-	       y - (radius * sin ((angle+1) * PI_CONV)));
+    line_fast (x + floor (0.5 + (radius * cos (angle * PI_CONV))),
+	       y - floor (0.5 + (radius * sin (angle * PI_CONV))),
+	       x + floor (0.5 + (radius * cos ((angle+1) * PI_CONV))),
+	       y - floor (0.5 + (radius * sin ((angle+1) * PI_CONV))));
   
   if (! bgi_fast_mode)
     refresh ();
@@ -412,6 +412,8 @@ int COLOR (int r, int g, int b)
 
 void delay (int msec)
 {
+  if (! bgi_fast_mode)
+    refresh ();
   SDL_Delay (msec);
 } // delay ()
 
@@ -805,6 +807,9 @@ int getch (void)
 {
   SDL_Event event;
 
+  if (! bgi_fast_mode)
+    refresh ();
+  
   if (window_is_hidden)
     return getchar ();
   else
@@ -1312,7 +1317,8 @@ void initwindow (int width, int height)
     return;
   }
 
-  bgi_renderer = SDL_CreateRenderer (bgi_window, -1, SDL_RENDERER_SOFTWARE);
+  bgi_renderer = SDL_CreateRenderer (bgi_window, -1,
+				     SDL_RENDERER_SOFTWARE);
   bgi_texture = SDL_CreateTexture (bgi_renderer,
 				   SDL_PIXELFORMAT_ARGB8888,
 				   SDL_TEXTUREACCESS_STREAMING,
@@ -1349,20 +1355,21 @@ int IS_BGI_COLOR (int color)
 
 int kbhit (void)
 {
-  const Uint8 *keys;
-  int i, n, pressed;
+  SDL_Event event;
   
-  SDL_PumpEvents ();
-  keys = SDL_GetKeyboardState (&n);
-  pressed = NOPE;
+  if (! bgi_fast_mode)
+    refresh ();
   
-  for (i = 0; i < n; i++)
-    if (keys[i])
-      pressed = YEAH;
-  
-  return (pressed);
-
-} // kbhit ()
+  if (SDL_PollEvent (&event)) {
+    if (event.type == SDL_KEYDOWN) {
+      // last_key = event.key.keysym.sym;
+      return YEAH;
+    }
+    else
+      SDL_PushEvent (&event); // don't disrupt the mouse
+  }
+  return NOPE;
+}
 
 // -----
 
@@ -2342,6 +2349,7 @@ void refresh (void)
   SDL_SetTextureBlendMode (bgi_texture, SDL_BLENDMODE_BLEND);
   SDL_RenderCopy (bgi_renderer, bgi_texture, NULL, NULL);
   SDL_RenderPresent (bgi_renderer);
+  //SDL_UpdateWindowSurface (bgi_window);
 } // refresh ()
 
 // -----
@@ -2693,27 +2701,25 @@ int GREEN_VALUE (int color)
 
 void updaterect (int x1, int y1, int x2, int y2)
 {
-  SDL_Rect rect, rect2;
+  SDL_Rect rect1, rect2;
+  int pitch = (bgi_maxx + 1) * sizeof (Uint32);
 
   swap_if_greater (&x1, &x2);
   swap_if_greater (&y1, &y2);
   
-  rect.x = x1;
-  rect.y = y1;
-  rect.w = x2 - x1 + 1;
-  rect.h = y2 - y1 + 1;
+  rect1.x = x1;
+  rect1.y = y1;
+  rect1.w = x2 - x1 + 1;
+  rect1.h = y2 - y1 + 1;
   
   // this works: but is THIS the expected behaviour?
   rect2.x = 0;
   rect2.y = 0;
   rect2.w = x2 + 1;
   rect2.h = y2 + 1;
-
-  SDL_UpdateTexture (bgi_texture, 
-		     &rect2,
-                     bgi_activepage,
-                     (bgi_maxx + 1) * sizeof (Uint32));
-  SDL_RenderCopy (bgi_renderer, bgi_texture, &rect, &rect);
+  
+  SDL_UpdateTexture (bgi_texture, &rect2, bgi_activepage, pitch);
+  SDL_RenderCopy (bgi_renderer, bgi_texture, &rect1, &rect1);
   SDL_RenderPresent (bgi_renderer);
 
 } // updaterect ()
@@ -2735,11 +2741,22 @@ void writeimagefile (char *filename,
   
   // create a surface from the existing window
   src = SDL_GetWindowSurface (bgi_window);
+  if (NULL == src) {
+    SDL_Log("SDL_GetWindowSurface failed: %s", SDL_GetError());
+    return;
+  }
+  
   // create a destination surface
   dest = SDL_CreateRGBSurface (0, rect.w, rect.h, 32, 0, 0, 0, 0);
+		
+  if (NULL == dest) {
+    SDL_Log("SDL_CreateRGBSurface: %s", SDL_GetError());
+    return;
+  }
   // blit and save
   SDL_BlitSurface (src, &rect, dest, NULL);
   SDL_SaveBMP (dest, filename);
+  
   // free the stuff
   SDL_FreeSurface (src);
   SDL_FreeSurface (dest);
