@@ -1,6 +1,6 @@
 % sdl_bgi-quickref.tex
 %
-% Guido Gonzato, September 22, 2015
+% Guido Gonzato, December 23, 2015
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -16,7 +16,8 @@
 \setlength{\parskip}{3pt}
 
 \newcommand{\SDLbgi}{SDL\_bgi}
-\newcommand{\version}{2.0.2}
+
+\newcommand{\version}{2.0.5}        % !!! Change here !!!
 
 \newcommand{\V}{\texttt{void}}      % void
 \newcommand{\I}{\texttt{int}}       % int
@@ -124,6 +125,9 @@ the following:
 
 \begin{small}
 \begin{verbatim}
+#define _SDL_BGI_H
+#define SDL_BGI_VERSION 2.0.5
+
 // everything gets drawn here
 
 extern SDL_Window   *bgi_window;
@@ -132,11 +136,22 @@ extern SDL_Texture  *bgi_texture;
 
 // available visual pages
 
-#define VPAGES 2
+#define VPAGES 4
 
 // BGI fonts
 
-#define DEFAULT_FONT   0 // 8x8
+#define DEFAULT_FONT     0 // 8x8
+#define TRIPLEX_FONT     1 // all other fonts are not implemented
+#define SMALL_FONT       2
+#define SANSSERIF_FONT   3
+#define GOTHIC_FONT      4
+#define BIG_FONT         5
+#define SCRIPT_FONT      6
+#define SIMPLEX_FONT     7
+#define TRIPLEX_SCR_FONT 8
+#define COMPLEX_FONT     9
+#define EUROPEAN_FONT    10
+#define BOLD_FONT        11
 
 #define HORIZ_DIR      0
 #define VERT_DIR       1
@@ -165,6 +180,7 @@ extern SDL_Texture  *bgi_texture;
 #define LIGHTGREEN     10
 #define LIGHTCYAN      11
 #define LIGHTRED       12
+#define LIGHTRED       12
 #define LIGHTMAGENTA   13
 #define YELLOW         14
 #define WHITE          15
@@ -190,6 +206,17 @@ extern SDL_Texture  *bgi_texture;
 
 #define EMPTY_FILL      0
 #define SOLID_FILL      1
+#define LINE_FILL       2
+#define LTSLASH_FILL    3
+#define SLASH_FILL      4
+#define BKSLASH_FILL    5
+#define LTBKSLASH_FILL  6
+#define HATCH_FILL      7
+#define XHATCH_FILL     8
+#define INTERLEAVE_FILL 9
+#define WIDE_DOT_FILL   10
+#define CLOSE_DOT_FILL  11
+#define USER_FILL       12
 
 // mouse buttons
 
@@ -201,6 +228,7 @@ extern SDL_Texture  *bgi_texture;
 #define WM_MOUSEMOVE    SDL_MOUSEMOTION
 
 #define PALETTE_SIZE    4096
+
 #define KEY_HOME        SDLK_HOME
 #define KEY_LEFT        SDLK_LEFT
 #define KEY_UP          SDLK_UP
@@ -237,6 +265,36 @@ extern SDL_Texture  *bgi_texture;
 #define KEY_PAUSE       SDLK_PAUSE
 #define KEY_SCR_LOCK    SDLK_SCROLLOCK
 #define KEY_ESC         SDLK_ESCAPE
+
+// graphics modes
+
+#define DETECT          0
+#define grOk            0
+#define SDL_CGALO       0
+#define SDL_CGAHI       1
+#define EGA             2
+#define EGAHI           2
+#define EGALO           2
+#define SDL_EGA         2
+#define SDL             3
+#define VGA             3
+#define SDL_VGA         3
+#define SDL_640x480     3
+#define SDL_HERC        4
+#define SDL_PC3270      5
+#define SVGA            6
+#define SDL_SVGALO      6
+#define SDL_800x600     6
+#define SDL_SVGAMED1    7
+#define SDL_1024x768    7
+#define SDL_SVGAMED2    8
+#define SDL_1152x900    8
+#define SDL_SVGAHI      9
+#define SDL_1280x1024   9
+#define SDL_WXGA        10
+#define SDL_1366x768    10
+#define SDL_USER        11
+#define SDL_FULLSCREEN  12
 \end{verbatim}
 \end{small}
 
@@ -303,6 +361,37 @@ struct rgb_colour {
   int colour_index;
   unsigned long pixel_value;
 };
+\end{verbatim}
+\end{small}
+
+% -----
+
+\section{Note for SDL2 Programmers}
+
+The following variables, declared in \F{SDL\_bgi.h}, are accessible to
+the programmer:
+
+\begin{small}
+\begin{verbatim}
+SDL_Window   *bgi_window;
+SDL_Renderer *bgi_renderer;
+SDL_Texture  *bgi_texture;
+\end{verbatim}
+\end{small}
+
+and can be used by native SDL2 functions. That is, you can use BGI and
+native SDL2 functions together, as in the following code snippet:
+
+\begin{small}
+\begin{verbatim}
+SDL_Surface *bitmap;
+SDL_Texture *texture;
+...
+bitmap = SDL_LoadBMP ("picture.bmp");
+texture = SDL_CreateTextureFromSurface (bgi_renderer, bitmap);
+SDL_RenderCopy (bgi_renderer, texture, NULL, NULL);
+SDL_RenderPresent (bgi_renderer);
+...
 \end{verbatim}
 \end{small}
 
@@ -444,9 +533,6 @@ color and fill pattern.
 Draws a polygon of \A{numpoints} vertices and fills it using the
 current fill color.
 
-\textbf{Note}: as of the current release, only convex polygons are
-correctly filled, and only using SOLID\_FILL.
-
 % -----
 
 \begin{bgi}
@@ -456,9 +542,6 @@ correctly filled, and only using SOLID\_FILL.
 Fills an enclosed area, containing the \A{x} and \A{y} points and
 bounded by the \A{border} color. The area is filled using the
 current fill color.
-
-\textbf{Note}: as of the current release, \func{floodfill()} only uses
-SOLID\_FILL.
 
 % -----
 
@@ -574,7 +657,8 @@ colors are being used, it returns \T{PALETTE\_SIZE}.
 \I{} \func{getmaxmode} (\V{}); 
 \end{bgi}
 
-Returns the maximum mode number for the current driver.
+Returns the maximum mode number for the current driver. In \SDLbgi,
+the default is \T{SDL\_FULLSCREEN}.
 
 % -----
 
@@ -827,10 +911,6 @@ Draws and fills a pie slice centered at (\A{x}, \A{y}), with a radius
 given by \A{radius}, traveling from \A{stangle} to \A{endangle}. The
 pie slice is filled using the current fill colour.
 
-\textbf{Note}: as of the current release, the pie slice is filled only
-using SOLID\_FILL.
-
-
 % -----
 
 \begin{bgi}
@@ -902,9 +982,6 @@ Hides the graphics window.
 Draws and fills an elliptical pie slice centered at (\A{x}, \A{y}),
 horizontal and vertical radii given by \A{xradius} and \A{yradius},
 traveling from \A{stangle} to \A{endangle}.
-
-\textbf{Note}: as of the current release, the sector is filled only
-using SOLID\_FILL.
 
 % -----
 
@@ -1119,8 +1196,8 @@ refresh is performed.
 \I{} \func{kbhit} (\V{});
 \end{bgi}
 
-Returns 1 when a key is pressed, including Ctrl, Shift, Alt, and so
-on. In ``slow mode'', a screen refresh is performed.
+Returns 1 when a key is pressed. In ``slow mode'', a screen refresh is
+performed.
 
 % -----
 
@@ -1343,6 +1420,15 @@ Sets the \A{n}-th entry in the RGB palette specifying the \A{r},
 
 Using \func{setrgbpalette()} and \func{setrgbcolor()} is faster than
 setting colors with \func{setcolor()} with a \func{COLOR()} argument.
+
+% -----
+
+\begin{bgi}
+\I{} \func{xkbhit} (\V{});
+\end{bgi}
+
+Returns 1 when any key is pressed, including Ctrl, Shift, etc. In
+``slow mode'', a screen refresh is performed.
 
 % -----
 

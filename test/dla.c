@@ -1,7 +1,7 @@
 /* dla.c  -*- C -*-
  * 
  * To compile:
- * gcc -o dla dla.c -lSDL_bgi -lSDL2
+ * gcc -o dla dla.c -lSDL_bgi -l
  * 
  * Diffusion limited aggregation.
  * 
@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <SDL2/SDL_bgi.h>
+#include "SDL_bgi.h"
 
 #define SIZE1 800
 #define SIZE2 600

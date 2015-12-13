@@ -23,4 +23,7 @@ To remove the library, do:
   $ cd src
   $ sudo make uninstall
 
+Please see the using.txt file in the doc/ directory.
+
 Enjoy!
+GG

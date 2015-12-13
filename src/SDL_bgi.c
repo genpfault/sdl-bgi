@@ -2,7 +2,8 @@
 
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, and useful for porting old programs.
-// Guido Gonzato PhD, September 2015.
+// Guido Gonzato PhD
+// December 23, 2015
 
 #include <math.h>
 #include "SDL_bgi.h"
@@ -16,8 +17,10 @@ SDL_Window   *bgi_window;
 SDL_Renderer *bgi_renderer;
 SDL_Texture  *bgi_texture;
 
-static Uint32
-  *bgi_vpage[VPAGES], // array of visual pages
+// static Uint32
+SDL_Surface
+  *bgi_vpage[VPAGES]; // array of visual pages
+Uint32 
   *bgi_activepage,    // active (= being drawn on) page, possibly hidden
   *bgi_visualpage;    // visualised page
 
@@ -96,13 +99,13 @@ static struct palettetype pal;
 
 // utility functions
 
-static void initpalette (void);
-static void putpixel_copy (int, int, Uint32);
-static void putpixel_xor  (int, int, Uint32);
-static void putpixel_and  (int, int, Uint32);
-static void putpixel_or   (int, int, Uint32);
-static void putpixel_not  (int, int, Uint32);
-static void ff_putpixel   (int x, int);
+static void initpalette    (void);
+static void putpixel_copy  (int, int, Uint32);
+static void putpixel_xor   (int, int, Uint32);
+static void putpixel_and   (int, int, Uint32);
+static void putpixel_or    (int, int, Uint32);
+static void putpixel_not   (int, int, Uint32);
+static void ff_putpixel    (int x, int);
 static Uint32 getpixel_raw (int, int);
 
 static void line_copy (int, int, int, int);
@@ -111,15 +114,16 @@ static void line_and  (int, int, int, int);
 static void line_or   (int, int, int, int);
 static void line_not  (int, int, int, int);
 static void line_fill (int, int, int, int);
+static void _floodfill (int, int, int);
 
 static void line_fast  (int, int, int, int);
 static void updaterect (int, int, int, int);
 
 // static void unimplemented (char *);
-static int  is_in_range (int, int, int);
-static void swap_if_greater (int *, int *);
+static int  is_in_range      (int, int, int);
+static void swap_if_greater  (int *, int *);
 static void circle_bresenham (int, int, int);
-static int  octant (int, int);
+static int  octant           (int, int);
 
 // -----
 
@@ -389,7 +393,8 @@ void closegraph (void)
   
   // free memory
   for (page = 0; page < bgi_np; page++)
-    free (bgi_vpage[page]);
+    // free (bgi_vpage[page]);
+    ;
   
   SDL_DestroyTexture (bgi_texture);
   SDL_DestroyRenderer (bgi_renderer);
@@ -459,10 +464,12 @@ static void swap_if_greater (int *x1, int *x2)
 
 // -----
 
+static void _ellipse (int, int, int, int);
+
 void ellipse (int x, int y, int stangle, int endangle, 
               int xradius, int yradius)
 {
-  // quick and dirty for now, Bresenham-based later (maybe)
+  // Bresenham-based if complete
   int angle;
   
   if (0 == xradius && 0 == yradius)
@@ -470,6 +477,12 @@ void ellipse (int x, int y, int stangle, int endangle,
 
   if (endangle < stangle)
     endangle += 360;
+  
+  // draw complete ellipse
+  if (0 == stangle && 360 == endangle) {
+    _ellipse (x, y, xradius, yradius);
+    return;
+  }
   
   // needed?
   bgi_last_arc.x = x;
@@ -500,6 +513,93 @@ int event (void)
   return NOPE;
 
 } // event ()
+
+// -----
+
+// Yeah, replicated code. The thing is, I can't catch the bug.
+
+void _ellipse (int cx, int cy, int xradius, int yradius)
+{
+  // from "A Fast Bresenham Type Algorithm For Drawing Ellipses"
+  // by John Kennedy
+
+  int
+    x, y,
+    xchange, ychange,
+    ellipseerror,
+    TwoASquare, TwoBSquare,
+    StoppingX, StoppingY;
+
+  if (0 == xradius && 0 == yradius)
+    return;
+ 
+  TwoASquare = 2*xradius*xradius;
+  TwoBSquare = 2*yradius*yradius;
+  x = xradius;
+  y = 0;
+  xchange = yradius*yradius*(1 - 2*xradius);
+  ychange = xradius*xradius;
+  ellipseerror = 0;
+  StoppingX = TwoBSquare*xradius;
+  StoppingY = 0;
+  
+  while (StoppingX >= StoppingY) {
+    
+    // 1st set of points, y' > -1
+ 
+    // normally, I'd put the line_fill () code here; but
+    // the outline getd overdrawn, can't find out why.
+    _putpixel (cx + x, cy - y);
+    _putpixel (cx - x, cy - y);
+    _putpixel (cx - x, cy + y);
+    _putpixel (cx + x, cy + y);
+    y++;
+    StoppingY += TwoASquare;
+    ellipseerror += ychange;
+    ychange +=TwoASquare; 
+    
+    if ((2*ellipseerror + xchange) > 0 ) {
+      x--;
+      StoppingX -= TwoBSquare;
+      ellipseerror +=xchange;
+      xchange += TwoBSquare;
+    }
+  } // while
+  
+  // 1st point set is done; start the 2nd set of points
+
+  x = 0;
+  y = yradius;
+  xchange = yradius*yradius;
+  ychange = xradius*xradius*(1 - 2*yradius);
+  ellipseerror = 0;
+  StoppingX = 0;
+  StoppingY = TwoASquare*yradius;
+  
+  while (StoppingX <= StoppingY ) {
+    
+    // 2nd set of points, y' < -1
+    
+    _putpixel (cx + x, cy - y);
+    _putpixel (cx - x, cy - y);
+    _putpixel (cx - x, cy + y);
+    _putpixel (cx + x, cy + y);
+    x++;
+    StoppingX += TwoBSquare;
+    ellipseerror += xchange;
+    xchange +=TwoBSquare;
+    if ((2*ellipseerror + ychange) > 0) {
+      y--,
+	StoppingY -= TwoASquare;
+      ellipseerror += ychange;
+      ychange +=TwoASquare;
+    }
+  }
+
+  if (! bgi_fast_mode)
+    refresh ();  
+  
+} // _ellipse ()
 
 // -----
 
@@ -534,11 +634,6 @@ void fillellipse (int cx, int cy, int xradius, int yradius)
  
     line_fill (cx + x, cy - y, cx - x, cy - y);
     line_fill (cx - x, cy + y, cx + x, cy + y);
-    _putpixel (cx + x, cy - y);
-    _putpixel (cx - x, cy - y);
-    _putpixel (cx - x, cy + y);
-    _putpixel (cx + x, cy + y);
-    
     y++;
     StoppingY += TwoASquare;
     ellipseerror += ychange;
@@ -553,7 +648,7 @@ void fillellipse (int cx, int cy, int xradius, int yradius)
   } // while
   
   // 1st point set is done; start the 2nd set of points
-  
+
   x = 0;
   y = yradius;
   xchange = yradius*yradius;
@@ -568,11 +663,6 @@ void fillellipse (int cx, int cy, int xradius, int yradius)
     
     line_fill (cx + x, cy - y, cx - x, cy - y);
     line_fill (cx - x, cy + y, cx + x, cy + y);
-    _putpixel (cx + x, cy - y);
-    _putpixel (cx - x, cy - y);
-    _putpixel (cx - x, cy + y);
-    _putpixel (cx + x, cy + y);
-    
     x++;
     StoppingX += TwoBSquare;
     ellipseerror += xchange;
@@ -584,36 +674,100 @@ void fillellipse (int cx, int cy, int xradius, int yradius)
       ychange +=TwoASquare;
     }
   }
+
+  // outline
   
+  _ellipse (cx, cy, xradius, yradius);
   if (! bgi_fast_mode)
     refresh ();  
   
-} // fillellipse ()
+} // _ellipse ()
 
 // -----
 
+// helper function for fillpoly ()
+
+static int intcmp (const void *n1, const void *n2)
+{
+  return (*(const int *) n1) - (*(const int *) n2);
+}
+
+// -----
+
+// the following function was adapted from the public domain
+// code by Darel Rex Finley,
+// http://alienryderflex.com/polygon_fill/
+
 void fillpoly (int numpoints, int *polypoints)
 {
-  // !!! only convex polygons for now
   int
-    tmpcol = bgi_fg_color,
-    x, y;
+    nodes,      // number of nodes
+    *nodeX,     // array of nodes
+    ymin, ymax,
+    pixelY,
+    i, j,
+    tmp, tmpcolor;
+
+  if (NULL == (nodeX = calloc (sizeof (int), numpoints))) {
+    fprintf (stderr, "Can't allocate memory for fillpoly()\n");
+    return;
+  }
   
-  // setcolor (bgi_fill_style.color);
+  tmp = bgi_fg_color;
+  if (EMPTY_FILL == bgi_fill_style.pattern)
+    tmpcolor = bgi_bg_color;
+  else // all other styles
+    tmpcolor = bgi_fill_style.color;
+  
+  setcolor (tmpcolor);
+  
+  // find Y maxima
+  
+  ymin = ymax = polypoints[1];
+  
+  for (i = 0; i < 2 * numpoints; i += 2) {
+    if (polypoints[i + 1] < ymin)
+      ymin = polypoints[i + 1];
+    if (polypoints[i + 1] > ymax)
+      ymax = polypoints[i + 1];
+  }
+  
+  //  Loop through the rows of the image.
+  for (pixelY = ymin; pixelY < ymax; pixelY++) {
+
+    //  Build a list of nodes.
+    nodes = 0;
+    j = 2 * numpoints - 2;
+  
+    for (i = 0; i < 2 * numpoints; i += 2) {
+      
+      if (
+          ((float) polypoints[i + 1] < (float)  pixelY &&
+           (float) polypoints[j + 1] >= (float) pixelY) ||
+          ((float) polypoints[j + 1] < (float)  pixelY &&
+           (float) polypoints[i + 1] >= (float) pixelY))
+	nodeX[nodes++] = 
+	(int) (polypoints[i] + (pixelY - (float) polypoints[i + 1]) / 
+	       ((float) polypoints[j + 1] - (float) polypoints[i + 1]) *
+	       (polypoints[j] - polypoints[i])); 
+      j = i;
+    }
+
+    // sort the nodes
+    qsort (nodeX, nodes, sizeof (int), intcmp);
+
+    // fill the pixels between node pairs.
+    for (i = 0; i < nodes; i += 2) {
+      if (SOLID_FILL == bgi_fill_style.pattern)
+        line_fast (nodeX[i], pixelY, nodeX[i + 1], pixelY);
+      else
+        line_fill (nodeX[i], pixelY, nodeX[i + 1], pixelY);
+    }
+      
+  } //   for pixelY
+
+  setcolor (tmp);
   drawpoly (numpoints, polypoints);
-  
-  if (numpoints < 4) { // triangle - find centroid
-    x = (polypoints[0] + polypoints[2] + polypoints[4]) / 3;
-    y = (polypoints[1] + polypoints[3] + polypoints[5]) / 3;
-  }
-  else {
-    x = (polypoints[0] + polypoints[4]) / 2; // 1st and 3rd vertices
-    y = (polypoints[1] + polypoints[5]) / 2;
-  }
-    
-  // !!! won't work for generic polygon!
-  floodfill (x, y, bgi_fill_style.color);
-  setcolor (tmpcol);
   
   if (! bgi_fast_mode)
     refresh ();
@@ -647,24 +801,12 @@ static void ff_putpixel (int x, int y)
   
   x += vp.left;
   y += vp.top;
-  
+
+  // if the corresponding bit in the pattern is 1
   if ( (fill_patterns[bgi_fill_style.pattern][y % 8] >> x % 8) & 1)
     putpixel_copy (x, y, palette[bgi_fill_style.color]);
   else
     putpixel_copy (x, y, palette[bgi_bg_color]);
-
-} // ff_putpixel ()
-
-// -----
-
-static void fill_putpixel (int x, int y)
-{
-  // similar to putpixel (), but uses fill color
-  
-  x += vp.left;
-  y += vp.top;
-  
-  putpixel_copy (x, y, palette[bgi_fill_style.color]);
 
 } // ff_putpixel ()
 
@@ -682,7 +824,7 @@ typedef struct {
 
 // max depth of stack - was 10000
 
-#define STACKSIZE 2000           
+#define STACKSIZE 2000
 
 // push new segment on stack
 
@@ -699,20 +841,19 @@ typedef struct {
 // with the same pixel value to the new pixel value nv.
 // A 4-connected neighbor is a pixel above, below, left, or right of a pixel.
 
-void floodfill (int x, int y, int border)
+void _floodfill (int x, int y, int border)
 {
-  int start, x1, x2, dy = 0;
-  unsigned long oc, nc, b; // border pixel value
-  Segment stack[STACKSIZE], *sp = stack; // stack of filled segments
+  int
+    start,
+    x1, x2,
+    dy = 0;
+  unsigned int
+    oldcol;
+  Segment 
+    stack[STACKSIZE],
+    *sp = stack; // stack of filled segments
   
-  oc = getpixel (x, y);
-  b = border;
-  nc = bgi_fg_color;
-  if (oc == b || oc == nc ||
-      x < 0 || x > vp.right - vp.left || // out of viewport/window?
-      y < 0 || y > vp.bottom - vp.top)
-    return;
-  
+  oldcol = getpixel (x, y);
   PUSH(y, x, x, 1);           // needed in some cases
   PUSH(y + 1, x, x, -1);      // seed segment (popped 1st)
 
@@ -725,15 +866,11 @@ void floodfill (int x, int y, int border)
      // segment of scan line y-dy for x1<=x<=x2 was previously filled,
      // now explore adjacent pixels in scan line y
     
-    for (x = x1; x >= 0 && getpixel(x, y) == oc; x--) {
-      // if (SOLID_FILL == bgi_fill_style.pattern)
-	fill_putpixel (x, y);
-      // else
-      // ff_putpixel (x, y);
-    }
+    for (x = x1; x >= 0 && getpixel (x, y) == oldcol; x--)
+      ff_putpixel (x, y);
     
     if (x >= x1) {
-      for (x++; x <= x2 && getpixel(x, y) == b; x++)
+      for (x++; x <= x2 && getpixel (x, y) == border; x++)
         ;
       start = x;
       if (x > x2)
@@ -746,25 +883,77 @@ void floodfill (int x, int y, int border)
       x = x1 + 1;
     }
     do {
-      for (x1 = x; x <= vp.right && getpixel(x, y) != b; x++) {
-	// if (SOLID_FILL == bgi_fill_style.pattern)
-	  fill_putpixel (x, y);
-	// else
-	  // ff_putpixel (x, y);
-      }
+      for (x1 = x; x <= vp.right && getpixel (x, y) != border; x++)
+	ff_putpixel (x, y);
       PUSH(y, start, x - 1, dy);
       if (x > x2 + 1)
         PUSH(y, x2 + 1, x - 1, -dy);    // leak on right?
-      for (x++; x <= x2 && getpixel (x, y) == b; x++)
+      for (x++; x <= x2 && getpixel (x, y) == border; x++)
         ;
       start = x;
+    } while (x <= x2);
+  
+  } // while
+
+} // floodfill ()
+
+// -----
+
+void floodfill (int x, int y, int border)
+{
+  unsigned int
+    oldcol;
+  int
+    found,
+    tmp_pattern,
+    tmp_color;
+  
+  oldcol = getpixel (x, y);
+  
+  // the way the above implementation of floodfill works,
+  // the fill colour must be different than the border colour
+  // and the current shape's background color.
+  
+  if (oldcol == border || oldcol == bgi_fill_style.color ||
+      x < 0 || x > vp.right - vp.left || // out of viewport/window?
+      y < 0 || y > vp.bottom - vp.top)
+    return;
+  
+  // special case for fill patterns. The background colour can't be
+  // the same in the area to be filled and in the fill pattern.
+  
+  if (SOLID_FILL == bgi_fill_style.pattern) {
+    _floodfill (x, y, border);
+    return;
+  }
+  else { // fill patterns
+    if (bgi_bg_color == oldcol) {
+      // solid fill first...
+      tmp_pattern = bgi_fill_style.pattern;
+      bgi_fill_style.pattern = SOLID_FILL;
+      tmp_color = bgi_fill_style.color;
+      // find a suitable temporary fill colour; it must be different
+      // than the border and the background
+      found = NOPE;
+      while (!found) {
+	bgi_fill_style.color = BLUE + random (WHITE);
+	if (oldcol != bgi_fill_style.color && 
+	    border != bgi_fill_style.color)
+	  found = YEAH;
+      }
+      _floodfill (x, y, border);
+      // ...then pattern fill
+      bgi_fill_style.pattern = tmp_pattern;
+      bgi_fill_style.color = tmp_color;
+      _floodfill (x, y, border);
     }
-    while (x <= x2);
+    else
+      _floodfill (x, y, border);
   }
 
   if (! bgi_fast_mode)
     refresh ();
-  
+
 } // floodfill ()
 
 // -----
@@ -806,6 +995,7 @@ int getbkcolor (void)
 int getch (void)
 {
   SDL_Event event;
+  SDL_Keycode key;
 
   if (! bgi_fast_mode)
     refresh ();
@@ -815,8 +1005,23 @@ int getch (void)
   else
     while (1)
       while (SDL_PollEvent (&event))
-	if (event.type == SDL_KEYDOWN)
-	  return event.key.keysym.sym;
+	if (event.type == SDL_KEYDOWN) {
+	  key = event.key.keysym.sym;
+	  if (key != SDLK_LCTRL &&
+	      key != SDLK_RCTRL &&
+	      key != SDLK_LSHIFT &&
+	      key != SDLK_RSHIFT &&
+	      key != SDLK_LGUI &&
+	      key != SDLK_RGUI &&
+	      key != SDLK_LALT &&
+	      key != SDLK_RALT &&
+	      key != SDLK_PAGEUP &&
+	      key != SDLK_PAGEDOWN &&
+	      key != SDLK_CAPSLOCK &&
+	      key != SDLK_MENU &&
+	      key != SDLK_APPLICATION)
+	    return key;
+	}
 
 } // getch ()
 
@@ -1255,15 +1460,13 @@ void initpalette (void)
 
 // -----
 
-static int
-  window_flag = 0;
-
 void initwindow (int width, int height)
 {
   int
     display_count = 0,
     display_index = 0,
     mode_index = 0,
+    window_flag = 0,
     page;
   
   SDL_DisplayMode mode = 
@@ -1317,8 +1520,7 @@ void initwindow (int width, int height)
     return;
   }
 
-  bgi_renderer = SDL_CreateRenderer (bgi_window, -1,
-				     SDL_RENDERER_SOFTWARE);
+  bgi_renderer = SDL_CreateRenderer (bgi_window, -1, 0);
   bgi_texture = SDL_CreateTexture (bgi_renderer,
 				   SDL_PIXELFORMAT_ARGB8888,
 				   SDL_TEXTUREACCESS_STREAMING,
@@ -1326,17 +1528,16 @@ void initwindow (int width, int height)
 				   bgi_maxy + 1);
 
   for (page = 0; page < VPAGES; page++) {
-    bgi_vpage[page] = malloc ( (bgi_maxx + 1) *
-			       (bgi_maxx + 1) *
-			       sizeof (Uint32));
+    bgi_vpage[page] = SDL_CreateRGBSurface 
+      (0, mode.w, mode.h, 32, 0, 0, 0, 0);
     if (NULL == bgi_vpage[page]) {
-      SDL_Log ("Can't allocate memory for visual page %d.", page);
+      SDL_Log ("Can't create surface for visual page %d.", page);
       break;
     }
     else
       bgi_np++;
   }
-  bgi_activepage = bgi_visualpage = bgi_vpage[0];
+  bgi_activepage = bgi_visualpage = bgi_vpage[0]->pixels;
   bgi_ap = bgi_vp = 0;
   
   graphdefaults ();
@@ -1356,14 +1557,30 @@ int IS_BGI_COLOR (int color)
 int kbhit (void)
 {
   SDL_Event event;
+  SDL_Keycode key;
   
   if (! bgi_fast_mode)
     refresh ();
   
   if (SDL_PollEvent (&event)) {
     if (event.type == SDL_KEYDOWN) {
-      // last_key = event.key.keysym.sym;
-      return YEAH;
+      key = event.key.keysym.sym;
+      if (key != SDLK_LCTRL &&
+          key != SDLK_RCTRL &&
+          key != SDLK_LSHIFT &&
+          key != SDLK_RSHIFT &&
+          key != SDLK_LGUI &&
+          key != SDLK_RGUI &&
+          key != SDLK_LALT &&
+          key != SDLK_RALT &&
+          key != SDLK_PAGEUP &&
+          key != SDLK_PAGEDOWN &&
+          key != SDLK_CAPSLOCK &&
+          key != SDLK_MENU &&
+          key != SDLK_APPLICATION)
+        return YEAH;
+      else
+	return NOPE;
     }
     else
       SDL_PushEvent (&event); // don't disrupt the mouse
@@ -2146,6 +2363,10 @@ void putpixel_copy (int x, int y, Uint32 pixel)
   
   bgi_activepage [y * (bgi_maxx + 1) + x] = pixel;
   
+  // we could use the native function:
+  // SDL_RenderDrawPoint (bgi_renderer, x, y);
+  // but strangely it's slower
+  
 } // putpixel_copy ()
 
 // -----
@@ -2349,7 +2570,7 @@ void refresh (void)
   SDL_SetTextureBlendMode (bgi_texture, SDL_BLENDMODE_BLEND);
   SDL_RenderCopy (bgi_renderer, bgi_texture, NULL, NULL);
   SDL_RenderPresent (bgi_renderer);
-  //SDL_UpdateWindowSurface (bgi_window);
+  // SDL_UpdateWindowSurface (bgi_window);
 } // refresh ()
 
 // -----
@@ -2424,7 +2645,7 @@ void sector (int x, int y, int stangle, int endangle,
 void setactivepage (int page)
 {
   if (page > -1 && page < bgi_np)
-    bgi_activepage = bgi_vpage[page];
+    bgi_activepage = bgi_vpage[page]->pixels;
 } // setactivepage ()
 
 // -----
@@ -2640,7 +2861,7 @@ void setvisualpage (int page)
 {
   if (page > -1 && page < bgi_np) {
     // cleardevice ();
-    bgi_visualpage = bgi_vpage[page];
+    bgi_visualpage = bgi_vpage[page]->pixels;
     if (! bgi_fast_mode)
       refresh ();
   }
@@ -2701,7 +2922,7 @@ int GREEN_VALUE (int color)
 
 void updaterect (int x1, int y1, int x2, int y2)
 {
-  SDL_Rect rect1, rect2;
+  SDL_Rect rect1; // , rect2;
   int pitch = (bgi_maxx + 1) * sizeof (Uint32);
 
   swap_if_greater (&x1, &x2);
@@ -2713,12 +2934,13 @@ void updaterect (int x1, int y1, int x2, int y2)
   rect1.h = y2 - y1 + 1;
   
   // this works: but is THIS the expected behaviour?
-  rect2.x = 0;
-  rect2.y = 0;
-  rect2.w = x2 + 1;
-  rect2.h = y2 + 1;
+  // rect2.x = 0;
+  // rect2.y = 0;
+  // rect2.w = x2 + 1;
+  // rect2.h = y2 + 1;
   
-  SDL_UpdateTexture (bgi_texture, &rect2, bgi_activepage, pitch);
+  // SDL_UpdateTexture (bgi_texture, &rect2, bgi_activepage, pitch);
+  SDL_UpdateTexture (bgi_texture, NULL, bgi_activepage, pitch);
   SDL_RenderCopy (bgi_renderer, bgi_texture, &rect1, &rect1);
   SDL_RenderPresent (bgi_renderer);
 

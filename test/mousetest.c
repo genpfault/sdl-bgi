@@ -1,7 +1,7 @@
 /* mousetest.c  -*- C -*-
  * 
  * To compile:
- * gcc -o mousetest mousetest.c -lSDL_bgi -lSDL2
+ * gcc -o mousetest mousetest.c -lSDL_bgi -l
  * 
  * By Guido Gonzato, May 2015
  * 
@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL2/SDL_bgi.h>
+#include "SDL_bgi.h"
 
 // -----
 

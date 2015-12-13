@@ -2,11 +2,15 @@
  
 // A BGI-like graphics library based on SDL2.
 // Easy to use and useful for porting old programs.
-// Guido Gonzato PhD, September 2015.
+// Guido Gonzato PhD
+// December 23, 2015.
 
 #include <SDL2/SDL.h>
 
-#define SDL_BGI_VERSION 2.0.3
+#ifndef _SDL_BGI_H
+#define _SDL_BGI_H
+
+#define SDL_BGI_VERSION 2.0.5
 
 #define NOPE 0
 #define YEAH 1
@@ -19,7 +23,7 @@ extern SDL_Texture  *bgi_texture;
 
 // available visual pages
 
-#define VPAGES 2
+#define VPAGES 4
 
 // BGI fonts
 
@@ -164,6 +168,7 @@ extern SDL_Texture  *bgi_texture;
 #define SDL_640x480     3
 #define SDL_HERC        4
 #define SDL_PC3270      5
+#define SVGA            6
 #define SDL_SVGALO      6
 #define SDL_800x600     6
 #define SDL_SVGAMED1    7
@@ -363,5 +368,7 @@ void swapbuffers (void);
 int  textheight (char *);
 int  textwidth (char *);
 void writeimagefile (char *, int, int, int, int);
+
+#endif
 
 // --- End of file SDL_bgi.h

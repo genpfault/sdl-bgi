@@ -1,7 +1,7 @@
 /* cellular.c  -*- C -*-
  * 
  * To compile:
- * gcc -o cellular cellular.c -lSDL_bgi -lSDL2
+ * gcc -o cellular cellular.c -lSDL_bgi -l
  * 
  * Simple cellular automata, as described at
  * http://mathworld.wolfram.com/ElementaryCellularAutomaton.html
@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#include <SDL2/SDL_bgi.h>
+#include "SDL_bgi.h"
 
 // -----
 

@@ -18,20 +18,32 @@ do is change the line that reads:
 to
 
   #include <SDL2/SDL_bgi.h>
+  
+or
 
-but you could also do:
+  #include "SDL_bgi.h"
+
+providing the right -I directive (e.g. -I/usr/include/SDL2/) to the
+compiler.
+
+But you could also do:
 
   $ sudo ln -s /usr/include/SDL2/SDL_bgi.h /usr/include/graphics.h
 
 which lets you leave old programs untouched - unless they also include
 dos.h and conio.h, which you'll have to remove or replace. Very basic
-dos.h and conio.h are provided in the src/test directory; they're good
-enough to compile the original bgidemo.c (not provided!) unmodified.
+dos.h and conio.h are provided in the test/ directory; they're good
+enough to compile the original bgidemo.c (not provided: it's not FOSS)
+unmodified.
 
 The graphics.h link must be created manually, since other software
-packages provide it (e.g. Allegro, wx, and others).
+packages may provide it (e.g. Allegro, wx, and others).
 
-Then, to compile a program:
+SDL_bgi.h defines the _SDL_BGI_H constant. You may check for its
+presence and write programs that employ SDL_BGI extensions; please
+have a look at the test program fern.c.
+
+To compile a program:
 
   $ gcc -o program program.c -lSDL_bgi -lSDL2
 
@@ -49,7 +61,9 @@ window size, you can use the new SDL driver:
 
 where <mode> can be one of the following:
 
+  VGA             640x480
   SDL_640x480     640x480
+  SVGA            800x600
   SDL_800x600     800x600
   SDL_1024x768    1024x768
   SDL_1152x900    1152x900
@@ -83,7 +97,7 @@ mode, respectively.
 
 Documentation and sample BGI programs are available at this address:
 http://www.cs.colorado.edu/~main/cs1300/doc/bgi/
-Most programs can be compiled with SDL_bgi.
+Nearly all programs can be compiled with SDL_bgi.
 
 
 Differences
@@ -99,9 +113,6 @@ Differences
   registerbgifont     - it makes no sense in SDL
   setgraphbufsize     - unneeded
 
-- floodfill() only uses SOLID_FILL. Fill patterns are used by bar(),
-bar3d(), and filledellipse(), though.
-
 - setpalette() only affects future drawing. That is, you can't get a
 "rotating palette animation" as in Turbo C.
 
@@ -109,20 +120,14 @@ bar3d(), and filledellipse(), though.
 to other BGI fonts (e.g. TRIPLEX_FONT, and others) make no effect:
 consider using SDL_ttf!
 
-- fillpoly() only works correctly when the polygon is convex, and it
-only uses SOLID_FILL since it uses floodfill().
-
-- kbhit() (provided by conio.h in Turbo C/Borland C++) returns 1 when
-any key is pressed, including Shift, Ctrl, etc.
-
-- Key presses may not be detected during a delay().
+- Key presses may not be detected correctly during a delay().
 
 
 Additions
 ---------
 
-Some functions and macros have been added to add functionality in a
-manner compatible with other BGI implementations (namely, Xbgi and
+Some functions and macros have been added to add functionality and
+provide compatibility with other BGI implementations (namely, Xbgi and
 WinBGIm).
 
 Further, the following variables (declared in SDL_bgi.h) are
@@ -209,6 +214,9 @@ graphics.
 - sdlbgislow (void) triggers "slow mode" even if the graphics system
 was opened with initwindow(). Calling refresh() is not needed.
 
+- void xkbhit (void) returns 1 when any key is pressed, including
+Shift, Alt, etc.
+
 - void writeimagefile(char *filename, int left, int top, int right,
 int bottom) writes a .bmp file from the screen rectangle defined by
 (left,top--right,bottom).
@@ -218,13 +226,12 @@ Bugs & Issues
 -------------
 
 Drawing in BGI compatibility (slow) mode is much slower than it
-should, since SDL_UpdateTexture() doesn't work as expected (bug?).
+should, since SDL_UpdateTexture() doesn't work as expected: instead of
+refreshing an SDL_Rect correctly, it only works on entire textures. It
+looks like it's an SDL2 bug.
 
 Colours don't have the same RGB values as the original BGI colours.
 But they look better (IMHO).
-
-Some NVIDIA cards (my GeForce 9300 GE, for instance) along with their
-nvidia-* binary driver may work strangely and cause memory leaks.
 
 Probably, this documentation is not 100% accurate. Your feedback is
 more than welcome.

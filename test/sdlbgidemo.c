@@ -1,7 +1,7 @@
 /* sdlbgidemo.c  -*- C -*-
  * 
  * To compile:
- * gcc -o sdlbgidemo sdlbgidemo.c -lSDL_bgi -lSDL2
+ * gcc -o sdlbgidemo sdlbgidemo.c -lSDL_bgi -l
  * 
  * By Guido Gonzato, May 2015.
  * 
@@ -21,7 +21,7 @@
  * 
  */
 
-#include <SDL2/SDL_bgi.h>
+#include "SDL_bgi.h"
 
 #define PI_CONV (3.1415926 / 180.0)
 
@@ -510,6 +510,57 @@ void boxdemo (void)
 
 // -----
 
+void polygondemo (void)
+{
+  // draw filled polygons
+  int
+    stop = 0,
+    x = maxx / 2,
+    y = maxy / 2,
+    cnt = 0,
+    i,
+    numpoints,
+    poly[32];
+  
+  message ("fillpoly() Demonstration");
+  mainwindow ();
+  
+  while (! stop) {
+    
+    // fill colour
+    setfillstyle (random (USER_FILL),
+		  COLOR (random (256), random (256), random (256)));
+    numpoints = 3 + random (14); // max 16
+    for (i = 0; i < 2 * numpoints; i += 2) {
+      poly[i]     = random (maxx);
+      poly[i + 1] = random (maxy);
+    }
+    // outline colour
+    
+    setcolor (COLOR (random (256), random (256), random (256)));
+    fillpoly (numpoints, poly); // outlined filled polygons
+    
+    cnt++;
+    if (0 == cnt % 50) // refresh every 50 polygons
+      refresh ();
+  
+    if (ismouseclick (WM_LBUTTONDOWN))
+      stop = 1;
+    
+    if (ismouseclick (WM_RBUTTONDOWN)) {
+      closegraph ();
+      exit (1);
+    }
+  
+  } // while
+  
+  refresh ();
+  get_click ();
+
+} // polygondemo ()
+
+// -----
+
 void circledemo (void)
 {
   // draw arcs and ellipses
@@ -586,6 +637,7 @@ void ellipsedemo (void)
     
     setfillstyle (random (USER_FILL), 
 		  COLOR (random (256), random (256), random (256)));
+    setcolor (COLOR (random (256), random (256), random (256)));
     fillellipse (random (maxx), random (maxy),
 		 random (r), random (r));
     
@@ -846,7 +898,7 @@ void sdlmixdemo (void)
   SDL_Rect
     rect1, rect2;    
     
-  message ("SDL_BGI and SDL2 Native Functions Demonstration");
+  message ("SDL_BGI and  Native Functions Demonstration");
   mainwindow ();
   line (0, height / 2, width, height / 2);
   line (width / 2, 0, width / 2, height);
@@ -1000,7 +1052,10 @@ void pagedemo (void)
   int
     stop = 0,
     xm, ym,
+    num_page,
     col;
+  char 
+    title [100];
 
   message ("setactivepage() / setvisualpage () Demonstration");
   mainwindow ();
@@ -1010,29 +1065,23 @@ void pagedemo (void)
   ym = (viewport.bottom - viewport.top ) / 2;
   settextstyle (DEFAULT_FONT, HORIZ_DIR, 6);
   settextjustify (CENTER_TEXT, CENTER_TEXT);
-  setcolor (GREEN);
-  outtextxy (xm, ym/2, "P A G E   0");
-  settextstyle (DEFAULT_FONT, HORIZ_DIR, 2);
-  setcolor (YELLOW);
   
-  outtextxy (xm, ym, "This is active page (and visual page) #0");
-  outtextxy (xm, ym + 30, "Press a key to switch to page #1");
-  refresh ();
-  get_key ();
-  
-  setactivepage (1);
-  setvisualpage (1);
-  setbkcolor (RED);
-  clearviewport ();
-  
-  setcolor (BLUE);
-  settextstyle (DEFAULT_FONT, HORIZ_DIR, 6);
-  outtextxy (xm, ym/2, "P A G E   1");
-  settextstyle (DEFAULT_FONT, HORIZ_DIR, 2);
-  outtextxy (xm, ym, "This is active page (and visual page) #1");
-  outtextxy (xm, ym + 30, "Press a key to go back to page #0");
-  refresh ();
-  get_key ();
+  for (num_page = 0; num_page < VPAGES; num_page++) {
+    setactivepage (num_page);
+    setvisualpage (num_page);
+    setbkcolor (COLOR (20*num_page, 20*num_page, 20*num_page));
+    clearviewport ();
+    setcolor (BLUE + num_page);
+    settextstyle (DEFAULT_FONT, HORIZ_DIR, 6);
+    sprintf (title, "P A G E   %d", num_page);
+    outtextxy (xm, ym/2, title);
+    settextstyle (DEFAULT_FONT, HORIZ_DIR, 2);
+    sprintf (title, "This is active page (and visual page) %d", num_page);
+    outtextxy (xm, ym, title);
+    outtextxy (xm, ym + 30, "Press a key to go to next page");
+    refresh ();
+    get_key ();
+  }
   
   setactivepage (0);
   setvisualpage (0);
@@ -1120,6 +1169,7 @@ int main (void)
   linedemo ();
   linereldemo ();
   boxdemo ();
+  polygondemo ();
   circledemo ();
   ellipsedemo ();
   floodfilldemo ();

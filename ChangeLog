@@ -1,20 +1,32 @@
 Changelog
 ---------
 
-v 2.0.3, 2015-09-28
+v. 2.0.5, 2015-12-13
+- fillpoly() correctly implemented
+- demo programs sdlbgidemo.c and fern.c improved
+- symbol _SDL_BGI_H defined in SDL_bgi.h
+- minor fix in getch()
+
+v. 2.0.4, 2015-11-30
+- rewritten to use SDL_Surfaces only instead of
+  bitmaps in main RAM
+- ellipse() and fillellipse() improved
+- xkbhit() added
+
+v. 2.0.3, 2015-09-28
 - in "slow mode", screen refresh is also 
   triggered by kbhit() and getch()
 - minimal dos.h and conio.h provided
 - kbhit() rewritten to avoid buffered keys
 
-v 2.0.2, 2015-06-03
+v. 2.0.2, 2015-06-03
 - fill patterns (not for floodfill() yet)
 - setfillpattern()/getfillpattern() implemented
 - writeimagefile() added
 - documentation updates
 - test programs updates
 
-v 2.0.1, 2015-05-11
+v. 2.0.1, 2015-05-11
 - line patterns implemented
 - floodfill improvements
 - writeimagefile() added

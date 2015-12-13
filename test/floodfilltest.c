@@ -63,8 +63,8 @@ int main (void)
       }
       else 
 	if (WM_RBUTTONDOWN == p) {
-	  // setcolor (random (MAXCOLORS));
-	  setfillstyle (SOLID_FILL,
+	  setcolor (random (MAXCOLORS));
+	  setfillstyle (1 + random(USER_FILL),
 			COLOR (random (255), random (255), random (255)));
 	  floodfill (mousex (), mousey (), YELLOW);
 	  refresh ();

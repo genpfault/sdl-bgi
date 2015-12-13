@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <SDL2/SDL_bgi.h>
+#include "SDL_bgi.h"
 
 #include "turtle.h"
 

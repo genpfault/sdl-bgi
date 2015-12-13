@@ -1,6 +1,6 @@
 // plasma.c
 // used to produce the plasma.bmp file
-// gcc plasma.c -lSDL_bgi -lSDL2 -lm
+// gcc plasma.c -lSDL_bgi -l -lm
 
 #include <math.h>
 #include <graphics.h>

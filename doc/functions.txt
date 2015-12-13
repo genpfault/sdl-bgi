@@ -219,3 +219,5 @@ int textheight (char *textstring);
 int textwidth (char *textstring);
 
 void writeimagefile (char *filename, int left, int top, int right, int bottom);
+
+int xkbhit (void);

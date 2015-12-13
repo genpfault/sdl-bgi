@@ -1,12 +1,6 @@
 TODO
 ----
 
-- implement fill patterns for floodfill()
+- add SDL_ttf TrueType fonts?
 
-- implement generic polygon for fillpoly() 
-
-- other functions are not optimally implemented: filled curves ought
-to use Bresenham-based algorithms.
-
-I've got little time and lots of things to do. Please feel free to
-contribute!
+Your suggestions are welcome!

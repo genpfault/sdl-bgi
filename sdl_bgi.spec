@@ -1,6 +1,6 @@
 Summary:    BGI-compatible 2D graphics C library
 Name:       SDL_bgi
-Version:    2.0.3
+Version:    2.0.5
 Release:    1
 License:    ZLib
 Group:      Libraries
@@ -52,8 +52,8 @@ fi
 
 %files
 %defattr(644,root,root,755)
-%doc 00_README Changelog doc/ INSTALL LICENSE sdl_bgi.spec
-%doc src/test/ TODO VERSION
+%doc AUTHORS ChangeLog doc/ INSTALL LICENSE README
+%doc sdl_bgi.spec test/ TODO VERSION
 %attr(755,root,root) %{_libdir}/*
 %attr(644,root,root) %{_includedir}/SDL2/*
 

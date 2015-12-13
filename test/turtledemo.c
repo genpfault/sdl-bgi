@@ -6,7 +6,7 @@
  * 
  * To compile this program:
  * 
- * gcc -o turtledemo turtledemo.c turtle.c -lSDL_bgi -lSDL2
+ * gcc -o turtledemo turtledemo.c turtle.c -lSDL_bgi -l
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <SDL2/SDL_bgi.h>
+#include "SDL_bgi.h"
 
 #include "turtle.h"
 

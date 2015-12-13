@@ -25,12 +25,21 @@
 #include <unistd.h>
 #include <time.h>
 #include <math.h>
-#include <SDL2/SDL_bgi.h>
 
-// -----
+/* graphics.h could be a link to SDL_bgi.h
+ * or another implementation. Let's write this program
+ * in a portable way.
+ */
+
+#include <graphics.h>
+
+/* ----- */
 
 int main (void)
 {
+#ifndef _SDL_BGI_H
+  int gd, gm;
+#endif
   int stop = 0;
   long int counter = 0;
   int midx, midy, scale;
@@ -41,14 +50,22 @@ int main (void)
     b[4] = {0.0, 0.04, -0.26, 0.28},
     c[4] = {0.0, 0.04, 0.23, 0.26},
     d[4] = {0.16, 0.85, 0.22, 0.24},
-    // e[4] = {0.0, 0.0, 0.0, 0.0},
+    /* e[4] = {0.0, 0.0, 0.0, 0.0}, */
     f[4] = {0.0, 1.6, 1.6, 0.44};
-    // p[4] = {0.01, 0.85, 0.07, 0.07};
+    /* p[4] = {0.01, 0.85, 0.07, 0.07}; */
 
+#ifdef _SDL_BGI_H
   initgraph (NULL, NULL, "");
+#else
+  initgraph (&gd, &gm, "");
+#endif
   srand (time(NULL));
   
+#ifdef _SDL_BGI_H
   setbkcolor (COLOR (0, 0, 40));
+#else
+  setbkcolor (BLACK);
+#endif
   cleardevice ();
   setcolor (YELLOW);
   outtextxy (0, 0, "Press a key to exit: ");
@@ -57,9 +74,13 @@ int main (void)
   midy = getmaxy () / 2;
   scale = getmaxx () / 16;
   x = y = 0.0;
+#ifdef _SDL_BGI_H
   setcolor (COLOR (random (256), random (256), random (256)));
+#else
+  setcolor (random (WHITE));
+#endif
   
-  // kbhit (), mouseclick () and event () are slow. Use them sparingly.
+  /* kbhit (), mouseclick () and event () are slow. Use them sparingly. */
   
   while (! stop) {
     prob = 1 + random (100);
@@ -72,30 +93,38 @@ int main (void)
     if (prob > 93)
       k = 3;
     
-    // to use equal probability, just use:
-    // k = random (5);
-    xx = a[k] * x + b[k] * y; //  + e[k];
+    /* to use equal probability, just use:
+     * k = random (5);
+     */
+    xx = a[k] * x + b[k] * y; /*  + e[k]; */
     yy = c[k] * x + d[k] * y + f[k];
     x = xx;
     y = yy;
+#ifdef _SDL_BGI_H
     _putpixel ((int)(midx + scale * x), (2 * midy - scale * y));
+#else
+    putpixel ((int)(midx + scale * x), (2 * midy - scale * y), getcolor ());
+#endif
     counter++;
     if (0 == counter % 100000) {
+#ifdef _SDL_BGI_H
       setcolor (COLOR (random (256), random (256), random (256)));
       refresh ();
-      // let's check for an event only once in a while.
+#else
+      setcolor (random (WHITE));
+#endif
+      /* let's check for an event only once in a while. */
       if (kbhit ())
-	    stop = 1;
+	stop = 1;
     }
-    if (10000000 == counter) // 10 millions
+    if (10000000 == counter) /* 10 million pixels */
       break;
   }
   setcolor (GREEN);
   outtextxy (0, 10, "Ok, leaving in 2 seconds");
   delay (2000);
-  
   closegraph ();
   return 0;
 }
 
-// ----- end of file fern.c
+/* --  end of file fern.c --- */

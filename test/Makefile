@@ -3,17 +3,17 @@
 
 # C compiler: gcc or clang
 CC = gcc
-CFLAGS = -std=c99 -O2 -g -I.. -L..
+CFLAGS = -std=c99 -O2 -g -I../src/ -I. -L..
 LIBS = -lSDL2
-SDL2_bgi = ../libSDL_bgi.so
+SDL2_bgi = ../src/libSDL_bgi.so
 
 PROGRAMS = cellular dla fern floodfilltest hopalong life \
-mandelbrot mousetest moveit sdlbgidemo simple turtledemo pixels
+mandelbrot mousetest moveit sdlbgidemo simple turtledemo
 
 all: $(PROGRAMS)
 
-../libSDL_bgi.so:
-	cd ..; make
+../src/libSDL_bgi.so:
+	cd ../src; make -f Makefile
 
 sdlbgidemo: sdlbgidemo.c $(SDL2_bgi)
 	$(CC) $(CFLAGS) -I. -o sdlbgidemo sdlbgidemo.c $(SDL2_bgi) $(LIBS) -lm
@@ -48,11 +48,8 @@ moveit: moveit.c $(SDL2_bgi)
 simple: simple.c $(SDL2_bgi)
 	$(CC) $(CFLAGS) -o simple simple.c $(SDL2_bgi) $(LIBS)
 
-pixels: pixels.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o pixels pixels.c $(SDL2_bgi) $(LIBS)
-
 turtledemo: turtledemo.c turtle.c $(SDL2_bgi)
 	$(CC) $(CFLAGS) -o turtledemo turtledemo.c turtle.c $(SDL2_bgi) $(LIBS) -lm
 
 clean:
-	rm -f $(PROGRAMS) a.out
+	rm -f $(PROGRAMS) a.out *o
