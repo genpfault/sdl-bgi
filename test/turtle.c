@@ -2,10 +2,10 @@
  * turtle.c	-*- C -*-
  * 
  * turtle graphics for BGI-compatible libraries
- * Tested with xbgi and grx
+ * Tested with SDL_bgi, xbgi, and grx
  * 
  * By Guido Gonzato <guido.gonzato at gmail.com>
- * January 2013
+ * February 29, 2016
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,26 +26,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "SDL_bgi.h"
+#include <graphics.h>
 
 #include "turtle.h"
 
 // -----
 
-static int t_x = 0, t_y = 0;           // turtle coordinates
+static int t_pos[2];                   // turtle coordinates
 static int t_heading = 0;              // turtle heading
 
 static int t_show_turtle = T_FALSE;    // draw the turtle?
 static int t_pen_down = T_TRUE;        // draw?
 static int t_turtle_drawn = T_TRUE;    // has the turtle been drawn?
 static int t_turtle_wrap = T_FALSE;    // wrap around the window?
+static int t_turtle_size = 21;         // turtle size in pixels
 
 static void draw_turtle (void);
-static void undraw_turtle (void);
 
 // sine and cosine tables for polar graphics. The angle
 // starts at pi/2 and increases clockwise: -(angle-90)
-
 
 static double t_sin[360] =
 {1.000000,  0.999848,  0.999391,  0.998630,  0.997564,  
@@ -199,25 +198,21 @@ static double t_cos[360] =
 
 // -----
 
-void setheading (int angle)
+void back (int n)
 {
-  t_heading = angle % 360; // avoid overflows
+  turnleft (180);
+  forwd (n);
+  turnleft (180);
 }
 
-// -----
-
-int heading (void)
+inline void backward (int n)
 {
-  return (t_heading);
+  back (n);
 }
 
-// -----
-
-void home (void)
+inline void bk (int n)
 {
-  t_x = getmaxx () / 2;
-  t_y = getmaxy () / 2;
-  setheading (0);
+  back (n) ;
 }
 
 // -----
@@ -230,41 +225,172 @@ void forwd (int n)
   newy = (int) ((double) n * t_sin[t_heading]);
   
   // is the turtle visible?
-  if (t_show_turtle && t_turtle_drawn)
-    undraw_turtle ();
+  if (t_show_turtle)
+    draw_turtle (); // delete previous
   
   // should we draw?
   if (t_pen_down)
-    line (t_x, t_y, t_x + newx, t_y - newy);
+    line (t_pos[0], t_pos[1], t_pos[0] + newx, t_pos[1] - newy);
 
-  t_x += newx;
-  t_y -= newy;
+  t_pos[0] += newx;
+  t_pos[1] -= newy;
   
+  // new position
   if (t_show_turtle)
     draw_turtle ();
   
   // is wrapping active?
   if (t_turtle_wrap) {
-    if (t_x < 0)
-      t_x = getmaxx () - t_x;
-    if (t_x > getmaxx ())
-      t_x = t_x - getmaxx ();
+    if (t_pos[0] < 0)
+      t_pos[0] = getmaxx () - t_pos[0];
+    if (t_pos[0] > getmaxx ())
+      t_pos[0] = t_pos[0] - getmaxx ();
     
-    if (t_y < 0)
-      t_y = getmaxy () - t_y;
-    if (t_y > getmaxy ())
-      t_y = t_y - getmaxy ();
+    if (t_pos[1] < 0)
+      t_pos[1] = getmaxy () - t_pos[1];
+    if (t_pos[1] > getmaxy ())
+      t_pos[1] = t_pos[1] - getmaxy ();
   }
   
 } // forwd
 
+inline void forward (int n)
+{
+  forwd (n);
+}
+
+inline void fd (int n)
+{
+  forwd (n);
+}
+
 // -----
 
-void back (int n)
+void turnleft (int n)
 {
-  turnleft (180);
-  forwd (n);
-  turnleft (180);
+  // delete the turtle
+  if (t_show_turtle)
+    draw_turtle ();
+  t_heading -= n;
+  if (t_heading < 0)
+    t_heading += 360;
+  if (t_show_turtle)
+    draw_turtle ();
+}
+
+inline void left (int n)
+{
+  turnleft (n);
+}
+
+inline void lt (int n)
+{
+  turnleft (n);
+}
+
+// -----
+
+void turnright (int n)
+{
+  // delete the turtle
+  if (t_show_turtle)
+    draw_turtle ();
+  t_heading += n;
+  if (t_heading >= 360)
+    t_heading -= 360;
+  if (t_show_turtle)
+    draw_turtle ();
+}
+
+inline void right (int n)
+{
+  turnright (n);
+}
+
+inline void rt (int n)
+{
+  turnright (n);
+}
+
+// -----
+
+void setposition (int x, int y)
+{
+  t_pos[0] = x;
+  t_pos[1] = y;
+}
+
+inline void go_to (int x, int y)
+{
+  setposition (x, y);
+}
+
+inline void setpos (int x, int y)
+{
+  setposition (x, y);
+}
+
+// -----
+
+void setx (int x)
+{
+  t_pos[0] = x;
+}
+
+// -----
+
+void sety (int y)
+{
+  t_pos[1] = y;
+}
+
+// -----
+
+void setheading (int angle)
+{
+  t_heading = angle % 360; // avoid overflows
+}
+
+inline void seth (int angle)
+{
+  setheading (angle);
+}
+
+// -----
+
+void home (void)
+{
+  t_pos[0] = getmaxx () / 2;
+  t_pos[1] = getmaxy () / 2;
+  setheading (0);
+}
+
+// -----
+
+int *position (void)
+{
+  return t_pos;
+}
+
+// -----
+
+int xcor (void)
+{
+  return (t_pos[0]);
+}
+
+// -----
+
+int ycor (void)
+{
+  return (t_pos[1]);
+}
+
+// -----
+
+int heading (void)
+{
+  return (t_heading);
 }
 
 // -----
@@ -274,6 +400,16 @@ void pendown (void)
   t_pen_down = T_TRUE;
 }
 
+inline void pd (void)
+{
+  pendown ();
+}
+
+inline void down (void)
+{
+  pendown ();
+}
+
 // -----
 
 void penup (void)
@@ -281,57 +417,58 @@ void penup (void)
   t_pen_down = T_FALSE;
 }
 
-// -----
-
-void turnleft (int n)
+inline void pu (void)
 {
-  t_heading -= n;
-  if (t_heading < 0)
-    t_heading += 360;
+  penup ();
+}
+
+inline void up (void)
+{
+  penup ();
 }
 
 // -----
 
-void turnright (int n)
+int isdown (void)
 {
-  t_heading += n;
-  if (t_heading >= 360)
-    t_heading -= 360;
-}
-
-// -----
-
-int xcor (void)
-{
-  return (t_x);
-}
-
-// -----
-
-int ycor (void)
-{
-  return (t_y);
+  return t_pen_down;
 }
 
 // -----
 
 void draw_turtle (void)
 {
+  int triangle[6];
+  int tmp_heading = t_heading;
+    
   setwritemode (XOR_PUT);
   
-  // maybe too simple but convenient :-)
-  circle (t_x, t_y, 10);
+  triangle[0] = t_pos[0] +
+    (int) ((double) t_turtle_size * t_cos[t_heading]);
+  triangle[1] = t_pos[1] -
+    (int) ((double) t_turtle_size * t_sin[t_heading]);
+  t_heading -= 90;
+  if (t_heading < 0)
+    t_heading += 360;
+  triangle[2] = t_pos[0] +
+    (int) ((double) t_turtle_size/3 * t_cos[t_heading]);
+  triangle[3] = t_pos[1] -
+    (int) ((double) t_turtle_size/3 * t_sin[t_heading]);
+  t_heading -= 180;
+  if (t_heading < 0)
+    t_heading += 360;
+  triangle[4] = t_pos[0] +
+    (int) ((double) t_turtle_size/3 * t_cos[t_heading]);
+  triangle[5] = t_pos[1] -
+    (int) ((double) t_turtle_size/3 * t_sin[t_heading]);
+  // draw it
+  line (triangle[0], triangle[1], triangle[2], triangle[3]);
+  line (triangle[2], triangle[3], triangle[4], triangle[5]);
+  line (triangle[4], triangle[5], triangle[0], triangle[1]);
   
   setwritemode (COPY_PUT);
   t_turtle_drawn = T_TRUE;
-}
-
-// -----
-
-void undraw_turtle (void)
-{
-  draw_turtle ();
-  t_turtle_drawn = T_FALSE;
+  t_heading = tmp_heading;
 }
 
 // -----
@@ -342,6 +479,11 @@ void showturtle (void)
   t_show_turtle = T_TRUE;
 }
 
+inline void st (void)
+{
+  showturtle ();
+}
+
 // -----
 
 void hideturtle (void)
@@ -350,12 +492,23 @@ void hideturtle (void)
   t_show_turtle = T_FALSE;
 }
 
+inline void ht (void)
+{
+  hideturtle ();
+}
+
 // -----
 
-void setposition (int x, int y)
+void turtlesize (int size)
 {
-  t_x = x;
-  t_y = y;
+  t_turtle_size = size;
+}
+
+// -----
+
+int isvisible (void)
+{
+  return t_show_turtle;
 }
 
 // -----

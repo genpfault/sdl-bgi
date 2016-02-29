@@ -1,16 +1,16 @@
 // SDL_bgi.h	-*- C -*-
  
-// A BGI-like graphics library based on SDL2.
-// Easy to use and useful for porting old programs.
-// Guido Gonzato PhD
-// December 23, 2015.
+// A BGI (Borland Graphics Library) implementation based on SDL2.
+// Easy to use, pretty fast, and useful for porting old programs.
+// Guido Gonzato, PhD
+// February 29, 2016
 
 #include <SDL2/SDL.h>
 
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.0.5
+#define SDL_BGI_VERSION 2.0.6
 
 #define NOPE 0
 #define YEAH 1
@@ -343,11 +343,11 @@ void sdlbgislow (void);
 void sector (int, int, int, int, int, int);
 void setactivepage (int);
 void setallpalette (struct palettetype *);
+void setalpha (int, Uint8);
 void setaspectratio (int, int);
 void setbkcolor (int);
 void setbkrgbcolor (int);
 void setcolor (int);
-void setalpha (int, Uint8);
 void setfillpattern (char *, int); 
 void setfillstyle (int, int);
 unsigned setgraphbufsize (unsigned);

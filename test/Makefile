@@ -8,7 +8,7 @@ LIBS = -lSDL2
 SDL2_bgi = ../src/libSDL_bgi.so
 
 PROGRAMS = cellular dla fern floodfilltest hopalong life \
-mandelbrot mousetest moveit sdlbgidemo simple turtledemo
+mandelbrot mousetest moveit plasma sdlbgidemo simple turtledemo
 
 all: $(PROGRAMS)
 
@@ -44,6 +44,9 @@ mousetest: mousetest.c $(SDL2_bgi)
 
 moveit: moveit.c $(SDL2_bgi)
 	$(CC) $(CFLAGS) -o moveit moveit.c $(SDL2_bgi) $(LIBS)
+
+plasma: plasma.c $(SDL2_bgi)
+	$(CC) $(CFLAGS) -o plasma plasma.c $(SDL2_bgi) $(LIBS) -lm
 
 simple: simple.c $(SDL2_bgi)
 	$(CC) $(CFLAGS) -o simple simple.c $(SDL2_bgi) $(LIBS)

@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+v. 2.0.6, 2016-02-29
+- fixed bug in writeimagefile() (reported by
+  Manea Alexandru Damian)
+- implemented clipping in readimagefile()
+- turtle graphics improvements
+- documentation improvements
+
 v. 2.0.5, 2015-12-13
 - fillpoly() correctly implemented
 - demo programs sdlbgidemo.c and fern.c improved

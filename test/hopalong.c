@@ -1,7 +1,7 @@
 /* hopalong.c  -*- C -*-
  * 
  * To compile:
- * gcc -o hopalong hopalong.c -lSDL_bgi -l
+ * gcc -o hopalong hopalong.c -lSDL_bgi -lSDL2
  * 
  * By Guido Gonzato, May 2015.
  * 
@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "SDL_bgi.h"
+#include <graphics.h>
 
 // -----
 

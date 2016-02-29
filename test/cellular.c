@@ -1,7 +1,7 @@
 /* cellular.c  -*- C -*-
  * 
  * To compile:
- * gcc -o cellular cellular.c -lSDL_bgi -l
+ * gcc -o cellular cellular.c -lSDL_bgi -lSDL2
  * 
  * Simple cellular automata, as described at
  * http://mathworld.wolfram.com/ElementaryCellularAutomaton.html
@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#include "SDL_bgi.h"
+#include <graphics.h>
 
 // -----
 
@@ -64,7 +64,10 @@ void run_rule (int rule)
 int main (int argc, char **argv)
 {
   
-  int rule, stop = 0;
+  int 
+    rule, 
+    ch,
+    stop = NOPE;
   char s[20];
   
   initwindow (1024, 1024 / 2 + 40);
@@ -85,9 +88,10 @@ int main (int argc, char **argv)
     putpixel (getmaxx () / 2, 20, RED);
     run_rule (rule);
     refresh ();
-    delay (2000);
-    if (kbhit ()) // warning - keep key pressed
-      stop = 1;
+    
+    ch = getch ();
+    if (KEY_ESC == ch)
+      stop = YEAH;
     cleardevice ();
   }
 

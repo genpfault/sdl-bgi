@@ -1,7 +1,7 @@
 /* simple.c  -*- C -*-
  * 
  * To compile:
- * gcc -o simple simple.c -lSDL_bgi -l
+ * gcc -o simple simple.c -lSDL_bgi -lSDL2
  * 
  * By Guido Gonzato, May 2015.
  * 
@@ -23,7 +23,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "SDL_bgi.h"
+#include <graphics.h>
 
 int i, stop, maxx, maxy;
 

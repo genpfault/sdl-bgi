@@ -1,6 +1,6 @@
 % sdl_bgi-quickref.tex
 %
-% Guido Gonzato, December 23, 2015
+% Guido Gonzato, February 29, 2016
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -17,10 +17,11 @@
 
 \newcommand{\SDLbgi}{SDL\_bgi}
 
-\newcommand{\version}{2.0.5}        % !!! Change here !!!
+\newcommand{\version}{2.0.6}        % !!! Change here !!!
 
 \newcommand{\V}{\texttt{void}}      % void
 \newcommand{\I}{\texttt{int}}       % int
+\newcommand{\U}{\texttt{Uint8}}     % Uint8
 \newcommand{\C}{\texttt{char *}}    % char *
 \newcommand{\func}[1]{\textbf{#1}}  % function
 \newcommand{\A}[1]{\emph{#1}}       % parameter
@@ -65,12 +66,12 @@
 
 \SDLbgi{} is an SDL2-based implementation of Borland Graphics
 Interface (BGI), a graphics library that was part of Turbo/Borland C
-compilers for DOS. It represented the \emph{de facto} standard for
+compilers for DOS. BGI represented the \emph{de facto} standard for
 computer graphics in the late eighties--early nineties, especially in
 education.
 
 \SDLbgi{} is one of the easiest ways to do graphics programming in C.
-It is much simpler (but obviously, less powerful) than SDL, OpenGL and
+It is much simpler (but obviously, less complete) than SDL, OpenGL and
 the like. Teachers may find \SDLbgi{} a useful tool for introductory
 computer graphics courses.
 
@@ -126,7 +127,7 @@ the following:
 \begin{small}
 \begin{verbatim}
 #define _SDL_BGI_H
-#define SDL_BGI_VERSION 2.0.5
+#define SDL_BGI_VERSION 2.0.6
 
 // everything gets drawn here
 
@@ -489,8 +490,8 @@ Closes the graphics system.
 \V{} \func{detectgraph} (\I{} \A{*graphdriver}, \I{} \A{*graphmode});
 \end{bgi}
 
-Detects the graphics driver and graphics mode to use by checking the
-hardware. In \SDLbgi, the default is 800x600 (SVGA).
+Detects the graphics driver and graphics mode to use. In \SDLbgi, the
+default is 800x600 (SVGA).
 
 % -----
 
@@ -539,9 +540,17 @@ current fill color.
 \V{} \func{floodfill} (\I{} \A{x}, \I{} \A{y}, \I{} \A{border});
 \end{bgi}
 
-Fills an enclosed area, containing the \A{x} and \A{y} points and
-bounded by the \A{border} color. The area is filled using the
-current fill color.
+Fills an enclosed area, containing the \A{x} and \A{y} points bounded
+by the \A{border} color. The area is filled using the current fill
+color.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getactivepage} (\V{});
+\end{bgi}
+
+Returns the active page number.
 
 % -----
 
@@ -601,7 +610,7 @@ graphics driver.
 \end{bgi}
 
 Copies the user-defined fill pattern, as set by setfillpattern, into
-the 8-byte area pointed to by pattern.
+the 8-byte area pointed to by \A{pattern}.
 
 % -----
 
@@ -740,6 +749,14 @@ direction, size, and justification.
 
 Fills the \texttt{viewporttype} structure pointed to by \A{viewport}
 with information about the current viewport.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getvisualpage} (\V{});
+\end{bgi}
+
+Returns the visual page number.
 
 % -----
 
@@ -1184,6 +1201,14 @@ refresh is performed.
 % -----
 
 \begin{bgi}
+\V{} \func{event} (\V{});
+\end{bgi}
+
+Returns 1 if an event (mouse click or key press) has occurred.
+
+% -----
+
+\begin{bgi}
 \I{} \func{getch} (\V{});
 \end{bgi}
 
@@ -1376,7 +1401,7 @@ Updates the screen contents, i.e.\ displays all graphics.
 % -----
 
 \begin{bgi}
-\V{} \func{sdlfastmode} (\V{}); 
+\V{} \func{sdlbgifast} (\V{}); 
 \end{bgi}
 
 Triggers ``fast mode'', i.e.\ \func{refresh()} is needed to display
@@ -1385,13 +1410,22 @@ graphics.
 % -----
 
 \begin{bgi}
-\V{} \func{sdlslowmode} (\V{}); 
+\V{} \func{sdlbgislow} (\V{}); 
 \end{bgi}
 
 Triggers ``slow mode'', i.e.\ \func{refresh()} is not needed to
 display graphics.
 
 % -----
+
+\begin{bgi}
+\V{} \func{setalpha} (\I{} \A{col}, \U{} \A{alpha}); 
+\end{bgi}
+
+Sets alpha transparency for colour \A{col} to \A{alpha} (0--255).
+
+% -----
+
 
 \begin{bgi}
 \V{} \func{setbkrgbcolor} (\I{} \A{n}); 
@@ -1420,6 +1454,14 @@ Sets the \A{n}-th entry in the RGB palette specifying the \A{r},
 
 Using \func{setrgbpalette()} and \func{setrgbcolor()} is faster than
 setting colors with \func{setcolor()} with a \func{COLOR()} argument.
+
+% -----
+
+\begin{bgi}
+\I{} \func{swapbuffers} (\V{});
+\end{bgi}
+
+Swaps the current active and the current visual graphics pages.
 
 % -----
 

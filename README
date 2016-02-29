@@ -16,7 +16,7 @@ for my experiments with fractals and cellular automata, using the BGI
 syntax I'm used to. Obviously, native SDL2 functions can be used in
 SDL_bgi programs.
 
-A few examples are provided in the src/test/ directory.
+A few examples are provided in the test/ directory.
 
 If you don't need BGI compatibility, I suggest that you check out
 SDL_gfx, a graphics library more complete and more powerful than

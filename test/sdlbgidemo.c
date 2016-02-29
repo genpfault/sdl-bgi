@@ -1,7 +1,7 @@
 /* sdlbgidemo.c  -*- C -*-
  * 
  * To compile:
- * gcc -o sdlbgidemo sdlbgidemo.c -lSDL_bgi -l
+ * gcc -o sdlbgidemo sdlbgidemo.c -lSDL_bgi -lSDL2 -lm
  * 
  * By Guido Gonzato, May 2015.
  * 
@@ -21,7 +21,7 @@
  * 
  */
 
-#include "SDL_bgi.h"
+#include <graphics.h>
 
 #define PI_CONV (3.1415926 / 180.0)
 
@@ -669,43 +669,172 @@ static int is_in_range (int x, int x1, int x2)
 
 // -----
 
+int
+  sierp_x,
+  sierp_y, 
+  len;
+
+static void sierp_a (int i);
+static void sierp_b (int i);
+static void sierp_c (int i);
+static void sierp_d (int i);
+
+// Sierpinsky curve; taken from Niklaus Wirth's
+// Algorithms + Data Structures = Programs
+
+static void sierp_a (int level)
+{
+  if (level > 0) {
+    sierp_a (level - 1);
+    sierp_x += len;
+    sierp_y -= len;
+    lineto (sierp_x, sierp_y);
+    sierp_b (level - 1);
+    sierp_x += 2*len;
+    lineto (sierp_x, sierp_y);
+    sierp_d (level - 1);
+    sierp_x += len;
+    sierp_y += len;
+    lineto (sierp_x, sierp_y);
+    sierp_a (level - 1);
+  }
+}
+
+static void sierp_b (int level)
+{
+  if (level > 0) {
+    sierp_b(level - 1);
+    sierp_x -= len; 
+    sierp_y -= len;
+    lineto (sierp_x, sierp_y);
+    sierp_c (level - 1);
+    sierp_y -= 2*len;
+    lineto (sierp_x, sierp_y);
+    sierp_a (level - 1);
+    sierp_x += len;
+    sierp_y -= len;
+    lineto (sierp_x, sierp_y);
+    sierp_b (level - 1);
+  }
+}
+
+static void sierp_c (int level)
+{
+  if (level > 0) {
+    sierp_c (level - 1);
+    sierp_x -= len;
+    sierp_y += len;
+    lineto (sierp_x, sierp_y);
+    sierp_d (level - 1);
+    sierp_x -= 2*len;
+    lineto (sierp_x, sierp_y);
+    sierp_b (level - 1);
+    sierp_x -= len;
+    sierp_y -= len;
+    lineto (sierp_x, sierp_y);
+    sierp_c (level - 1);
+  }
+}
+
+static void sierp_d (int level)
+{
+  if (level > 0) {
+    sierp_d (level - 1);
+    sierp_x += len;
+    sierp_y += len;
+    lineto (sierp_x, sierp_y);
+    sierp_a (level - 1);
+    sierp_y += 2*len;
+    lineto (sierp_x, sierp_y);
+    sierp_c (level - 1);
+    sierp_x -= len;
+    sierp_y += len;
+    lineto (sierp_x, sierp_y);
+    sierp_d (level - 1);
+  }
+}
+
+void sierpinski (int level)
+{
+  sierp_a (level);
+  sierp_x += len;
+  sierp_y -= len;
+  lineto (sierp_x, sierp_y);
+  
+  sierp_b (level);
+  sierp_x -= len;
+  sierp_y -= len;
+  lineto (sierp_x, sierp_y);
+  
+  sierp_c (level);
+  sierp_x -= len;
+  sierp_y += len;
+  lineto (sierp_x, sierp_y);
+  
+  sierp_d (level);
+  sierp_x += len;
+  sierp_y += len;
+  lineto (sierp_x, sierp_y);
+}
+
+// -----
+
 void floodfilldemo (void)
 {
   // show how to use floodfill ()
   int
     i, j,
-    p, stop = 0;
+    p, sierp_width,
+    stop = 0;
   
-  message ("floodfill() Demonstration (click around, middle click to exit)");
+  message ("floodfill() Demonstration");
   mainwindow ();
+  width = viewport.right - viewport.left + 1;
+  height = viewport.bottom - viewport.top + 1;
   
-  setcolor (RED);
-  // draw something to fill
-  for (j = 25; j < maxy; j += 20)
-    for (i = 0; i < maxx; i += 50) {
-      line (i, j, i + 25, j - 25);
-      line (i + 25, j - 25, i + 50, j);
-    }
-  refresh ();
+  setcolor (WHITE);
+  
+  // each "petal" is (len*6) pixels wide; at recursion level "N", we have
+  // 2^(N-1) petals connected by 2^(N-1)-1 segments, which are (2*len)
+  // pixels long. The overall width of the Sierpinski curve is then:
+  // W = (len*6)*2^(N-1) + (len*2)*2^(N-1)-1
+  // For example: given len=5, at recursion level 5 we'll have 16
+  // petals connected by 15 segments; width = 5*8*16 + 5*2*15 = 630 pixels.
+
+  // find max possible length
+  len = 15;
+  while ( (sierp_width = len*6*16 + len*2*15) > height - 4)
+    len--;
+  
+  sierp_width = (len*6)*16 + (len*2)*15;
+  sierp_x = width / 2 - sierp_width / 2;
+  sierp_y = height - (height - sierp_width) / 2;
+  moveto (sierp_x, sierp_y);
+  sierpinski (5);
   
   while (! stop) {
+    
+    setfillstyle (SOLID_FILL, 1 + random (YELLOW));
+    // center of the Sierpinski curve
+    floodfill (width / 2, height / 2, WHITE);
+    refresh ();
+    delay (100);
   
-    if ((p = mouseclick ())) {
-      
-      if ( (WM_LBUTTONDOWN == p) &&
-	   (is_in_range (mousex (), 0, width)) &&
-	   (is_in_range (mousey (), 0, height)) ) {
-        setcolor (COLOR (random (255), random (255), random (255)));
-	setfillstyle (SOLID_FILL,
-		      COLOR (random (255), random (255), random (255)));
-        floodfill (mousex (), mousey (), RED);
-	refresh ();
-      }
-      else 
-	if (WM_MBUTTONDOWN == p) 
-	  stop = 1;
-    } // if
-
+    setfillstyle (SOLID_FILL, 1 + random (YELLOW));
+    // outside
+    floodfill (1, 1, WHITE);
+    refresh ();
+    delay (100);
+    
+    if (ismouseclick (WM_LBUTTONDOWN))
+      stop = 1;
+    
+    if (ismouseclick (WM_RBUTTONDOWN)) {
+      closegraph ();
+      exit (1);
+    }
+    
+    
   } // while
   
   refresh ();
@@ -898,7 +1027,7 @@ void sdlmixdemo (void)
   SDL_Rect
     rect1, rect2;    
     
-  message ("SDL_BGI and  Native Functions Demonstration");
+  message ("SDL_BGI and Native Functions Demonstration");
   mainwindow ();
   line (0, height / 2, width, height / 2);
   line (width / 2, 0, width / 2, height);
@@ -908,7 +1037,7 @@ void sdlmixdemo (void)
   src = SDL_LoadBMP ("./plasma.bmp"); // 600 x 600
   if (NULL == src) {
     fprintf (stderr, "Can't load bitmap\n");
-    exit (1);
+    return;
   }
 
   // source rect
@@ -1078,9 +1207,10 @@ void pagedemo (void)
     settextstyle (DEFAULT_FONT, HORIZ_DIR, 2);
     sprintf (title, "This is active page (and visual page) %d", num_page);
     outtextxy (xm, ym, title);
-    outtextxy (xm, ym + 30, "Press a key to go to next page");
+    outtextxy (xm, ym + 30, "Left click to go to next page");
     refresh ();
-    get_key ();
+    // get_key ();
+    pause ();
   }
   
   setactivepage (0);
@@ -1131,7 +1261,7 @@ void theend (void)
   
   while (! stop) {
     
-    for (col = 0; col < 256; col += 7) {
+    for (col = 0; col < 256; col += 3) {
       setcolor (COLOR (col, col, col));
       outtextxy (xm, ym, "That's all, folks!");
       refresh ();

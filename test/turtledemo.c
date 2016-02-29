@@ -1,13 +1,11 @@
-/*
- * turtledemo.c	-*- C -*-
+/* turtledemo.c	-*- C -*-
+ * 
+ * To compile:
+ * gcc -o turtledemo turtledemo.c turtle.c -lSDL_bgi -lm
  * 
  * By Guido Gonzato <guido.gonzato at gmail.com>
- * 2012-12-20
- * 
- * To compile this program:
- * 
- * gcc -o turtledemo turtledemo.c turtle.c -lSDL_bgi -l
- * 
+ * February 2016
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -27,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "SDL_bgi.h"
+#include <graphics.h>
 
 #include "turtle.h"
 
@@ -232,13 +230,20 @@ int powerof2 (int ex)
 
 // -----
 
+void randomwalk (void)
+{
+  int dly = 10;
+  setheading (T_THREE);
+}
+
+// -----
+
 int main (void)
 {
-  int i, l, x, y, xc;
+  int i, l, x, y, xc, stop = 0;
   char s[32];
 
   initwindow (0, 0);
-
   setbkcolor (BLACK);
 
   // Koch
@@ -250,12 +255,12 @@ int main (void)
     setheading (T_EAST);
     setcolor (i + 1);
     koch (getmaxx () + 1, i);
-    // added!
     refresh ();
     delay (200);
   }
   setcolor (YELLOW);
   outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
+  refresh ();
   getch ();
 
   // fractal tree
@@ -263,15 +268,15 @@ int main (void)
     cleardevice ();
     setcolor (YELLOW);
     outtextxy (0, 0, "Tree:");
-    setposition (getmaxx () *4/10, getmaxy ());
+    setposition (getmaxx ()*4/10, getmaxy ());
     setheading (T_NORTH);
     tree (getmaxy () / 3, i);
-    // added!
     refresh ();
     delay (200);
   }
   setcolor (YELLOW);
   outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
+  refresh ();
   getch ();
 
   // square Koch
@@ -283,12 +288,12 @@ int main (void)
     setheading (T_EAST);
     setcolor (i + 1);
     sq_koch (getmaxx () + 1, i);
-    // added!
     refresh ();
     delay (200);
   }
   setcolor (YELLOW);
   outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
+  refresh ();
   getch ();
 
   // rotating square
@@ -311,13 +316,14 @@ int main (void)
   }
   setcolor (YELLOW);
   outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
+  refresh ();
   getch ();
-
+  
   // Hilbert
-  setbkcolor (WHITE);
   cleardevice ();
   xc = getmaxx () / 2;
   x = xc;
+  setcolor (YELLOW);
   
   for (i = 1; i < 8; i++) {
     l = getmaxy () / powerof2 (i);
@@ -325,19 +331,18 @@ int main (void)
     y = l / 2;
     setposition (x, y);
     setheading (T_WEST);
-    setcolor (BLUE);
     hilbert_left (l, i);
-    // added!
     refresh ();
     sprintf (s, "Hilbert curve at level %d", i);
-    setcolor (BLUE);
     outtextxy (0, 0, s);
+    refresh ();
     getch ();
     cleardevice ();
   }
   outtextxy (0, 0, "PRESS A KEY TO EXIT:");
+  refresh ();
   
-  int stop = 0;
+  stop = 0;
   // stars
   while (! stop) {
     setposition (random (getmaxx ()), random (getmaxy ()));
@@ -346,9 +351,8 @@ int main (void)
     star (random (80));
     star_6 (random (20));
     star_20 (random (40));
-    // added!
     refresh ();
-    delay (200);
+    delay (50);
     if (kbhit ())
       stop = 1;
   }

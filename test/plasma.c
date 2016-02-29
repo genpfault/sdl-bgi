@@ -1,6 +1,6 @@
 // plasma.c
 // used to produce the plasma.bmp file
-// gcc plasma.c -lSDL_bgi -l -lm
+// gcc plasma.c -lSDL_bgi -lSDL2 -lm
 
 #include <math.h>
 #include <graphics.h>
@@ -53,6 +53,7 @@ int main (void)
   refresh ();
   writeimagefile ("plasma.bmp", 0, 0, 599, 599);
   getch ();
+  
   closegraph ();
   return 0;
 

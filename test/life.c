@@ -1,7 +1,7 @@
 /* life.c  -*- C -*-
  * 
  * To compile:
- * gcc -o life life.c -lSDL_bgi -l
+ * gcc -o life life.c -lSDL_bgi -lSDL2
  * 
  * Simple cellular automata, as described at
  * http://mathworld.wolfram.com/ElementaryCellularAutomaton.html
@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "SDL_bgi.h"
+#include <graphics.h>
 
 #define SIZE 500
 #define ALIVE 1

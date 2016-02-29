@@ -1,7 +1,7 @@
 /* mandelbrot.c  -*- C -*-
  * 
  * To compile:
- * gcc -o mandelbrot mandelbrot.c -lSDL_bgi -l
+ * gcc -o mandelbrot mandelbrot.c -lSDL_bgi -lSDL2
  * 
  * By Guido Gonzato, May 2015
  * 
@@ -28,7 +28,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "SDL_bgi.h"
+#include <graphics.h>
 
 int max_iter = 100;
 int maxx, maxy;

@@ -1,9 +1,9 @@
 // SDL_bgi.c	-*- C -*-
 
 // A BGI (Borland Graphics Library) implementation based on SDL2.
-// Easy to use, and useful for porting old programs.
-// Guido Gonzato PhD
-// December 23, 2015
+// Easy to use, pretty fast, and useful for porting old programs.
+// Guido Gonzato, PhD
+// February 29, 2016
 
 #include <math.h>
 #include "SDL_bgi.h"
@@ -17,20 +17,30 @@ SDL_Window   *bgi_window;
 SDL_Renderer *bgi_renderer;
 SDL_Texture  *bgi_texture;
 
-// static Uint32
-SDL_Surface
+static SDL_Surface
   *bgi_vpage[VPAGES]; // array of visual pages
-Uint32 
-  *bgi_activepage,    // active (= being drawn on) page, possibly hidden
+
+// pixel data of active and visual pages
+
+static Uint32 
+  *bgi_activepage,    // active (= being drawn on) page; may be hidden
   *bgi_visualpage;    // visualised page
 
-// the palette contains the BGI colors, entries 0:MAXCOLORS;
+// This is how we draw stuff on the screen. Pixels pointed to by
+// bgi_activepage (a pointer to pixel data in the active surface) 
+// are modified by functions like putpixel_copy(); bgi_texture is
+// updated with the new bgi_activepage contents; bgi_texture is then
+// copied to bgi_renderer, and finally bgi_renderer is made present.
+
+// The palette contains the BGI colors, entries 0:MAXCOLORS;
 // then three entries for temporary fg, bg, fill RGB colors allocated 
 // with COLOR(); then user-defined RGB colors
 
-static Uint32 palette[1 + MAXCOLORS + 3 + PALETTE_SIZE]; // all colors
+static Uint32
+  palette[1 + MAXCOLORS + 3 + PALETTE_SIZE]; // all colors
 
-static Uint32 bgi_palette[1 + MAXCOLORS] = { // 0 - 15
+static Uint32 
+  bgi_palette[1 + MAXCOLORS] = { // 0 - 15
   0xff000000, // BLACK
   0xff0000ff, // BLUE
   0xff00ff00, // GREEN
@@ -190,7 +200,7 @@ unsigned int setgraphbufsize (unsigned bufsize)
 
 // -----
 
-// implemented stuff!
+// implemented stuff starts here
 
 static int is_in_range (x, x1, x2)
 {
@@ -203,7 +213,10 @@ static int is_in_range (x, x1, x2)
 
 void arc (int x, int y, int stangle, int endangle, int radius)
 {
-  // quick and dirty for now, Bresenham-based later (maybe)
+  // Draws a circular arc centered at (x, y), with a radius
+  // given by radius, traveling from stangle to endangle.
+  
+  // Quick and dirty for now, Bresenham-based later (maybe)
   
   int angle;
   
@@ -235,6 +248,9 @@ void arc (int x, int y, int stangle, int endangle, int radius)
 
 void bar3d (int left, int top, int right, int bottom, int depth, int topflag)
 {
+  // Draws a three-dimensional, filled-in rectangle (bar), using
+  // the current fill colour and fill pattern.
+  
   Uint32 tmp, tmpcolor;
   
   tmp = bgi_fg_color;
@@ -267,6 +283,9 @@ void bar3d (int left, int top, int right, int bottom, int depth, int topflag)
 
 void bar (int left, int top, int right, int bottom)
 {
+  // Draws a filled-in rectangle (bar), using the current fill colour
+  // and fill pattern.
+  
   int
     y, 
     tmp, tmpcolor, tmpthickness;
@@ -301,7 +320,7 @@ void bar (int left, int top, int right, int bottom)
 
 int BLUE_VALUE (int color)
 {
-  // return the blue component of 'color' in the extended palette
+  // Returns the blue component of an RGB color.
   return (palette[color] & 0xFF);
 
 } // BLUE_VALUE ()
@@ -310,7 +329,8 @@ int BLUE_VALUE (int color)
 
 static void circle_bresenham (int x, int y, int radius)
 {
-  // adapted from:
+  // Draws a circle of the given radius at (x, y).
+  // Adapted from:
   // http://members.chello.at/easyfilter/bresenham.html
   
   int 
@@ -342,6 +362,8 @@ static void circle_bresenham (int x, int y, int radius)
 
 void circle (int x, int y, int radius)
 {
+  // Draws a circle of the given radius at (x, y).
+  
   // the Bresenham algorithm draws a better-looking circle
   
   if (NORM_WIDTH == bgi_line_style.thickness)
@@ -355,6 +377,9 @@ void circle (int x, int y, int radius)
 
 void cleardevice (void)
 {
+  // Clears the graphics screen, filling it with the current
+  // background color.
+  
   int x, y;
 
   bgi_cp_x = bgi_cp_y = 0;
@@ -372,6 +397,9 @@ void cleardevice (void)
 
 void clearviewport (void)
 {
+  // Clears the viewport, filling it with the current 
+  // background color.
+  
   int x, y;
   
   bgi_cp_x = bgi_cp_y = 0;
@@ -389,12 +417,14 @@ void clearviewport (void)
 
 void closegraph (void)
 {
-  int page;
+  // Closes the graphics system.
   
-  // free memory
-  for (page = 0; page < bgi_np; page++)
-    // free (bgi_vpage[page]);
-    ;
+  // int page;
+  
+  // free memory - is really necessary?
+  // for (page = 0; page < bgi_np; page++)
+    // SDL_FreeSurface (bgi_vpage[page]);
+    // ;
   
   SDL_DestroyTexture (bgi_texture);
   SDL_DestroyRenderer (bgi_renderer);
@@ -407,6 +437,9 @@ void closegraph (void)
 
 int COLOR (int r, int g, int b)
 {
+  // Can be used as an argument for setcolor() and setbkcolor()
+  // to set an RBG color.
+  
   // set up the temporary color
   bgi_tmp_color_argb = 0xff000000 | r << 16 | g << 8 | b;
   return -1;
@@ -417,6 +450,8 @@ int COLOR (int r, int g, int b)
 
 void delay (int msec)
 {
+  // Waits for msec milliseconds.
+  
   if (! bgi_fast_mode)
     refresh ();
   SDL_Delay (msec);
@@ -426,6 +461,8 @@ void delay (int msec)
 
 void detectgraph (int *graphdriver, int *graphmode)
 {
+  // Detects the graphics driver and graphics mode to use.
+  
   *graphdriver = SDL;
   *graphmode = SDL_FULLSCREEN;
 } // detectgraph ()
@@ -434,6 +471,8 @@ void detectgraph (int *graphdriver, int *graphmode)
 
 void drawpoly (int numpoints, int *polypoints)
 {
+  // Draws a polygon of numpoints vertices.
+  
   int n;
 
   for (n = 0; n < numpoints - 1; n++)
@@ -469,6 +508,9 @@ static void _ellipse (int, int, int, int);
 void ellipse (int x, int y, int stangle, int endangle, 
               int xradius, int yradius)
 {
+  // Draws an elliptical arc centered at (x, y), with axes given by
+  // xradius and yradius, traveling from stangle to endangle.
+  
   // Bresenham-based if complete
   int angle;
   
@@ -503,6 +545,8 @@ void ellipse (int x, int y, int stangle, int endangle,
 
 int event (void)
 {
+  // Returns 1 if an event (mouse click or key press) has occurred.
+  
   SDL_Event event;
 
   if (SDL_PollEvent (&event)) {
@@ -605,6 +649,10 @@ void _ellipse (int cx, int cy, int xradius, int yradius)
 
 void fillellipse (int cx, int cy, int xradius, int yradius)
 {
+  // Draws an ellipse centered at (x, y), with axes given by
+  // xradius and yradius, and fills it using the current fill color
+  // and fill pattern.
+  
   // from "A Fast Bresenham Type Algorithm For Drawing Ellipses"
   // by John Kennedy
 
@@ -700,6 +748,9 @@ static int intcmp (const void *n1, const void *n2)
 
 void fillpoly (int numpoints, int *polypoints)
 {
+  // Draws a polygon of numpoints vertices and fills it using the
+  // current fill color.
+  
   int
     nodes,      // number of nodes
     *nodeX,     // array of nodes
@@ -826,16 +877,38 @@ typedef struct {
 
 #define STACKSIZE 2000
 
-// push new segment on stack
+Segment 
+  stack[STACKSIZE],
+  *sp = stack; // stack of filled segments
 
-#define PUSH(Y, XL, XR, DY) \
-  if (sp < stack+STACKSIZE && Y+(DY) >= 0 && Y+(DY) <= vp.bottom - vp.top ) \
-    { sp->y = Y; sp->xl = XL; sp->xr = XR; sp->dy = DY; sp++; }
+// the following functions were implemented as unreadable macros
 
-// pop segment off stack
+static inline void ff_push (int y, int xl, int xr, int dy)
+{
+  // push new segment on stack
+  if (sp < stack + STACKSIZE && y + dy >= 0 &&
+      y + dy <= vp.bottom - vp.top ) {
+    sp->y = y; 
+    sp->xl = xl; 
+    sp->xr = xr; 
+    sp->dy = dy; 
+    sp++;
+  }
+}
 
-#define POP(Y, XL, XR, DY) \
-    { sp--; Y = sp->y+(DY = sp->dy); XL = sp->xl; XR = sp->xr;}
+// -----
+
+static inline void ff_pop (int *y, int *xl, int *xr, int *dy)
+{
+  // pop segment off stack
+  sp--;
+  *dy = sp->dy;
+  *y = sp->y + *dy;
+  *xl = sp->xl; 
+  *xr = sp->xr;
+}
+
+// -----
 
 // fill: set the pixel at (x,y) and all of its 4-connected neighbors
 // with the same pixel value to the new pixel value nv.
@@ -843,25 +916,25 @@ typedef struct {
 
 void _floodfill (int x, int y, int border)
 {
+  // Fills an enclosed area, containing the x and y points bounded by
+  // the border color. The area is filled using the current fill color.
+  
   int
     start,
     x1, x2,
     dy = 0;
   unsigned int
     oldcol;
-  Segment 
-    stack[STACKSIZE],
-    *sp = stack; // stack of filled segments
   
   oldcol = getpixel (x, y);
-  PUSH(y, x, x, 1);           // needed in some cases
-  PUSH(y + 1, x, x, -1);      // seed segment (popped 1st)
+  ff_push (y, x, x, 1);           // needed in some cases
+  ff_push (y + 1, x, x, -1);      // seed segment (popped 1st)
 
   while (sp > stack) {
     
     // pop segment off stack and fill a neighboring scan line
     
-    POP(y, x1, x2, dy);
+    ff_pop (&y, &x1, &x2, &dy);
     
      // segment of scan line y-dy for x1<=x<=x2 was previously filled,
      // now explore adjacent pixels in scan line y
@@ -879,15 +952,15 @@ void _floodfill (int x, int y, int border)
     else {
       start = x + 1;
       if (start < x1)
-        PUSH(y, start, x1 - 1, -dy);    // leak on left?
+        ff_push (y, start, x1 - 1, -dy);    // leak on left?
       x = x1 + 1;
     }
     do {
       for (x1 = x; x <= vp.right && getpixel (x, y) != border; x++)
 	ff_putpixel (x, y);
-      PUSH(y, start, x - 1, dy);
+      ff_push (y, start, x - 1, dy);
       if (x > x2 + 1)
-        PUSH(y, x2 + 1, x - 1, -dy);    // leak on right?
+        ff_push (y, x2 + 1, x - 1, -dy);    // leak on right?
       for (x++; x <= x2 && getpixel (x, y) == border; x++)
         ;
       start = x;
@@ -960,13 +1033,19 @@ void floodfill (int x, int y, int border)
 
 int getactivepage (void)
 {
+  // Returns the active page number.
+  
   return (bgi_ap);
+
 } // getactivepage ()
 
 // -----
 
 void getarccoords (struct arccoordstype *arccoords)
 {
+  // Gets the coordinates of the last call to arc(), filling the
+  // arccoords structure.
+  
   arccoords->x = bgi_last_arc.x;
   arccoords->y = bgi_last_arc.y;
   arccoords->xstart = bgi_last_arc.xstart;
@@ -979,6 +1058,8 @@ void getarccoords (struct arccoordstype *arccoords)
 
 void getaspectratio (int *xasp, int *yasp)
 {
+  // Retrieves the current graphics mode’s aspect ratio.
+
   *xasp = 10000;
   *yasp = 10000;
 } // getaspectratio ()
@@ -987,6 +1068,8 @@ void getaspectratio (int *xasp, int *yasp)
 
 int getbkcolor (void)
 {
+  // Returns the current background color.
+  
   return bgi_bg_color;
 } // getbkcolor ()
 
@@ -994,6 +1077,8 @@ int getbkcolor (void)
 
 int getch (void)
 {
+  // Waits for a key and returns its ASCII code.
+  
   SDL_Event event;
   SDL_Keycode key;
 
@@ -1029,6 +1114,8 @@ int getch (void)
 
 int getcolor (void)
 {
+  // Returns the current drawing (foreground) color.
+  
   return bgi_fg_color;
 } // getcolor ()
 
@@ -1043,6 +1130,9 @@ struct palettetype *getdefaultpalette (void)
 
 char *getdrivername (void)
 {
+  // Returns a pointer to a string containing the name of the current
+  // graphics driver.
+
   return ("SDL_bgi");
 }
 
@@ -1050,6 +1140,9 @@ char *getdrivername (void)
 
 int getevent (void)
 {
+  // Waits for a keypress or mouse click, and returns the code of
+  // the mouse button or key that was pressed.
+  
   SDL_Event event;
   
   // wait for an event
@@ -1079,6 +1172,9 @@ int getevent (void)
 
 void getfillpattern (char *pattern)
 {
+  // Copies the user-defined fill pattern, as set by setfillpattern,
+  // into the 8-byte area pointed to by pattern.
+  
   int i;
   
   for (i = 0; i < 8; i++)
@@ -1090,8 +1186,10 @@ void getfillpattern (char *pattern)
 
 void getfillsettings (struct fillsettingstype *fillinfo)
 {
-  // for now
-  fillinfo->pattern = SOLID_FILL;
+  // Fills the fillsettingstype structure pointed to by fillinfo
+  // with information about the current fill pattern and fill color.
+  
+  fillinfo->pattern = bgi_fill_style.pattern;
   fillinfo->color = bgi_fill_color;
 } // getfillsettings ()
 
@@ -1099,6 +1197,8 @@ void getfillsettings (struct fillsettingstype *fillinfo)
 
 int getgraphmode (void)
 {
+  // Returns the current graphics mode.
+  
   return bgi_gm;
 } // getgraphmode ()
 
@@ -1106,6 +1206,9 @@ int getgraphmode (void)
 
 void getimage (int left, int top, int right, int bottom, void *bitmap)
 {
+  // Copies a bit image of the specified region into the memory
+  // pointed by bitmap.
+  
   Uint32 bitmap_w, bitmap_h, *tmp;
   int i = 2, x, y;
 
@@ -1128,6 +1231,9 @@ void getimage (int left, int top, int right, int bottom, void *bitmap)
 
 void getlinesettings (struct linesettingstype *lineinfo)
 {
+  // Fills the linesettingstype structure pointed by lineinfo with
+  // information about the current line style, pattern, and thickness.
+  
   lineinfo->linestyle = bgi_line_style.linestyle;
   lineinfo->upattern = bgi_line_style.upattern;
   lineinfo->thickness = bgi_line_style.thickness;
@@ -1137,6 +1243,8 @@ void getlinesettings (struct linesettingstype *lineinfo)
 
 int getmaxcolor (void)
 {
+  // Returns the maximum color value available (MAXCOLORS).
+  
   if (! bgi_argb_mode)
     return MAXCOLORS;
   else
@@ -1147,6 +1255,8 @@ int getmaxcolor (void)
 
 int getmaxmode (void)
 {
+  // Returns the maximum mode number for the current driver.
+  
   return SDL_FULLSCREEN;
 } // getmaxmode ()
 
@@ -1154,6 +1264,8 @@ int getmaxmode (void)
 
 int getmaxx ()
 {
+  // Returns the maximum x screen coordinate.
+
   return bgi_maxx;
 } // getmaxx ()
 
@@ -1161,6 +1273,8 @@ int getmaxx ()
 
 int getmaxy ()
 {
+  // Returns the maximum y screen coordinate.
+
   return bgi_maxy;
 } // getmaxy ()
 
@@ -1168,6 +1282,9 @@ int getmaxy ()
 
 char *getmodename (int mode_number)
 {
+  // Returns a pointer to a string containing the name of the
+  // specified graphics mode.
+
   switch (mode_number) {
     
   case SDL_CGAHI:
@@ -1227,6 +1344,8 @@ char *getmodename (int mode_number)
 
 void getmoderange (int graphdriver, int *lomode, int *himode)
 {
+  // Gets the range of valid graphics modes.
+
   // return dummy values
   *lomode = 0;
   *himode = 0;
@@ -1236,6 +1355,9 @@ void getmoderange (int graphdriver, int *lomode, int *himode)
 
 void getpalette (struct palettetype *palette)
 {
+  // Fills the palettetype structure pointed by palette with
+  // information about the current palette’s size and colors.
+
   int i;
   
   for (i = 0; i <= MAXCOLORS; i++)
@@ -1247,6 +1369,9 @@ void getpalette (struct palettetype *palette)
 
 int getpalettesize (struct palettetype *palette)
 {
+  // Returns the size of the palette.
+  
+  // !!! BUG - don't ignore the parameter
   return 1 + MAXCOLORS + 2 + PALETTE_SIZE;
 } // getpalettesize ()
 
@@ -1261,6 +1386,8 @@ static Uint32 getpixel_raw (int x, int y)
 
 unsigned int getpixel (int x, int y)
 {
+  // Returns the color of the pixel located at (x, y).
+
   int col;
   Uint32 tmp;
   
@@ -1289,6 +1416,10 @@ unsigned int getpixel (int x, int y)
 
 void gettextsettings (struct textsettingstype *texttypeinfo)
 {
+  // Fills the textsettingstype structure pointed to by texttypeinfo
+  // with information about the current text font, direction, size,
+  // and justification.
+
   texttypeinfo->font = bgi_txt_style.font;
   texttypeinfo->direction = bgi_txt_style.direction;
   texttypeinfo->charsize = bgi_txt_style.charsize;
@@ -1300,6 +1431,9 @@ void gettextsettings (struct textsettingstype *texttypeinfo)
 
 void getviewsettings (struct viewporttype *viewport)
 {
+  // Fills the viewporttype structure pointed to by viewport with
+  // information about the current viewport.
+
   viewport->left = vp.left;
   viewport->top = vp.top;
   viewport->right = vp.right;
@@ -1311,6 +1445,8 @@ void getviewsettings (struct viewporttype *viewport)
 
 int getvisualpage (void)
 {
+  // Returns the visual page number.
+
   return (bgi_vp);
 } // getvisualpage ()
 
@@ -1318,6 +1454,8 @@ int getvisualpage (void)
 
 int getx (void)
 {
+  // Returns the current viewport’s x coordinate.
+
   return bgi_cp_x;
 } // getx ()
 
@@ -1325,6 +1463,8 @@ int getx (void)
 
 int gety (void)
 {
+  // Returns the current viewport’s y coordinate.
+
   return bgi_cp_y;
 } // gety ()
 
@@ -1332,7 +1472,9 @@ int gety (void)
 
 char *grapherrormsg (int errorcode)
 {
-  // pointless
+  // Returns a pointer to the error message string associated with
+  // errorcode, returned by graphresult(). Actually, it does nothing.
+  
   return NULL;
 } // grapherrormsg ()
 
@@ -1340,6 +1482,8 @@ char *grapherrormsg (int errorcode)
 
 void graphdefaults (void)
 {
+  // Resets all graphics settings to their defaults.
+
   int i;
   
   initpalette ();
@@ -1386,14 +1530,20 @@ void graphdefaults (void)
 
 int graphresult (void)
 {
+  // Returns the error code for the last unsuccessful graphics 
+  // operation and resets the error level to grOk. Actually,
+  // it does nothing.
+  
   return grOk;
 } // graphresult ()
 
 // -----
 
-
 unsigned imagesize (int left, int top, int right, int bottom)
 {
+  // Returns the size in bytes of the memory area required to store
+  // a bit image.
+
   return 2 * sizeof(Uint32) + // witdth, height
     (right - left + 1) * (bottom - top + 1) * sizeof (Uint32);
 } // imagesize ()
@@ -1402,6 +1552,8 @@ unsigned imagesize (int left, int top, int right, int bottom)
 
 void initgraph (int *graphdriver, int *graphmode, char *pathtodriver)
 {
+  // Initializes the graphics system.
+
   bgi_fast_mode = NOPE;   // BGI compatibility
   
   // the graphics driver parameter is ignored and is always
@@ -1462,6 +1614,8 @@ void initpalette (void)
 
 void initwindow (int width, int height)
 {
+  // Initializes the graphics system, opening a width * height window.
+  
   int
     display_count = 0,
     display_index = 0,
@@ -1521,11 +1675,20 @@ void initwindow (int width, int height)
   }
 
   bgi_renderer = SDL_CreateRenderer (bgi_window, -1, 0);
+  if (NULL == bgi_renderer) {
+    printf ("Could not create renderer: %s\n", SDL_GetError ());
+    return;
+  }
+  
   bgi_texture = SDL_CreateTexture (bgi_renderer,
 				   SDL_PIXELFORMAT_ARGB8888,
 				   SDL_TEXTUREACCESS_STREAMING,
 				   bgi_maxx + 1,
 				   bgi_maxy + 1);
+  if (NULL == bgi_texture) {
+    printf ("Could not create texture: %s\n", SDL_GetError ());
+    return;
+  }
 
   for (page = 0; page < VPAGES; page++) {
     bgi_vpage[page] = SDL_CreateRGBSurface 
@@ -1537,6 +1700,7 @@ void initwindow (int width, int height)
     else
       bgi_np++;
   }
+  
   bgi_activepage = bgi_visualpage = bgi_vpage[0]->pixels;
   bgi_ap = bgi_vp = 0;
   
@@ -1548,6 +1712,7 @@ void initwindow (int width, int height)
 
 int IS_BGI_COLOR (int color)
 {
+  // Returns 1 if the current color is a standard BGI color (not RGB)-
   // the color argument is redundant
   return ! bgi_argb_mode;
 } // IS_BGI_COLOR ()
@@ -1556,6 +1721,8 @@ int IS_BGI_COLOR (int color)
 
 int kbhit (void)
 {
+  // Returns 1 when a key is pressed.
+  
   SDL_Event event;
   SDL_Keycode key;
   
@@ -1590,7 +1757,8 @@ int kbhit (void)
 
 // -----
 
-// Bresenham's line algorithm routines (copy, xor, and, or, not)
+// Bresenham's line algorithm routines that implement logical 
+// operations: copy, xor, and, or, not.
 
 void line_copy (int x1, int y1, int x2, int y2)
 {
@@ -1787,6 +1955,8 @@ void line_not (int x1, int y1, int x2, int y2)
 
 void line_fill (int x1, int y1, int x2, int y2)
 {
+  // line routin used for filling
+  
   int 
     dx = abs (x2 - x1), 
     sx = x1 < x2 ? 1 : -1,
@@ -1818,6 +1988,8 @@ void line_fill (int x1, int y1, int x2, int y2)
 
 static int octant (int x, int y)
 {
+  // returns the octant where x, y lies.
+  
   if (x >= 0) { // octants 1, 2, 7, 8
     
     if (y >= 0)
@@ -1842,6 +2014,8 @@ static int octant (int x, int y)
 
 void line (int x1, int y1, int x2, int y2)
 {
+  // Draws a line between two specified points.
+  
   int oct;
   
   // viewport
@@ -1952,7 +2126,7 @@ void line_fast (int x1, int y1, int x2, int y2)
   int 
     fastmode = bgi_fast_mode;
   
-  bgi_fast_mode = YEAH; // draw if fast mode
+  bgi_fast_mode = YEAH; // draw in fast mode
   line (x1, y1, x2, y2);
   bgi_fast_mode = fastmode;
   
@@ -1962,6 +2136,9 @@ void line_fast (int x1, int y1, int x2, int y2)
 
 void linerel (int dx, int dy)
 {
+  // Draws a line from the CP to a point that is (dx,dy) 
+  // pixels from the CP.
+  
   line (bgi_cp_x, bgi_cp_y, bgi_cp_x + dx, bgi_cp_y + dy);
   bgi_cp_x += dx;
   bgi_cp_y += dy;
@@ -1971,6 +2148,8 @@ void linerel (int dx, int dy)
 
 void lineto (int x, int y)
 {
+  // Draws a line from the CP to (x, y), then moves the CP to (dx, dy).
+
   line (bgi_cp_x, bgi_cp_y, x, y);
   bgi_cp_x = x;
   bgi_cp_y = y;
@@ -1980,6 +2159,9 @@ void lineto (int x, int y)
 
 int mouseclick (void)
 {
+  // Returns the code of the mouse button that was clicked,
+  // or 0 if none was clicked.
+
   SDL_Event event;
 
   while (1) {
@@ -2015,6 +2197,8 @@ int mouseclick (void)
 
 int ismouseclick (int kind)
 {
+  // Returns 1 if the 'kind' mouse button was clicked.
+  
   SDL_PumpEvents ();
 
   switch (kind) {
@@ -2039,6 +2223,9 @@ int ismouseclick (int kind)
 
 void getmouseclick (int kind, int *x, int *y)
 {
+  // Sets the x,y coordinates of the last kind button click
+  // expected by ismouseclick().
+
   *x = bgi_mouse_x;
   *y = bgi_mouse_y;
 } // getmouseclick ()
@@ -2047,6 +2234,8 @@ void getmouseclick (int kind, int *x, int *y)
 
 int mousex (void)
 {
+  // Returns the X coordinate of the last mouse click.
+
   return bgi_mouse_x - vp.left;
 } // mousex ()
 
@@ -2054,6 +2243,8 @@ int mousex (void)
 
 int mousey (void)
 {
+  // Returns the Y coordinate of the last mouse click.
+
   return bgi_mouse_y - vp.top;
 } // mousey ()
 
@@ -2061,6 +2252,8 @@ int mousey (void)
 
 void moverel (int dx, int dy)
 {
+  // Moves the CP by (dx, dy) pixels.
+
   bgi_cp_x += dx;
   bgi_cp_y += dy;
 } // moverel ()
@@ -2069,6 +2262,8 @@ void moverel (int dx, int dy)
 
 void moveto (int x, int y)
 {
+  // Moves the CP to the position (x, y), relative to the viewport.
+
   bgi_cp_x = x;
   bgi_cp_y = y;
 } // moveto ()
@@ -2077,6 +2272,7 @@ void moveto (int x, int y)
 
 void _bar (int left, int top, int right, int bottom)
 {
+  // service routine
   int tmp, y;
   
   // like bar (), but uses bgi_fg_color
@@ -2093,6 +2289,8 @@ void _bar (int left, int top, int right, int bottom)
 
 void drawchar (unsigned char ch)
 {
+  // used by outtextxy ()
+
   unsigned char i, j, k;
   int x, y, tmp;
 
@@ -2139,6 +2337,8 @@ void drawchar (unsigned char ch)
 
 void outtext (char *textstring)
 {
+  // Outputs textstring at the CP.
+  
   outtextxy (bgi_cp_x, bgi_cp_y, textstring);
   if ( (HORIZ_DIR == bgi_txt_style.direction) &&
        (LEFT_TEXT == bgi_txt_style.horiz))
@@ -2149,6 +2349,8 @@ void outtext (char *textstring)
 
 void outtextxy (int x, int y, char *textstring)
 {
+  // Outputs textstring at (x, y).
+  
   int
     tmp,
     i, 
@@ -2226,6 +2428,9 @@ void outtextxy (int x, int y, char *textstring)
 
 void pieslice (int x, int y, int stangle, int endangle, int radius)
 {
+  // Draws and fills a pie slice centered at (x, y), with a radius
+  // given by radius, traveling from stangle to endangle.
+  
   // quick and dirty for now, Bresenham-based later.
   int angle;
   
@@ -2267,6 +2472,8 @@ void pieslice (int x, int y, int stangle, int endangle, int radius)
 
 void putimage (int left, int top, void *bitmap, int op)
 {
+  // Puts the bit image pointed to by bitmap onto the screen.
+  
   Uint32 bitmap_w, bitmap_h, *tmp;
   int i = 2, x, y;
   
@@ -2447,6 +2654,8 @@ void putpixel_not (int x, int y, Uint32 pixel)
 
 void putpixel (int x, int y, int color)
 {
+  // Plots a point at (x,y) in the color defined by color.
+  
   int tmpcolor;
   
   x += vp.left;
@@ -2500,55 +2709,67 @@ void putpixel (int x, int y, int color)
 
 void readimagefile (char *bitmapname, int x1, int y1, int x2, int y2)
 {
-  SDL_Surface *bm_surface;
-  SDL_Texture *bm_texture;
-  SDL_Rect rect1, rect2;
+  // Reads a .bmp file and displays it immediately at (x1, y1 ).
   
-  // laod bitmap
+  SDL_Surface
+    *bm_surface;
+  SDL_Texture
+    *bm_texture;
+  SDL_Rect
+    src_rect, dest_rect;
+  
+  // load bitmap
   bm_surface = SDL_LoadBMP (bitmapname);
-  
-  if (NULL == bm_surface) // failed to load bitmap
+  if (NULL == bm_surface) {
+    printf ("SDL_LoadBMP error: %s\n", SDL_GetError ());
     return;
+  }
   
-  // create texture and source rect
+  // create texture
   bm_texture = SDL_CreateTextureFromSurface (bgi_renderer, bm_surface);
-  rect1.x = 0;
-  rect1.y = 0;
-  rect1.w = bm_surface->w;
-  rect1.h = bm_surface->h;
-  
-  if (x1 + vp.left + rect1.w > vp.right && vp.clip)
-    rect1.w = vp.right - x1 - vp.left + 1;
-  if (y1 + vp.top + rect1.h > vp.bottom && vp.clip)
-    rect1.h = vp.bottom - y1 - vp.top + 1;
-  
-  rect2.x = x1 + vp.left;
-  rect2.y = y1 + vp.top;
-  
-  if (0 == x2 || 0 == y2) {
-    rect2.w = rect1.w;
-    rect2.h = rect1.h;
-  }
-  else {
-    // keep original size
-    rect1.w = bm_surface->w;
-    rect1.h = bm_surface->h;
-    rect2.w = x2 - x1;
-    rect2.h = y2 - y1;
+  if (NULL == bm_texture) {
+    printf ("SDL_CreateTextureFromSurface error: %s\n", SDL_GetError ());
+    return;
   }
   
-  SDL_RenderCopy (bgi_renderer, bm_texture, &rect1, &rect2);
+  src_rect.x = 0;
+  src_rect.y = 0;
+  src_rect.w = bm_surface->w;
+  src_rect.h = bm_surface->h;
+  
+  // destination rect, position
+  dest_rect.x = x1 + vp.left;
+  dest_rect.y = y1 + vp.top;
+  
+  if (0 == x2 || 0 == y2) { // keep original size
+    dest_rect.w = src_rect.w;
+    dest_rect.h = src_rect.h;
+  }
+  else { // change size
+    dest_rect.w = x2 - x1;
+    dest_rect.h = y2 - y1;
+  }
+  
+  // clip it if necessary
+  if (x1 + vp.left + src_rect.w > vp.right && vp.clip)
+    dest_rect.w = vp.right - x1 - vp.left + 1;
+  if (y1 + vp.top + src_rect.h > vp.bottom && vp.clip)
+    dest_rect.h = vp.bottom - y1 - vp.top + 1;
+  
+  SDL_RenderCopy (bgi_renderer, bm_texture, &src_rect, &dest_rect);
   SDL_FreeSurface (bm_surface);
   SDL_DestroyTexture (bm_texture);
-  // always!
+  // this is needed - we're not working with bgi_activepage
   SDL_RenderPresent (bgi_renderer);
-  
+
 } // readimagefile ()
 
 // -----
 
 void rectangle (int x1, int y1, int x2, int y2)
 {
+  // Draws a rectangle delimited by (left,top) and (right,bottom).
+  
   line_fast (x1, y1, x2, y1);
   line_fast (x2, y1, x2, y2);
   line_fast (x2, y2, x1, y2);
@@ -2563,6 +2784,8 @@ void rectangle (int x1, int y1, int x2, int y2)
 
 void refresh (void)
 {
+  // Updates the screen.
+  
   SDL_UpdateTexture (bgi_texture, 
 		     NULL,
 		     bgi_visualpage,
@@ -2577,6 +2800,7 @@ void refresh (void)
 
 void restorecrtmode (void)
 {
+  // Hides the graphics window.
 
   SDL_HideWindow (bgi_window);
   window_is_hidden = YEAH;
@@ -2587,6 +2811,9 @@ void restorecrtmode (void)
 
 void sdlbgifast (void)
 {
+  // Triggers “fast mode”, i.e. refresh() is needed to
+  // display graphics.
+  
   bgi_fast_mode = YEAH;
 } // sdlbgifast ()
 
@@ -2594,6 +2821,9 @@ void sdlbgifast (void)
 
 void sdlbgislow (void)
 {
+  // Triggers “slow mode”, i.e. refresh() is not needed to
+  // display graphics.
+
   bgi_fast_mode = NOPE;
 } // sdlbgislow ()
 
@@ -2602,6 +2832,10 @@ void sdlbgislow (void)
 void sector (int x, int y, int stangle, int endangle,
              int xradius, int yradius)
 {
+  // Draws and fills an elliptical pie slice centered at (x, y),
+  // horizontal and vertical radii given by xradius and yradius,
+  // traveling from stangle to endangle.
+  
   // quick and dirty for now, Bresenham-based later.
   int angle, tmpcolor;
   
@@ -2644,14 +2878,21 @@ void sector (int x, int y, int stangle, int endangle,
 
 void setactivepage (int page)
 {
-  if (page > -1 && page < bgi_np)
+  // Makes page the active page for all subsequent graphics output.
+  
+  if (page > -1 && page < bgi_np) {
     bgi_activepage = bgi_vpage[page]->pixels;
+    bgi_ap = page;
+  }
+    
 } // setactivepage ()
 
 // -----
 
 void setallpalette (struct palettetype *palette)
 {
+  // Sets the current palette to the values given in palette.
+  
   int i;
   
   for (i = 0; i <= MAXCOLORS; i++)
@@ -2663,6 +2904,8 @@ void setallpalette (struct palettetype *palette)
 
 void setaspectratio (int xasp, int yasp)
 {
+  // Changes the default aspect ratio of the graphics.
+  
   // ignored
   return;
 } // setaspectratio ()
@@ -2671,6 +2914,8 @@ void setaspectratio (int xasp, int yasp)
 
 void setbkcolor (int col)
 {
+  // Sets the current background color using the default palette.
+  
   if (-1 == col) { // COLOR () set up the WHITE + 2 color
     bgi_argb_mode = 1;
     bgi_bg_color = WHITE + 2;
@@ -2686,6 +2931,9 @@ void setbkcolor (int col)
 
 void setbkrgbcolor (int index)
 {
+  // Sets the current background color using using the
+  // n-th color index in the RGB palette.
+  
   bgi_bg_color = 1 + MAXCOLORS + 2 + index;
 } // setbkrgbcolor ()
 
@@ -2693,6 +2941,8 @@ void setbkrgbcolor (int index)
 
 void setcolor (int col)
 {
+  // Sets the current drawing color using the default palette.
+  
   if (-1 == col) { // COLOR () set up the WHITE + 1 color
     bgi_argb_mode = 1;
     bgi_fg_color = WHITE + 1;
@@ -2708,6 +2958,8 @@ void setcolor (int col)
 
 void setalpha (int col, Uint8 alpha)
 {
+  // Sets alpha transparency for 'col' to 'alpha' (0-255).
+  
   Uint32 tmp;
   
   if (-1 == col) { // COLOR () set up the WHITE + 1 color
@@ -2728,6 +2980,8 @@ void setalpha (int col, Uint8 alpha)
 
 void setfillpattern (char *upattern, int color)
 {
+  // Sets a user-defined fill pattern.
+  
   int i;
   
   for (i = 0; i < 8; i++)
@@ -2752,6 +3006,8 @@ void setfillpattern (char *upattern, int color)
 
 void setfillstyle (int pattern, int color)
 {
+  // Sets the fill pattern and fill color.
+  
   bgi_fill_style.pattern = pattern;
   
   if (-1 == color) { // COLOR () set up the WHITE + 3 color
@@ -2771,6 +3027,8 @@ void setfillstyle (int pattern, int color)
 
 void setgraphmode (int mode)
 {
+  // Shows the window that was hidden by restorecrtmode ().
+  
   SDL_ShowWindow (bgi_window);
   window_is_hidden = NOPE;
 
@@ -2780,6 +3038,8 @@ void setgraphmode (int mode)
 
 void setlinestyle (int linestyle, unsigned upattern, int thickness)
 {
+  // Sets the line width and style for all lines drawn by line(),
+  // lineto(), rectangle(), drawpoly(), etc.
 
   bgi_line_style.linestyle = linestyle;
   line_patterns[USERBIT_LINE] = bgi_line_style.upattern = upattern;
@@ -2791,6 +3051,8 @@ void setlinestyle (int linestyle, unsigned upattern, int thickness)
 
 void setpalette (int colornum, int color)
 {
+  // Changes the standard palette colornum to color.
+  
   palette[colornum] = bgi_palette[color];
 } // setpalette ()
 
@@ -2798,6 +3060,9 @@ void setpalette (int colornum, int color)
 
 void setrgbcolor (int index)
 {
+  // Sets the current drawing color using the n-th color index
+  // in the RGB palette.
+  
   bgi_fg_color = 1 + MAXCOLORS + 2 + index;
 } // setrgbcolor ()
 
@@ -2805,6 +3070,9 @@ void setrgbcolor (int index)
 
 void setrgbpalette (int colornum, int red, int green, int blue)
 {
+  // Sets the n-th entry in the RGB palette specifying the r, g,
+  // and b components.
+  
   palette[1 + MAXCOLORS + 2 + colornum] = 
     0xff000000 | red << 16 | green << 8 | blue;
 } // setrgbpalette ()
@@ -2813,6 +3081,8 @@ void setrgbpalette (int colornum, int red, int green, int blue)
 
 void settextjustify (int horiz, int vert)
 {
+  // Sets text justification.
+  
   bgi_txt_style.horiz = horiz;
   bgi_txt_style.vert = vert;
 } // settextjustify ()
@@ -2821,7 +3091,10 @@ void settextjustify (int horiz, int vert)
 
 void settextstyle (int font, int direction, int charsize)
 {
-  // only change the direction
+  // Sets the text font (only DEFAULT FONT is actually available),
+  // the direction in which text is displayed (HORIZ DIR, VERT DIR),
+  // and the size of the characters.
+  
   if (VERT_DIR == direction)
     bgi_txt_style.direction = VERT_DIR;
   else
@@ -2834,14 +3107,19 @@ void settextstyle (int font, int direction, int charsize)
 
 void setusercharsize (int multx, int divx, int multy, int divy)
 {
+  // Lets the user change the character width and height.
+  
   bgi_font_mag_x = (float)multx / (float)divx;
   bgi_font_mag_y = (float)multy / (float)divy;
+
 } // setusercharsize ()
 
 // -----
 
 void setviewport (int left, int top, int right, int bottom, int clip)
 {
+  // Sets the current viewport for graphics output.
+  
   if (left < 0 || right > bgi_maxx || top < 0 || bottom > bgi_maxy)
     return;
 
@@ -2859,19 +3137,27 @@ void setviewport (int left, int top, int right, int bottom, int clip)
 
 void setvisualpage (int page)
 {
+  // Sets the visual graphics page number.
+  
   if (page > -1 && page < bgi_np) {
-    // cleardevice ();
-    bgi_visualpage = bgi_vpage[page]->pixels;
-    if (! bgi_fast_mode)
-      refresh ();
+    bgi_vp = page;
+    bgi_visualpage = bgi_vpage[bgi_vp]->pixels;
   }
+  
+  if (! bgi_fast_mode)
+    refresh ();
+  
 } // setvisualpage ()
 
 // -----
 
 void setwritemode (int mode)
 {
+  // Sets the writing mode for line drawing. mode can be COPY PUT,
+  // XOR PUT, OR PUT, AND PUT, and NOT PUT.
+  
   bgi_writemode = mode;
+
 } // setwritemode ()
 
 // -----
@@ -2888,7 +3174,8 @@ void swapbuffers (void)
 
 int textheight (char *textstring)
 {
-  // text height in pixels
+  // Returns the height in pixels of a string.
+
   return bgi_font_mag_y * bgi_font_height;
 } // textheight ()
 
@@ -2896,7 +3183,8 @@ int textheight (char *textstring)
 
 int textwidth (char *textstring)
 {
-  // text width in pixels
+  // Returns the height in pixels of a string.
+
   return (strlen (textstring) * bgi_font_width * bgi_font_mag_x);
 } // textwidth ()
 
@@ -2922,26 +3210,28 @@ int GREEN_VALUE (int color)
 
 void updaterect (int x1, int y1, int x2, int y2)
 {
-  SDL_Rect rect1; // , rect2;
+  // updates a rectangle on the screen. Suffers from SDL2 bug.
+  
+  SDL_Rect src_rect; // , dest_rect;
   int pitch = (bgi_maxx + 1) * sizeof (Uint32);
 
   swap_if_greater (&x1, &x2);
   swap_if_greater (&y1, &y2);
   
-  rect1.x = x1;
-  rect1.y = y1;
-  rect1.w = x2 - x1 + 1;
-  rect1.h = y2 - y1 + 1;
+  src_rect.x = x1;
+  src_rect.y = y1;
+  src_rect.w = x2 - x1 + 1;
+  src_rect.h = y2 - y1 + 1;
   
   // this works: but is THIS the expected behaviour?
-  // rect2.x = 0;
-  // rect2.y = 0;
-  // rect2.w = x2 + 1;
-  // rect2.h = y2 + 1;
+  // dest_rect.x = 0;
+  // dest_rect.y = 0;
+  // dest_rect.w = x2 + 1;
+  // dest_rect.h = y2 + 1;
   
-  // SDL_UpdateTexture (bgi_texture, &rect2, bgi_activepage, pitch);
+  // SDL_UpdateTexture (bgi_texture, &dest_rect, bgi_activepage, pitch);
   SDL_UpdateTexture (bgi_texture, NULL, bgi_activepage, pitch);
-  SDL_RenderCopy (bgi_renderer, bgi_texture, &rect1, &rect1);
+  SDL_RenderCopy (bgi_renderer, bgi_texture, &src_rect, &src_rect);
   SDL_RenderPresent (bgi_renderer);
 
 } // updaterect ()
@@ -2951,8 +3241,11 @@ void updaterect (int x1, int y1, int x2, int y2)
 void writeimagefile (char *filename,
 		     int left, int top, int right, int bottom)
 {
+  // Writes a .bmp file from the screen rectangle defined by
+  // left, top, right, bottom.
+  
   SDL_Surface
-    *src, *dest;
+    *dest;
   SDL_Rect
     rect;
 
@@ -2961,28 +3254,30 @@ void writeimagefile (char *filename,
   rect.w = right - left + 1;
   rect.h = bottom - top + 1;
   
-  // create a surface from the existing window
-  src = SDL_GetWindowSurface (bgi_window);
-  if (NULL == src) {
-    SDL_Log("SDL_GetWindowSurface failed: %s", SDL_GetError());
+  // the user specified a range larger than the viewport
+  if (rect.w > (vp.right - vp.left + 1))
+    rect.w = vp.right - vp.left + 1;  
+  if (rect.h > (vp.bottom - vp.top + 1))
+    rect.h = vp.bottom - vp.top + 1;
+  
+  dest = SDL_CreateRGBSurface (0, rect.w, rect.h, 32, 0, 0, 0, 0);
+  if (NULL == dest) {
+    SDL_Log ("dest SDL_CreateRGBSurface failed: %s", SDL_GetError ());
     return;
   }
   
-  // create a destination surface
-  dest = SDL_CreateRGBSurface (0, rect.w, rect.h, 32, 0, 0, 0, 0);
-		
-  if (NULL == dest) {
-    SDL_Log("SDL_CreateRGBSurface: %s", SDL_GetError());
-    return;
-  }
+  SDL_RenderReadPixels (bgi_renderer,
+			NULL,
+			SDL_GetWindowPixelFormat (bgi_window),
+			bgi_vpage[bgi_vp]->pixels,
+			bgi_vpage[bgi_vp]->pitch);
   // blit and save
-  SDL_BlitSurface (src, &rect, dest, NULL);
+  SDL_BlitSurface (bgi_vpage[bgi_vp], &rect, dest, NULL);
   SDL_SaveBMP (dest, filename);
   
   // free the stuff
-  SDL_FreeSurface (src);
   SDL_FreeSurface (dest);
-  
+
 } // writeimagefile ()
 
 // -----
