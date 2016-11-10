@@ -3,14 +3,14 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs.
 // Guido Gonzato, PhD
-// February 29, 2016
+// November 10, 2016
 
 #include <SDL2/SDL.h>
 
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.0.6
+#define SDL_BGI_VERSION 2.0.7
 
 #define NOPE 0
 #define YEAH 1
@@ -20,6 +20,8 @@
 extern SDL_Window   *bgi_window;
 extern SDL_Renderer *bgi_renderer;
 extern SDL_Texture  *bgi_texture;
+
+// type of last event: SDL_KEYDOWN or SDL_MOUSEBUTTONDOWN
 
 // available visual pages
 
@@ -270,6 +272,7 @@ void detectgraph (int *, int *);
 void drawpoly (int, int *);
 void ellipse (int, int, int, int, int, int);
 int  event (void);
+int  eventtype (void);
 void fillellipse (int, int, int, int);
 void fillpoly (int, int *);
 void floodfill (int, int, int);

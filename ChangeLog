@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+v. 2.0.7, 2016-11-10
+- fixed bug in event() (reported by Peje Nilsson)
+- added eventtype()
+
 v. 2.0.6, 2016-02-29
 - fixed bug in writeimagefile() (reported by
   Manea Alexandru Damian)

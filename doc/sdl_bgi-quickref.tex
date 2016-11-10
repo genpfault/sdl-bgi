@@ -1,6 +1,6 @@
 % sdl_bgi-quickref.tex
 %
-% Guido Gonzato, February 29, 2016
+% Guido Gonzato, November 10, 2016
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -17,7 +17,7 @@
 
 \newcommand{\SDLbgi}{SDL\_bgi}
 
-\newcommand{\version}{2.0.6}        % !!! Change here !!!
+\newcommand{\version}{2.0.7}        % !!! Change here !!!
 
 \newcommand{\V}{\texttt{void}}      % void
 \newcommand{\I}{\texttt{int}}       % int
@@ -57,7 +57,7 @@
 \maketitle
 
 \begin{center}
-  \includegraphics[width=0.5\textwidth]{sdlbgi.png}  
+  \includegraphics[width=0.5\textwidth]{SDL_bgi_logo.png}  
 \end{center}
 
 % -----
@@ -127,7 +127,7 @@ the following:
 \begin{small}
 \begin{verbatim}
 #define _SDL_BGI_H
-#define SDL_BGI_VERSION 2.0.6
+#define SDL_BGI_VERSION 2.0.7
 
 // everything gets drawn here
 
@@ -1201,14 +1201,6 @@ refresh is performed.
 % -----
 
 \begin{bgi}
-\V{} \func{event} (\V{});
-\end{bgi}
-
-Returns 1 if an event (mouse click or key press) has occurred.
-
-% -----
-
-\begin{bgi}
 \I{} \func{getch} (\V{});
 \end{bgi}
 
@@ -1287,11 +1279,20 @@ actually redundant.
 
 % -----
 
-% \begin{bgi}
-% \texttt{unsigned long} \func{converttorgb} (\I{} \A{color});
-% \end{bgi}
+\begin{bgi}
+\V{} \func{event} (\V{});
+\end{bgi}
 
-% Converts a BGI color to its RGB equivalent.
+Returns 1 if an event (mouse click or key press) has occurred.
+
+% -----
+
+\begin{bgi}
+\V{} \func{eventtype} (\V{});
+\end{bgi}
+
+Returns the type of the last event; either \T{SDL\_KEYPRESS} or
+\T{SDL\_MOUSEBUTTONDOWN}.
 
 % -----
 

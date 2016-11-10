@@ -3,7 +3,7 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs.
 // Guido Gonzato, PhD
-// February 29, 2016
+// November 10, 2016
 
 #include <math.h>
 #include "SDL_bgi.h"
@@ -74,6 +74,7 @@ static int
   bgi_fg_color = WHITE,   // index of BGI foreground color
   bgi_bg_color = BLACK,   // index of BGI background color
   bgi_fill_color = WHITE, // index of BGI fill color
+  bgi_last_event = 0,     // mouse click or keyboard event
   bgi_mouse_x,            // coordinates of last mouse click
   bgi_mouse_y, 
   bgi_font_width = 8,     // default font width and height  
@@ -551,12 +552,25 @@ int event (void)
 
   if (SDL_PollEvent (&event)) {
     if ( (event.type == SDL_KEYDOWN) ||
-         (event.type == SDL_MOUSEBUTTONDOWN) )
+         (event.type == SDL_MOUSEBUTTONDOWN) ) {
+      SDL_PushEvent (&event); // don't disrupt the event
+      bgi_last_event = event.type;
       return YEAH;
+    }
   }
   return NOPE;
 
 } // event ()
+
+// -----
+
+int eventtype (void)
+{
+  // Returns the type of event occurred
+  
+  return (bgi_last_event);
+  
+} // eventtype ()
 
 // -----
 
@@ -592,7 +606,7 @@ void _ellipse (int cx, int cy, int xradius, int yradius)
     // 1st set of points, y' > -1
  
     // normally, I'd put the line_fill () code here; but
-    // the outline getd overdrawn, can't find out why.
+    // the outline gets overdrawn, can't find out why.
     _putpixel (cx + x, cy - y);
     _putpixel (cx - x, cy - y);
     _putpixel (cx - x, cy + y);
@@ -1152,12 +1166,14 @@ int getevent (void)
       switch (event.type) {
       
       case SDL_MOUSEBUTTONDOWN:
+	bgi_last_event = SDL_MOUSEBUTTONDOWN;
         bgi_mouse_x = event.button.x;
         bgi_mouse_y = event.button.y;
         return event.button.button;
         break;
       
       case SDL_KEYDOWN:
+	bgi_last_event = SDL_KEYDOWN;
         bgi_mouse_x = bgi_mouse_y = -1;
         return event.key.keysym.sym;
         break;

@@ -36,6 +36,8 @@ void ellipse (int x, int y, int stangle, int endangle, int xradius, int yradius)
 
 int event (void);
 
+int eventtype (void);
+
 void fillellipse (int x, int y, int xradius, int yradius);
 
 void fillpoly (int numpoints, int *polypoints);

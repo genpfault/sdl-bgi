@@ -203,6 +203,8 @@ the code of the mouse button or key that was pressed.
 
 - int event(void) is a non-blocking version of getevent().
 
+- int eventtype() returns the type of the last event.
+
 - void readimagefile(char *filename, int x1, int y1, int x2, int y2)
 reads a .bmp file and displays it immediately (i.e. no refresh
 needed).

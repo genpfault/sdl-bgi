@@ -81,8 +81,13 @@ int main (int argc, char **argv)
 	stop = 1;
     }
   }
-   
+  
   closegraph ();
+  if (SDL_KEYDOWN == eventtype())
+    puts ("Key pressed.");
+  else
+    puts ("Mouse clicked.");
+  
   return 0;
 }
 
