@@ -1,8 +1,8 @@
 Installing SDL_bgi from sources
 -------------------------------
 
-Please make sure you have SDL2 development packages. On Debian, Ubuntu
-and similar distributions, please install 'libsdl2-dev' and its
+Please make sure you have SDL2 development packages. On Debian, Mint,
+Ubuntu and similar distributions, please install 'libsdl2-dev' and its
 dependencies.
 
 To compile and install the SDL_bgi library (using gcc or clang):
@@ -11,8 +11,9 @@ To compile and install the SDL_bgi library (using gcc or clang):
   $ make
   $ sudo make install
 
-which will copy SDL_bgi.h to /usr/include/SDL2/, and libSDL_bgi.so to
-/usr/lib.
+the latter command will copy SDL_bgi.h to /usr/include/SDL2/, 
+libSDL_bgi.so to /usr/lib, and will create the symbolic link
+/usr/include/graphics.h.
 
 To compile some test programs in the test/ directory:
 

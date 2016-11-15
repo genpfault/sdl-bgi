@@ -3,7 +3,7 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs.
 // Guido Gonzato, PhD
-// November 10, 2016
+// November 15, 2016
 
 #include <math.h>
 #include "SDL_bgi.h"
@@ -33,8 +33,8 @@ static Uint32
 // copied to bgi_renderer, and finally bgi_renderer is made present.
 
 // The palette contains the BGI colors, entries 0:MAXCOLORS;
-// then three entries for temporary fg, bg, fill RGB colors allocated 
-// with COLOR(); then user-defined RGB colors
+// then three entries for temporary fg, bg, and fill RGB colors
+// allocated with COLOR(); then user-defined RGB colors
 
 static Uint32
   palette[1 + MAXCOLORS + 3 + PALETTE_SIZE]; // all colors
@@ -1388,7 +1388,7 @@ int getpalettesize (struct palettetype *palette)
   // Returns the size of the palette.
   
   // !!! BUG - don't ignore the parameter
-  return 1 + MAXCOLORS + 2 + PALETTE_SIZE;
+  return 1 + MAXCOLORS + 3 + PALETTE_SIZE;
 } // getpalettesize ()
 
 // -----
@@ -1698,7 +1698,8 @@ void initwindow (int width, int height)
   
   bgi_texture = SDL_CreateTexture (bgi_renderer,
 				   SDL_PIXELFORMAT_ARGB8888,
-				   SDL_TEXTUREACCESS_STREAMING,
+				   SDL_TEXTUREACCESS_STATIC,
+				   // SDL_TEXTUREACCESS_STREAMING,
 				   bgi_maxx + 1,
 				   bgi_maxy + 1);
   if (NULL == bgi_texture) {
@@ -3079,7 +3080,7 @@ void setrgbcolor (int index)
   // Sets the current drawing color using the n-th color index
   // in the RGB palette.
   
-  bgi_fg_color = 1 + MAXCOLORS + 2 + index;
+  bgi_fg_color = 1 + MAXCOLORS + 3 + index;
 } // setrgbcolor ()
 
 // -----
@@ -3089,7 +3090,7 @@ void setrgbpalette (int colornum, int red, int green, int blue)
   // Sets the n-th entry in the RGB palette specifying the r, g,
   // and b components.
   
-  palette[1 + MAXCOLORS + 2 + colornum] = 
+  palette[1 + MAXCOLORS + 3 + colornum] = 
     0xff000000 | red << 16 | green << 8 | blue;
 } // setrgbpalette ()
 

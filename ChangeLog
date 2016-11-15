@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+v. 2.0.8, 2016-11-15
+- fixed bug in palette-manipulating functions 
+  (reported by Jacek Mainczyk)
+- Makefile changes
+
 v. 2.0.7, 2016-11-10
 - fixed bug in event() (reported by Peje Nilsson)
 - added eventtype()

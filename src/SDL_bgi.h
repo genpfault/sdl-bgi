@@ -3,14 +3,14 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs.
 // Guido Gonzato, PhD
-// November 10, 2016
+// November 15, 2016
 
 #include <SDL2/SDL.h>
 
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.0.7
+#define SDL_BGI_VERSION 2.0.8
 
 #define NOPE 0
 #define YEAH 1

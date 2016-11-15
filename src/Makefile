@@ -1,8 +1,10 @@
 # Makefile for SDL_bgi
 
-SRC = SDL_bgi.c
-OBJ = SDL_bgi.o
-LIB = libSDL_bgi.so
+VERSION = 2.0.8
+NAME = SDL_bgi
+SRC = $(NAME).c
+OBJ = $(NAME).o
+LIB = lib$(NAME).so.$(VERSION)
 INC_DIR = /usr/include/SDL2/
 LIB_DIR = /usr/lib/
 
@@ -16,19 +18,23 @@ all: $(LIB)
 OBJ:
 	$(CC) $(CFLAGS) $(SRC)
 
-libSDL_bgi.so: $(OBJ)
-	$(CC) -shared -o $(LIB) $(OBJ)
+$(LIB): $(OBJ)
+	$(CC) -shared -o $(LIB) $(OBJ) ; \
+	strip $(LIB); \
+	ln -s ./$(LIB) lib$(NAME).so
 
 install: $(LIB) SDL_bgi.h
-	cp $(LIB) $(LIB_DIR); \
-	cp SDL_bgi.h $(INC_DIR)
+	cp $(LIB) $(LIB_DIR) ; \
+	cp SDL_bgi.h $(INC_DIR) ; \
+	ln -sf $(INC_DIR)/SDL_bgi.h /usr/include/graphics.h
 
 uninstall:
-	rm -f $(INC_DIR)\SDL_bgi.h
-	rm -f $(LIB_DIR)\$(LIB)
+	/bin/rm -f $(INC_DIR)/SDL_bgi.h ; \
+	/bin/rm -f $(LIB_DIR)/$(LIB) ; \
+	/bin/rm -f /usr/include/graphics.h
 
 test: all
 	cd test; make
 
 clean:
-	rm -f $(OBJ) $(LIB)
+	rm -f $(OBJ) $(LIB) lib$(NAME).so
