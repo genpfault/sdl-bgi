@@ -29,13 +29,13 @@
 
 // -----
 
-int main (void)
+int main (int argc, char *argv[])
 {
 
   int c, gd, gm, x, y;
   
   gd = SDL;
-  gm = SDL_1024x768;
+  gm = SDL_800x600;
   initgraph (&gd, &gm, "");
   
   setbkcolor (BLACK);

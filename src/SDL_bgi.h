@@ -3,14 +3,33 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs.
 // Guido Gonzato, PhD
-// November 15, 2016
+// January 2, 2018
+
+/*
+This software is provided 'as-is', without any express or implied
+warranty.  In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_keycode.h>
 
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.0.8
+#define SDL_BGI_VERSION 2.1.0
 
 #define NOPE 0
 #define YEAH 1
@@ -20,8 +39,6 @@
 extern SDL_Window   *bgi_window;
 extern SDL_Renderer *bgi_renderer;
 extern SDL_Texture  *bgi_texture;
-
-// type of last event: SDL_KEYDOWN or SDL_MOUSEBUTTONDOWN
 
 // available visual pages
 
@@ -111,8 +128,9 @@ extern SDL_Texture  *bgi_texture;
 #define WM_LBUTTONDOWN  SDL_BUTTON_LEFT
 #define WM_MBUTTONDOWN  SDL_BUTTON_MIDDLE
 #define WM_RBUTTONDOWN  SDL_BUTTON_RIGHT
-#define WM_WHEELUP      4 // SDL_MOUSEWHEEL no longer exists
-#define WM_WHEELDOWN    5 // ditto
+#define WM_WHEEL        SDL_MOUSEWHEEL
+#define WM_WHEELUP      SDL_USEREVENT
+#define WM_WHEELDOWN    SDL_USEREVENT + 1
 #define WM_MOUSEMOVE    SDL_MOUSEMOTION
 
 #define PALETTE_SIZE    4096

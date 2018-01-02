@@ -27,7 +27,7 @@
 
 // -----
 
-int main (void)
+int main (int argc, char *argv[])
 {
 
   int gd, gm, c, p, x, y;

@@ -187,7 +187,7 @@ void explain (void)
 
 // -----
 
-int main (void)
+int main (int argc, char *argv[])
 {
   int palette, c, init, redraw, flag;
   double xm, ym, xstep, ystep, x1, y1, x2, y2;
@@ -229,7 +229,7 @@ int main (void)
       redraw = 0;
     }
     
-    c = getevent (); // wait for a key or mouse click
+    c = getevent (); // wait for a key, mouse click, or wheel motion
     
     switch (c) {
       

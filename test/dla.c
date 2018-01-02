@@ -40,7 +40,7 @@ unsigned long iterations;
 
 // -----
 
-int main (void)
+int main (int argc, char *argv[])
 {
   int x, y, stop = 0;
   unsigned int percent;

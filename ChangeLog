@@ -1,18 +1,30 @@
 Changelog
 ---------
 
+v. 2.1.0, 2018-01-02
+- fixed stupid bug in getch()
+- added mouse wheel up/down events
+- code cleanup
+- improved documentation
+- improved turtle graphics
+- added CMake support for GNU/Linux
+  (thanks to Jani Rautiainen)
+- added Mingw-w64 + MSYS2 support
+- added Mac OS X support
+
 v. 2.0.8, 2016-11-15
 - fixed bug in palette-manipulating functions 
   (reported by Jacek Mainczyk)
 - Makefile changes
 
 v. 2.0.7, 2016-11-10
-- fixed bug in event() (reported by Peje Nilsson)
+- fixed bug in event()
+  (reported by Peje Nilsson)
 - added eventtype()
 
 v. 2.0.6, 2016-02-29
-- fixed bug in writeimagefile() (reported by
-  Manea Alexandru Damian)
+- fixed bug in writeimagefile()
+  (reported by Manea Alexandru Damian)
 - implemented clipping in readimagefile()
 - turtle graphics improvements
 - documentation improvements
@@ -53,11 +65,13 @@ v. 2.0.0, 2015-04-30
 - added readimagefile() and logical plotting (XOR, etc.)
 
 v. 1.0.1, 2014-12-09
-- Fixed minor bugs in putpixel() (reported by Angelo Graziosi)
+- Fixed minor bugs in putpixel()
+  (reported by Angelo Graziosi)
 - changed getimage()/putimage() to include width, heigth info
   in saved bitmap
 - changed getimage()/putimage() to include viewport info
-- fixed MAXCOLOR value (reported by Angelo Graziosi)
+- fixed MAXCOLOR value
+  (reported by Angelo Graziosi)
 - fixed kbhit() behaviour (reported by Angelo Graziosi) - but breaks
   mouseclick() as a result. To be fixed later.
 

@@ -66,7 +66,7 @@ int main (int argc, char **argv)
   setcolor (COLOR (random (256), random (256), random (256)));
 
   while (! stop) {
-    xx = y - sgn (x) * sqrt (abs (k * x - 1));
+    xx = y - sgn (x) * sqrt (fabs (k * x - 1));
     y = j - x;
     x = xx;
     xp = x * 2 + xoffs;

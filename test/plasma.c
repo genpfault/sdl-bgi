@@ -7,7 +7,7 @@
 
 #define PI 3.141593
 
-int main (void)
+int main (int argc, char *argv[])
 {
 
   int i, x, y, r, g, b;

@@ -4,7 +4,7 @@
  * gcc -o turtledemo turtledemo.c turtle.c -lSDL_bgi -lm
  * 
  * By Guido Gonzato <guido.gonzato at gmail.com>
- * February 2016
+ * July 2017
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,82 @@
 #include <graphics.h>
 
 #include "turtle.h"
+
+// -----
+
+void pause (void)
+{
+  // pause and exit if right click
+  int
+    stop = 0;
+
+  hideturtle ();
+  setcolor (YELLOW);
+  outtextxy (0, 10,
+	     "=== Left click to continue, right click to exit ===");
+  refresh ();
+  
+  while (! stop) {
+    if (ismouseclick (WM_LBUTTONDOWN))
+      stop = 1;
+    if (ismouseclick (WM_RBUTTONDOWN)) {
+      closegraph ();
+      exit (1);
+    }
+  }
+  
+  while (ismouseclick (WM_LBUTTONDOWN))
+    ;
+
+} // pause ()
+
+// -----
+
+void turtle_hello (void)
+{
+  int
+    len = 20, 
+    c, stop = 0, angle = 0;
+  
+  cleardevice ();
+  setcolor (GREEN);
+  outtextxy (0, 0,
+	     "Hello, I'm the turtle! Arrow keys to move around, ESC to stop.");
+  refresh ();
+  
+  home ();
+  wrap ();
+  setheading (angle);
+  turtlesize (50);
+  showturtle ();
+  refresh ();
+  
+  do {
+
+    c = getch ();
+    
+    switch (c) {
+    case KEY_UP:
+      forwd (len);
+      break;
+    case KEY_LEFT:
+      turnleft (5);
+      break;
+    case KEY_RIGHT:
+      turnright (5);
+      break;
+    default:
+      forwd (len);
+    }
+    
+    refresh ();
+    
+  } while (c != KEY_ESC);
+  
+  hideturtle ();
+  nowrap ();
+  refresh ();
+}
 
 // -----
 
@@ -230,22 +306,18 @@ int powerof2 (int ex)
 
 // -----
 
-void randomwalk (void)
-{
-  int dly = 10;
-  setheading (T_THREE);
-}
-
-// -----
-
-int main (void)
+int main (int argc, char *argv[])
 {
   int i, l, x, y, xc, stop = 0;
-  char s[32];
+  char s[200];
 
-  initwindow (0, 0);
+  initwindow (1024, 768);
   setbkcolor (BLACK);
+  setcolor (GREEN);
 
+  turtle_hello ();
+  pause ();
+  
   // Koch
   for (i = 0; i < 6; i++) {
     cleardevice ();
@@ -258,31 +330,25 @@ int main (void)
     refresh ();
     delay (200);
   }
-  setcolor (YELLOW);
-  outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
-  refresh ();
-  getch ();
+  pause ();
 
   // fractal tree
   for (i = 0; i < 14; i++) {
     cleardevice ();
-    setcolor (YELLOW);
+    setcolor (GREEN);
     outtextxy (0, 0, "Tree:");
     setposition (getmaxx ()*4/10, getmaxy ());
     setheading (T_NORTH);
     tree (getmaxy () / 3, i);
     refresh ();
-    delay (200);
+    delay (100);
   }
-  setcolor (YELLOW);
-  outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
-  refresh ();
-  getch ();
+  pause ();
 
   // square Koch
   for (i = 0; i < 6; i++) {
     cleardevice ();
-    setcolor (RED);
+    setcolor (GREEN);
     outtextxy (0, 0, "Square Koch curve:");
     setposition (0, getmaxy () / 2);
     setheading (T_EAST);
@@ -291,39 +357,33 @@ int main (void)
     refresh ();
     delay (200);
   }
-  setcolor (YELLOW);
-  outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
-  refresh ();
-  getch ();
+  pause ();
 
   // rotating square
   cleardevice ();
-  setcolor (RED);
+  setcolor (GREEN);
   outtextxy (0, 0, "Rotating square:");
   home ();
   setheading (0);
+  
   l = getmaxx () / 2;
   
   for (i = 1; i < l; i++) {
     setcolor (1 + i % 15);
     forwd (i);
     turnright (89);
-    // added!
     refresh ();
-    delay (10);
+    delay (5);
     if (kbhit ())
       break;
   }
-  setcolor (YELLOW);
-  outtextxy (0, 20, "PRESS A KEY TO CONTINUE:");
-  refresh ();
-  getch ();
+  pause ();
   
   // Hilbert
   cleardevice ();
   xc = getmaxx () / 2;
   x = xc;
-  setcolor (YELLOW);
+  setcolor (GREEN);
   
   for (i = 1; i < 8; i++) {
     l = getmaxy () / powerof2 (i);
@@ -333,7 +393,7 @@ int main (void)
     setheading (T_WEST);
     hilbert_left (l, i);
     refresh ();
-    sprintf (s, "Hilbert curve at level %d", i);
+    sprintf (s, "Hilbert curve at level %d (press a key to continue)", i);
     outtextxy (0, 0, s);
     refresh ();
     getch ();
@@ -363,4 +423,3 @@ int main (void)
 } // main ()
 
 // ----- end of file turtledemo.c
-

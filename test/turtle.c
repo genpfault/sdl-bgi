@@ -5,7 +5,7 @@
  * Tested with SDL_bgi, xbgi, and grx
  * 
  * By Guido Gonzato <guido.gonzato at gmail.com>
- * February 29, 2016
+ * June 27, 2017
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ static void draw_turtle (void);
 // starts at pi/2 and increases clockwise: -(angle-90)
 
 static double t_sin[360] =
-{1.000000,  0.999848,  0.999391,  0.998630,  0.997564,  
+{ 1.000000,  0.999848,  0.999391,  0.998630,  0.997564,  
   0.996195,  0.994522,  0.992546,  0.990268,  0.987688,  
   0.984808,  0.981627,  0.978148,  0.974370,  0.970296,  
   0.965926,  0.961262,  0.956305,  0.951057,  0.945519,  
@@ -235,22 +235,26 @@ void forwd (int n)
   t_pos[0] += newx;
   t_pos[1] -= newy;
   
-  // new position
-  if (t_show_turtle)
-    draw_turtle ();
-  
   // is wrapping active?
   if (t_turtle_wrap) {
+    
     if (t_pos[0] < 0)
-      t_pos[0] = getmaxx () - t_pos[0];
+      t_pos[0] = getmaxx () + t_pos[0];
+    
     if (t_pos[0] > getmaxx ())
       t_pos[0] = t_pos[0] - getmaxx ();
     
     if (t_pos[1] < 0)
-      t_pos[1] = getmaxy () - t_pos[1];
+      t_pos[1] = getmaxy () + t_pos[1];
+    
     if (t_pos[1] > getmaxy ())
       t_pos[1] = t_pos[1] - getmaxy ();
-  }
+    
+  } // t_turtle_wrap
+  
+  // new position
+  if (t_show_turtle)
+    draw_turtle ();
   
 } // forwd
 
@@ -436,37 +440,60 @@ int isdown (void)
 
 // -----
 
+void draw_turtle_triangle (void)
+{
+  // draws a triangular turtle. 
+  
+  int triangle[6];
+  int col;
+  
+  triangle[0] = t_pos[0] +
+    (int) ((double) t_turtle_size * t_cos[t_heading]);
+  triangle[1] = t_pos[1] -
+    (int) ((double) t_turtle_size * t_sin[t_heading]);
+  
+  t_heading -= 90;
+  if (t_heading < 0)
+    t_heading += 360;
+  
+  triangle[2] = t_pos[0] +
+    (int) ((double) t_turtle_size/3 * t_cos[t_heading]);
+  triangle[3] = t_pos[1] -
+    (int) ((double) t_turtle_size/3 * t_sin[t_heading]);
+  
+  t_heading -= 180;
+  if (t_heading < 0)
+    t_heading += 360;
+  
+  triangle[4] = t_pos[0] +
+    (int) ((double) t_turtle_size/3 * t_cos[t_heading]);
+  triangle[5] = t_pos[1] -
+    (int) ((double) t_turtle_size/3 * t_sin[t_heading]);
+  
+  // draw it
+  col = getcolor ();
+  if (RED != getbkcolor ())
+    setcolor (RED);
+  else
+    setcolor (WHITE);
+  line (triangle[0], triangle[1], triangle[2], triangle[3]);
+  line (triangle[2], triangle[3], triangle[4], triangle[5]);
+  line (triangle[4], triangle[5], triangle[0], triangle[1]);
+  setcolor (col);
+  
+}
+
+// -----
+
 void draw_turtle (void)
 {
   int triangle[6];
   int tmp_heading = t_heading;
     
   setwritemode (XOR_PUT);
-  
-  triangle[0] = t_pos[0] +
-    (int) ((double) t_turtle_size * t_cos[t_heading]);
-  triangle[1] = t_pos[1] -
-    (int) ((double) t_turtle_size * t_sin[t_heading]);
-  t_heading -= 90;
-  if (t_heading < 0)
-    t_heading += 360;
-  triangle[2] = t_pos[0] +
-    (int) ((double) t_turtle_size/3 * t_cos[t_heading]);
-  triangle[3] = t_pos[1] -
-    (int) ((double) t_turtle_size/3 * t_sin[t_heading]);
-  t_heading -= 180;
-  if (t_heading < 0)
-    t_heading += 360;
-  triangle[4] = t_pos[0] +
-    (int) ((double) t_turtle_size/3 * t_cos[t_heading]);
-  triangle[5] = t_pos[1] -
-    (int) ((double) t_turtle_size/3 * t_sin[t_heading]);
-  // draw it
-  line (triangle[0], triangle[1], triangle[2], triangle[3]);
-  line (triangle[2], triangle[3], triangle[4], triangle[5]);
-  line (triangle[4], triangle[5], triangle[0], triangle[1]);
-  
+  draw_turtle_triangle (); // more shapes to be implemented
   setwritemode (COPY_PUT);
+  
   t_turtle_drawn = T_TRUE;
   t_heading = tmp_heading;
 }

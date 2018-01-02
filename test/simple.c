@@ -123,7 +123,7 @@ void pixels (void)
 
 // -----
 
-int main (void)
+int main (int argc, char *argv[])
 {
 
   int gd, gm;

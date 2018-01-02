@@ -3,56 +3,68 @@
 
 # C compiler: gcc or clang
 CC = gcc
-CFLAGS = -std=c99 -O2 -g -I../src/ -I. -L..
-LIBS = -lSDL2
-SDL2_bgi = ../src/libSDL_bgi.so
+
+# Detect the platform: GNU/Linux, Darwin (OS X), Mingw-w64
+PLATFORM := $(shell uname)
+
+ifeq ($(PLATFORM),Linux)
+CFLAGS = -O2 -g -I.
+LIBS = -lSDL_bgi -lSDL2
+endif
+
+ifeq ($(PLATFORM),MINGW64_NT-6.1)
+CFLAGS = -O2 -g -I. -I/mingw64/include/SDL2
+LIBS = -lmingw32 -L/mingw64/bin -lSDL_bgi -lSDL2main -lSDL2 # -mwindows
+endif
+
+ifeq ($(PLATFORM),Darwin)
+CFLAGS = -O2 -g -I. -I/library/Frameworks/SDL2.framework/Headers
+LIBS = -lSDL_bgi -framework SDL2
+endif
 
 PROGRAMS = cellular dla fern floodfilltest hopalong life \
 mandelbrot mousetest moveit plasma sdlbgidemo simple turtledemo
 
 all: $(PROGRAMS)
 
-../src/libSDL_bgi.so:
-	cd ../src; make -f Makefile
+sdlbgidemo: sdlbgidemo.c 
+	$(CC) $(CFLAGS) -I. -o sdlbgidemo sdlbgidemo.c $(LIBS) -lm
 
-sdlbgidemo: sdlbgidemo.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -I. -o sdlbgidemo sdlbgidemo.c $(SDL2_bgi) $(LIBS) -lm
+cellular: cellular.c 
+	$(CC) $(CFLAGS) -o cellular cellular.c $(LIBS)
 
-cellular: cellular.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o cellular cellular.c $(SDL2_bgi) $(LIBS)
+dla: dla.c 
+	$(CC) $(CFLAGS) -o dla dla.c $(LIBS)
 
-dla: dla.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o dla dla.c $(SDL2_bgi) $(LIBS)
+fern: fern.c 
+	$(CC) $(CFLAGS) -o fern fern.c $(LIBS)
 
-fern: fern.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o fern fern.c $(SDL2_bgi) $(LIBS)
+floodfilltest: floodfilltest.c 
+	$(CC) $(CFLAGS) -o floodfilltest floodfilltest.c $(LIBS)
 
-floodfilltest: floodfilltest.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o floodfilltest floodfilltest.c $(SDL2_bgi) $(LIBS)
+hopalong: hopalong.c 
+	$(CC) $(CFLAGS) -o hopalong hopalong.c $(LIBS) -lm
 
-hopalong: hopalong.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o hopalong hopalong.c $(SDL2_bgi) $(LIBS) -lm
+life: life.c 
+	$(CC) $(CFLAGS) -o life life.c $(LIBS)
 
-life: life.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o life life.c $(SDL2_bgi) $(LIBS)
+mandelbrot: mandelbrot.c 
+	$(CC) $(CFLAGS) -o mandelbrot mandelbrot.c $(LIBS)
 
-mandelbrot: mandelbrot.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o mandelbrot mandelbrot.c $(SDL2_bgi) $(LIBS)
+mousetest: mousetest.c 
+	$(CC) $(CFLAGS) -o mousetest mousetest.c $(LIBS)
 
-mousetest: mousetest.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o mousetest mousetest.c $(SDL2_bgi) $(LIBS)
+moveit: moveit.c 
+	$(CC) $(CFLAGS) -o moveit moveit.c $(LIBS)
 
-moveit: moveit.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o moveit moveit.c $(SDL2_bgi) $(LIBS)
+plasma: plasma.c 
+	$(CC) $(CFLAGS) -o plasma plasma.c $(LIBS) -lm
 
-plasma: plasma.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o plasma plasma.c $(SDL2_bgi) $(LIBS) -lm
+simple: simple.c 
+	$(CC) $(CFLAGS) -o simple simple.c $(LIBS)
 
-simple: simple.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o simple simple.c $(SDL2_bgi) $(LIBS)
-
-turtledemo: turtledemo.c turtle.c $(SDL2_bgi)
-	$(CC) $(CFLAGS) -o turtledemo turtledemo.c turtle.c $(SDL2_bgi) $(LIBS) -lm
+turtledemo: turtledemo.c turtle.c 
+	$(CC) $(CFLAGS) -o turtledemo turtledemo.c turtle.c $(LIBS) -lm
 
 clean:
 	rm -f $(PROGRAMS) a.out *o

@@ -5,7 +5,7 @@
  * Tested with xbgi, SDL_bgi and grx
  * 
  * By Guido Gonzato <guido.gonzato at gmail.com>
- * February 2016
+ * May 2017
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,6 +77,27 @@ int  isvisible (void);        /* is the turtle visible? */
 void wrap (void);             /* wrap around the window */
 void nowrap (void);           /* don't wrap around the window */
 
+// Python-inspired functions possibly to be implemented:
+// circle(), dot(), stamp(), clearstamp(), clearstamps(),
+// undo(), speed(), towards(), distance(), degrees(), radians(),
+// pensize(), width(), pen(), filling(), begin_fill(),
+// end_fill(), reset(), clear(), write(), shape(),
+// resizemode(), shapesize(), turtlesize(), shearfactor(),
+// settiltangle(), tiltangle(), tilt(), shapetransform(),
+// get_shapepoly(), onclick(), onrelease(), ondrag(),
+// begin_poly(), end_poly(), get_poly(), clone(), 
+// getturtle() | getpen(), getscreen(), setundobuffer(),
+// undobufferentries(), bgcolor(), bgpic(), clear() | clearscreen(),
+// reset() | resetscreen(), screensize(), setworldcoordinates(),
+// delay(), tracer(), update(), listen(), onkey() | onkeyrelease(),
+// onkeypress(), onclick() | onscreenclick(), ontimer(),
+// mainloop() | done(), mode(), colormode(), getcanvas(),
+// getshapes(), register_shape() | addshape(), turtles(),
+// window_height(), window_width(), textinput(), numinput(),
+// bye(), exitonclick(), setup(), title()
+
+
+
 #define  T_TRUE  1
 #define  T_FALSE 0
 
@@ -87,7 +108,7 @@ void nowrap (void);           /* don't wrap around the window */
 #define  T_SOUTH         180
 #define  T_SOUTHWEST     225
 #define  T_WEST          270
-#define  T_NORTWEST      315
+#define  T_NORTHWEST     315
 
 #define  T_TWELVE    T_NORTH
 #define  T_THREE      T_EAST

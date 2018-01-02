@@ -1,16 +1,44 @@
 # Makefile for SDL_bgi
 
-VERSION = 2.0.8
+VERSION = 2.1.0
 NAME = SDL_bgi
 SRC = $(NAME).c
 OBJ = $(NAME).o
-LIB = lib$(NAME).so.$(VERSION)
-INC_DIR = /usr/include/SDL2/
+HEADERS = SDL_bgi.h SDL_bgi_font.h
+
+# Detect the platform: GNU/Linux, Darwin (OS X), Mingw-w64
+PLATFORM := $(shell uname)
+
+ifeq ($(PLATFORM),Linux)
+INC_DIR = /usr/include/
+SDL_INC = $(INC_DIR)/SDL2
 LIB_DIR = /usr/lib/
+LIB     = lib$(NAME).so
+LDFLAGS = -lSDL2
+STRIP   = strip
+endif
+
+ifeq ($(PLATFORM),Darwin)
+INC_DIR = /usr/include
+SDL_INC = /library/Frameworks/SDL2.framework/Headers
+LIB_DIR = /usr/lib
+LIB     = lib$(NAME).so
+LDFLAGS = -framework SDL2
+STRIP   = echo # don't strip the library
+endif
+
+ifeq ($(PLATFORM),MINGW64_NT-6.1)
+INC_DIR = /mingw64/include
+SDL_INC = $(INC_DIR)/SDL2
+LIB_DIR = /mingw64/bin
+LIB     = $(NAME).dll
+LDFLAGS = -L/mingw64/bin -lSDL2
+STRIP   = strip
+endif
 
 # C compiler: tested with gcc and clang
 CC = gcc
-CFLAGS = -O2 -g -c -Wall -fpic
+CFLAGS = -O2 -g -c -Wall -I $(INC_DIR) -fPIC
 
 .PHONY : all
 all: $(LIB)
@@ -19,22 +47,22 @@ OBJ:
 	$(CC) $(CFLAGS) $(SRC)
 
 $(LIB): $(OBJ)
-	$(CC) -shared -o $(LIB) $(OBJ) ; \
-	strip $(LIB); \
-	ln -s ./$(LIB) lib$(NAME).so
+	$(CC) -shared -o $(LIB) $(OBJ) $(LDFLAGS) ; \
+	$(STRIP) $(LIB)
 
-install: $(LIB) SDL_bgi.h
-	cp $(LIB) $(LIB_DIR) ; \
-	cp SDL_bgi.h $(INC_DIR) ; \
-	ln -sf $(INC_DIR)/SDL_bgi.h /usr/include/graphics.h
+install: $(LIB) $(HEADERS)
+	install -m 755 $(LIB) $(LIB_DIR) ; \
+	install -m 644 $(HEADERS) $(SDL_INC) ; \
+	install graphics.h $(INC_DIR)
 
 uninstall:
-	/bin/rm -f $(INC_DIR)/SDL_bgi.h ; \
-	/bin/rm -f $(LIB_DIR)/$(LIB) ; \
-	/bin/rm -f /usr/include/graphics.h
+	rm -f $(SDL_INC)/SDL_bgi.h ; \
+	rm -f $(SDL_INC)/SDL_bgi_font.h ; \
+	rm -f $(INC_DIR)/graphics.h
+	rm -f $(LIB_DIR)/$(LIB)
 
 test: all
 	cd test; make
 
 clean:
-	rm -f $(OBJ) $(LIB) lib$(NAME).so
+	rm -f $(OBJ) $(LIB)

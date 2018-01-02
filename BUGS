@@ -1,6 +1,5 @@
 BUGS
 ----
 
-Some NVIDIA cards (e.g. GeForce 9300 GE) are not properly supported by
-some GNU/Linux drivers. As a result, SDL_bgi may not function properly
-with such cards.
+None, as far as I know.
+Please report bugs if you find any.

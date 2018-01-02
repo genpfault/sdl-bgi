@@ -3,4 +3,6 @@ TODO
 
 - add SDL_ttf TrueType fonts?
 
+- use SDL_TEXTUREACCESS_STREAMING?
+
 Your suggestions are welcome!

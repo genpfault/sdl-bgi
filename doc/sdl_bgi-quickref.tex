@@ -1,6 +1,7 @@
 % sdl_bgi-quickref.tex
 %
-% Guido Gonzato, November 15, 2016
+% Guido Gonzato, PhD
+% January 2, 2018
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -15,9 +16,9 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{3pt}
 
-\newcommand{\SDLbgi}{SDL\_bgi}
+\newcommand{\SDLbgi}{\texttt{SDL\_bgi}}
 
-\newcommand{\version}{2.0.8}        % !!! Change here !!!
+\newcommand{\version}{2.1.0}        % !!! Change here !!!
 
 \newcommand{\V}{\texttt{void}}      % void
 \newcommand{\I}{\texttt{int}}       % int
@@ -80,7 +81,7 @@ For example, this is a minimal program that opens a window and draws
 
 \begin{small}
 \begin{verbatim}
-#include <SDL2/SDL_bgi.h>
+#include <graphics.h>
 
 int main (void)
 {
@@ -91,8 +92,8 @@ int main (void)
   outtextxy (0, 0, "Drawing 1000 lines...");
   for (i = 0; i < 1000; i++) {
     setcolor (1 + random (15));
-    line ( random(getmaxx()), random(getmaxy()),
-    random(getmaxx()), random(getmaxy()) );
+    line (random(getmaxx()), random(getmaxy()),
+    random (getmaxx()), random(getmaxy()) );
   }
   getch ();
   closegraph ();
@@ -101,10 +102,10 @@ int main (void)
 \end{verbatim}
 \end{small}
 
-The program includes the header file \F{SDL\_bgi.h}, which contains
-all necessary definitions. The call to \func{initgraph()} opens a
-window; from now on, graphics functions may be called.
-\func{closegraph()} closes the window.
+The program includes the header file \F{graphics.h}, which in turn
+includes \F{SDL\_bgi.h} that contains all necessary definitions. The
+call to \func{initgraph()} opens a window; from now on, graphics
+functions may be called. \func{closegraph()} closes the window.
  
 Within the window, pixel coordinates range from (0, 0), the upper left
 corner, to (\func{get\-maxx()}, \func{getmaxy()}), the lower right
@@ -127,7 +128,7 @@ the following:
 \begin{small}
 \begin{verbatim}
 #define _SDL_BGI_H
-#define SDL_BGI_VERSION 2.0.7
+#define SDL_BGI_VERSION 2.1.0
 
 // everything gets drawn here
 
@@ -224,8 +225,9 @@ extern SDL_Texture  *bgi_texture;
 #define WM_LBUTTONDOWN  SDL_BUTTON_LEFT
 #define WM_MBUTTONDOWN  SDL_BUTTON_MIDDLE
 #define WM_RBUTTONDOWN  SDL_BUTTON_RIGHT
-#define WM_WHEELUP      4 // SDL_MOUSEWHEEL no longer exists
-#define WM_WHEELDOWN    5 // ditto
+#define WM_WHEEL        SDL_MOUSEWHEEL
+#define WM_WHEELUP      SDL_USEREVENT
+#define WM_WHEELDOWN    SDL_USEREVENT + 1
 #define WM_MOUSEMOVE    SDL_MOUSEMOTION
 
 #define PALETTE_SIZE    4096

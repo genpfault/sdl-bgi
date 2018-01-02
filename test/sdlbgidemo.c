@@ -3,7 +3,7 @@
  * To compile:
  * gcc -o sdlbgidemo sdlbgidemo.c -lSDL_bgi -lSDL2 -lm
  * 
- * By Guido Gonzato, May 2015.
+ * By Guido Gonzato, June 2017.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -139,6 +139,23 @@ void mainwindow (void)
 
 // -----
 
+Uint32 speedtest (void)
+{
+  Uint32
+    start, pixels = 0;
+  
+  start = SDL_GetTicks ();
+  do {
+    putpixel (random (maxx), random (maxy), random (MAXCOLORS));
+    pixels++;
+  } while (SDL_GetTicks () < start + 1000);
+  
+  clearviewport ();
+  return (pixels);
+}
+
+// ---
+
 void sdlbgi_info (void)
 {
   // display information on SDL_bgi settings
@@ -155,11 +172,13 @@ void sdlbgi_info (void)
     palette;
   
   Uint32
-    time1, time2;
+    time1, time2, pixels_per_second;
 
   char *driver, *mode;
   int i, x, y, dy;
 
+  message ("Please wait one second...");
+  pixels_per_second = speedtest ();
   message ("Information on SDL_bgi Graphics");
   mainwindow ();
   setcolor (RED);
@@ -188,6 +207,7 @@ void sdlbgi_info (void)
   outtextxy (x, y += dy, "Current fill colour: ");
   outtextxy (x, y += dy, "Character size: ");
   outtextxy (x, y += dy, "Available pages: ");
+  outtextxy (x, y += dy, "Pixels per second: ");
   
   settextjustify (LEFT_TEXT, TOP_TEXT);
   y = 40;
@@ -223,6 +243,8 @@ void sdlbgi_info (void)
   sprintf (str, "%d", textinfo.charsize);
   outtextxy (x, y += dy, str);
   sprintf (str, "%d", VPAGES);
+  outtextxy (x, y += dy, str);
+  sprintf (str, "%d", pixels_per_second);
   outtextxy (x, y += dy, str);
 
   refresh ();
@@ -1288,7 +1310,7 @@ void theend (void)
 
 // -----
 
-int main (void)
+int main (int argc, char *argv[])
 {
   
   init_sdlbgi ();

@@ -1,9 +1,27 @@
-// SDL_bgi.c	-*- C -*-
+/// SDL_bgi.c	-*- C -*-
 
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs.
 // Guido Gonzato, PhD
-// November 15, 2016
+// January 2, 2018
+
+/*
+This software is provided 'as-is', without any express or implied
+warranty.  In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+*/
 
 #include <math.h>
 #include "SDL_bgi.h"
@@ -130,7 +148,7 @@ static void _floodfill (int, int, int);
 static void line_fast  (int, int, int, int);
 static void updaterect (int, int, int, int);
 
-// static void unimplemented (char *);
+static void unimplemented    (char *);
 static int  is_in_range      (int, int, int);
 static void swap_if_greater  (int *, int *);
 static void circle_bresenham (int, int, int);
@@ -203,7 +221,7 @@ unsigned int setgraphbufsize (unsigned bufsize)
 
 // implemented stuff starts here
 
-static int is_in_range (x, x1, x2)
+static int is_in_range (int x, int x1, int x2)
 {
   return (x >= x1 && x <= x2);
 }
@@ -420,12 +438,11 @@ void closegraph (void)
 {
   // Closes the graphics system.
   
-  // int page;
+  int page;
   
   // free memory - is really necessary?
-  // for (page = 0; page < bgi_np; page++)
-    // SDL_FreeSurface (bgi_vpage[page]);
-    // ;
+  for (page = 0; page < bgi_np; page++)
+    SDL_FreeSurface (bgi_vpage[page]);
   
   SDL_DestroyTexture (bgi_texture);
   SDL_DestroyRenderer (bgi_renderer);
@@ -456,6 +473,18 @@ void delay (int msec)
   if (! bgi_fast_mode)
     refresh ();
   SDL_Delay (msec);
+
+  /*
+  Uint32 
+    start, stop;
+  
+  start = SDL_GetTicks ();
+  stop = start + msec;
+  do {
+    ;
+  } while (SDL_GetTicks () < stop);
+  */
+
 } // delay ()
 
 // -----
@@ -552,7 +581,8 @@ int event (void)
 
   if (SDL_PollEvent (&event)) {
     if ( (event.type == SDL_KEYDOWN) ||
-         (event.type == SDL_MOUSEBUTTONDOWN) ) {
+         (event.type == SDL_MOUSEBUTTONDOWN) ||
+         (event.type == SDL_MOUSEWHEEL)) {
       SDL_PushEvent (&event); // don't disrupt the event
       bgi_last_event = event.type;
       return YEAH;
@@ -1114,12 +1144,10 @@ int getch (void)
 	      key != SDLK_RGUI &&
 	      key != SDLK_LALT &&
 	      key != SDLK_RALT &&
-	      key != SDLK_PAGEUP &&
-	      key != SDLK_PAGEDOWN &&
 	      key != SDLK_CAPSLOCK &&
 	      key != SDLK_MENU &&
 	      key != SDLK_APPLICATION)
-	    return key;
+	    return (int) key;
 	}
 
 } // getch ()
@@ -1156,7 +1184,7 @@ int getevent (void)
 {
   // Waits for a keypress or mouse click, and returns the code of
   // the mouse button or key that was pressed.
-  
+
   SDL_Event event;
   
   // wait for an event
@@ -1164,6 +1192,12 @@ int getevent (void)
     while (SDL_PollEvent(&event))
     
       switch (event.type) {
+
+      case SDL_KEYDOWN:
+	bgi_last_event = SDL_KEYDOWN;
+        bgi_mouse_x = bgi_mouse_y = -1;
+        return event.key.keysym.sym;
+        break;
       
       case SDL_MOUSEBUTTONDOWN:
 	bgi_last_event = SDL_MOUSEBUTTONDOWN;
@@ -1172,10 +1206,13 @@ int getevent (void)
         return event.button.button;
         break;
       
-      case SDL_KEYDOWN:
-	bgi_last_event = SDL_KEYDOWN;
-        bgi_mouse_x = bgi_mouse_y = -1;
-        return event.key.keysym.sym;
+      case SDL_MOUSEWHEEL:
+	bgi_last_event = SDL_MOUSEWHEEL;
+	SDL_GetMouseState (&bgi_mouse_x, &bgi_mouse_y);
+	if (1 == event.wheel.y) // up
+	  return (WM_WHEELUP);
+	else
+          return (WM_WHEELDOWN);
         break;
     
       default:
@@ -1690,7 +1727,8 @@ void initwindow (int width, int height)
     return;
   }
 
-  bgi_renderer = SDL_CreateRenderer (bgi_window, -1, 0);
+  bgi_renderer = SDL_CreateRenderer (bgi_window, -1, 
+				    SDL_RENDERER_SOFTWARE);
   if (NULL == bgi_renderer) {
     printf ("Could not create renderer: %s\n", SDL_GetError ());
     return;
@@ -1698,7 +1736,7 @@ void initwindow (int width, int height)
   
   bgi_texture = SDL_CreateTexture (bgi_renderer,
 				   SDL_PIXELFORMAT_ARGB8888,
-				   SDL_TEXTUREACCESS_STATIC,
+				   SDL_TEXTUREACCESS_TARGET,
 				   // SDL_TEXTUREACCESS_STREAMING,
 				   bgi_maxx + 1,
 				   bgi_maxy + 1);
@@ -2802,15 +2840,9 @@ void rectangle (int x1, int y1, int x2, int y2)
 void refresh (void)
 {
   // Updates the screen.
-  
-  SDL_UpdateTexture (bgi_texture, 
-		     NULL,
-		     bgi_visualpage,
-		     (bgi_maxx + 1) * sizeof (Uint32));
-  SDL_SetTextureBlendMode (bgi_texture, SDL_BLENDMODE_BLEND);
-  SDL_RenderCopy (bgi_renderer, bgi_texture, NULL, NULL);
-  SDL_RenderPresent (bgi_renderer);
-  // SDL_UpdateWindowSurface (bgi_window);
+
+  updaterect (0, 0, bgi_maxx, bgi_maxy);
+
 } // refresh ()
 
 // -----
@@ -3229,7 +3261,7 @@ void updaterect (int x1, int y1, int x2, int y2)
 {
   // updates a rectangle on the screen. Suffers from SDL2 bug.
   
-  SDL_Rect src_rect; // , dest_rect;
+  SDL_Rect src_rect, dest_rect;
   int pitch = (bgi_maxx + 1) * sizeof (Uint32);
 
   swap_if_greater (&x1, &x2);
@@ -3239,15 +3271,22 @@ void updaterect (int x1, int y1, int x2, int y2)
   src_rect.y = y1;
   src_rect.w = x2 - x1 + 1;
   src_rect.h = y2 - y1 + 1;
-  
+
+  // this doesn't work:
+  // dest_rect.x = x1;
+  // dest_rect.y = y1;
+  // dest_rect.w = x2 - x1 + 1;
+  // dest_rect.h = y2 - y1 + 1;
+
   // this works: but is THIS the expected behaviour?
-  // dest_rect.x = 0;
-  // dest_rect.y = 0;
-  // dest_rect.w = x2 + 1;
-  // dest_rect.h = y2 + 1;
+  dest_rect.x = 0;
+  dest_rect.y = 0;
+  dest_rect.w = x2 + 1;
+  dest_rect.h = y2 + 1;
   
-  // SDL_UpdateTexture (bgi_texture, &dest_rect, bgi_activepage, pitch);
-  SDL_UpdateTexture (bgi_texture, NULL, bgi_activepage, pitch);
+  SDL_UpdateTexture (bgi_texture, &dest_rect, bgi_activepage, pitch);
+  // SDL_UpdateTexture (bgi_texture, NULL, bgi_activepage, pitch);
+  SDL_SetTextureBlendMode (bgi_texture, SDL_BLENDMODE_BLEND);
   SDL_RenderCopy (bgi_renderer, bgi_texture, &src_rect, &src_rect);
   SDL_RenderPresent (bgi_renderer);
 
@@ -3296,7 +3335,5 @@ void writeimagefile (char *filename,
   SDL_FreeSurface (dest);
 
 } // writeimagefile ()
-
-// -----
 
 // --- end of file SDL_bgi.c
