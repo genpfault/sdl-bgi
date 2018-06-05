@@ -487,7 +487,7 @@ void draw_turtle_triangle (void)
 
 void draw_turtle (void)
 {
-  int triangle[6];
+  // int triangle[6];
   int tmp_heading = t_heading;
     
   setwritemode (XOR_PUT);

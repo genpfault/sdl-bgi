@@ -1,10 +1,9 @@
 #!/bin/sh
 
+VERSION=$(cat VERSION)
+
 mkdir -p build && cd build/
-
 cmake -DCMAKE_INSTALL_PREFIX=/usr ..
-
-VERSION="2.1.0"
 PACKAGE_DONE=0
 
 # is this system .deb based?

@@ -28,7 +28,12 @@ To compile a program (MSYS2 + mingw-w64):
         -lSDL_bgi -lSDL2main -lSDL2 # -mwindows
 
 The `-mwindows` creates a window-only program, i.e. a terminal is not
-started.
+started. **Note:** functions provided by `stdio.h` will not work
+if you don't start a terminal!
+
+Code::Blocks users should read the file `howto_CodeBlocks.md`.
+
+Dev-C++ users should read the file `howto_Dev-Cpp.md`.
 
 Most old programs that use the original BGI library should compile
 unmodified. For instance,

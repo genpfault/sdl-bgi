@@ -43,7 +43,7 @@ int main (int argc, char *argv[])
   int stop = 0;
   long int counter = 0;
   int midx, midy, scale;
-  int k, prob;
+  int k = 0, prob;
   float x, y, xx, yy;
   float
     a[4] = {0.0, 0.85, 0.2, -0.15},

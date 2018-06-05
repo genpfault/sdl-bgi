@@ -1,10 +1,10 @@
 # Makefile for SDL_bgi
 
-VERSION = 2.1.0
+VERSION = 2.1.2
 NAME = SDL_bgi
 SRC = $(NAME).c
 OBJ = $(NAME).o
-HEADERS = SDL_bgi.h SDL_bgi_font.h
+HEADERS = SDL_bgi.h 
 
 # Detect the platform: GNU/Linux, Darwin (OS X), Mingw-w64
 PLATFORM := $(shell uname)
@@ -57,7 +57,6 @@ install: $(LIB) $(HEADERS)
 
 uninstall:
 	rm -f $(SDL_INC)/SDL_bgi.h ; \
-	rm -f $(SDL_INC)/SDL_bgi_font.h ; \
 	rm -f $(INC_DIR)/graphics.h
 	rm -f $(LIB_DIR)/$(LIB)
 

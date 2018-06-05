@@ -1,0 +1,36 @@
+# Makefile for SDL_bgi, for Dev-C++ 5.11
+# and TDM-GCC 5.1.0-3
+
+# To compile SDL_bgi for DevCpp from the 
+# MSYS2 shell, run this command:
+# PATH=/c/Dev-Cpp/MinGW64/bin/:$PATH && make -f Makefile.DevCpp
+
+VERSION = 2.1.2
+NAME = SDL_bgi
+SRC = $(NAME).c
+OBJ = $(NAME).o
+HEADERS = SDL_bgi.h 
+
+# We assume that Dev-Cpp is installed in C:\Dev-Cpp,
+# while SDL2 is installed in C:\SDL2-2.0.8
+SDL_DIR = /c/SDL2-2.0.8
+INC_DIR = /c/Dev-Cpp/MinGW64/include/
+SDL_INC = $(SDL_DIR)/i686-w64-mingw32/include/
+SDL_LIB = $(SDL_DIR)/i686-w64-mingw32/lib/
+LIB     = $(NAME).dll
+LDFLAGS = -L $(SDL_LIB) -lSDL2
+STRIP   = strip.exe
+CC      = gcc.exe
+CFLAGS = -O2 -g -c -Wall -I . -I $(INC_DIR) -I $(SDL_INC)
+
+.PHONY : all
+all: $(LIB)
+
+OBJ:
+	$(CC) $(CFLAGS) $(SRC)
+
+$(LIB): $(OBJ)
+	$(CC) -shared -o $(LIB) $(OBJ) $(LDFLAGS) ; \
+	$(STRIP) $(LIB)
+
+# End of Makefile.DevCpp

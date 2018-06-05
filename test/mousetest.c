@@ -30,7 +30,7 @@
 int main (int argc, char *argv[])
 {
 
-  int gd, gm, c, p, x, y;
+  int gd, gm, p, x, y;
   char s[] = "Click around (or here to exit)";
   int len;
   

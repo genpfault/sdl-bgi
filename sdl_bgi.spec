@@ -4,7 +4,7 @@
 
 Summary:       BGI-compatible 2D graphics C library
 Name:          SDL_bgi
-Version:       2.1.0
+Version:       2.1.2
 Release:       1
 License:       ZLib
 Group:         Libraries
@@ -36,7 +36,6 @@ mkdir -p $RPM_BUILD_ROOT/%{_includedir}
 mkdir -p $RPM_BUILD_ROOT/%{_includedir}/SDL2/
 /usr/bin/install -m 644 graphics.h $RPM_BUILD_ROOT/%{_includedir}
 /usr/bin/install -m 644 SDL_bgi.h  $RPM_BUILD_ROOT/%{_includedir}/SDL2/
-/usr/bin/install -m 644 SDL_bgi_font.h $RPM_BUILD_ROOT/%{_includedir}/SDL2/
 /usr/bin/install -m 644 lib%{name}.so $RPM_BUILD_ROOT/%{_libdir}
 
 %clean
@@ -48,7 +47,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc sdl_bgi.spec test/ TODO VERSION
 %attr(644,root,root) %{_libdir}/lib%{name}.so
 %attr(644,root,root) %{_includedir}/SDL2/SDL_bgi.h
-%attr(644,root,root) %{_includedir}/SDL2/SDL_bgi_font.h
 %attr(644,root,root) %{_includedir}/graphics.h
 
 %changelog

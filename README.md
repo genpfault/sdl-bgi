@@ -6,13 +6,14 @@ graphics primitives, and is much easier to use than pure SDL2. It
 should be especially useful for beginners, i.e. in high school
 programming courses.
 
-`SDL_bgi` is nearly fully compatible with BGI, the Borland Graphics
-Interface that was the de facto standard in PC graphics back in DOS
-days. For instance, it compiles and runs the original `bgidemo.c`
-almost perfectly. `SDL_bgi` is pretty fast, very easy to use, and it 
-also provides extensions for ARGB colours and mouse support. It should
-run on any platform supported by SDL2; it was tested in GNU/Linux and
-Windows (MSYS2 + Mingw-w64).
+`SDL_bgi` is nearly fully compatible with BGI (`graphics.h`), the
+Borland Graphics Interface that was the de facto standard in PC
+graphics back in DOS days. For instance, it compiles and runs the
+original `bgidemo.c` almost perfectly. `SDL_bgi` is pretty fast,
+very easy to use, and it also provides extensions for ARGB colours and
+mouse support. It should run on any platform supported by SDL2; it was
+tested in GNU/Linux, Windows (MSYS2 + Mingw-w64, CodeBlocks, Dev-C++),
+and Mac OS X Yosemite.
 
 I wrote `SDL_bgi` because I wanted a simple but fast graphics library
 for my experiments with fractals and cellular automata, using the BGI

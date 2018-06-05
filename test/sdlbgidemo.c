@@ -3,7 +3,7 @@
  * To compile:
  * gcc -o sdlbgidemo sdlbgidemo.c -lSDL_bgi -lSDL2 -lm
  * 
- * By Guido Gonzato, June 2017.
+ * By Guido Gonzato, June 2018.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -172,10 +172,10 @@ void sdlbgi_info (void)
     palette;
   
   Uint32
-    time1, time2, pixels_per_second;
+    pixels_per_second;
 
   char *driver, *mode;
-  int i, x, y, dy;
+  int x, y, dy;
 
   message ("Please wait one second...");
   pixels_per_second = speedtest ();
@@ -260,9 +260,7 @@ void colordemo (void)
   int
     stop = 0,
     i, x, y,
-    col1, col2, col3,
-    cnt = 0,
-    rnd;
+    col1, col2, col3;
   
   message ("setcolor(COLOR(r,g,b)) Demonstration");
   mainwindow ();
@@ -490,8 +488,6 @@ void boxdemo (void)
   // draw filled bars
   int
     stop = 0,
-    x = maxx / 2,
-    y = maxy / 2,
     cnt = 0,
     x1, y1, x2, y2;
   
@@ -537,8 +533,6 @@ void polygondemo (void)
   // draw filled polygons
   int
     stop = 0,
-    x = maxx / 2,
-    y = maxy / 2,
     cnt = 0,
     i,
     numpoints,
@@ -588,8 +582,6 @@ void circledemo (void)
   // draw arcs and ellipses
   int
     stop = 0,
-    x = maxx / 2,
-    y = maxy / 2,
     r = 100,
     cnt = 0,
     rnd;
@@ -647,8 +639,6 @@ void ellipsedemo (void)
   // draw filled ellipses
   int
     stop = 0,
-    x = maxx / 2,
-    y = maxy / 2,
     r = 100,
     cnt = 0;
   
@@ -681,13 +671,6 @@ void ellipsedemo (void)
   get_click ();
   
 } // ellipsedemo ()
-
-// -----
-
-static int is_in_range (int x, int x1, int x2)
-{
-  return ( x >= x1 && x <= x2);
-}
 
 // -----
 
@@ -805,8 +788,7 @@ void floodfilldemo (void)
 {
   // show how to use floodfill ()
   int
-    i, j,
-    p, sierp_width,
+    sierp_width,
     stop = 0;
   
   message ("floodfill() Demonstration");
@@ -871,8 +853,6 @@ void alphademo (void)
 {
   int
     stop = 0,
-    cnt = 0,
-    rnd,
     x1, y1, x2, y2;
   
   message ("setalpha() Demonstration");
@@ -914,8 +894,6 @@ void loadimagedemo (void)
   // load a .bmp file
   int
     stop = 0,
-    cnt = 0,
-    rnd,
     x, y;
   
   message ("readimagefile() Demonstration");
@@ -1043,7 +1021,7 @@ void sdlmixdemo (void)
   int 
     i, inc, stop = 0;
   SDL_Surface
-    *src, *dest;
+    *src;
   SDL_Texture
     *bm_texture;
   SDL_Rect
@@ -1201,10 +1179,8 @@ void pagedemo (void)
 {
   // show how to use visual pages
   int
-    stop = 0,
     xm, ym,
-    num_page,
-    col;
+    num_page;
   char 
     title [100];
 
@@ -1256,9 +1232,6 @@ void theend (void)
     col,
     r, maxr;
 
-  struct viewporttype
-    viewport;
-  
   message ("That's All Folks!");
   mainwindow ();
 

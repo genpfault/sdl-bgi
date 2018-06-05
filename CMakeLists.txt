@@ -1,12 +1,12 @@
 # CMakeLists.txt for SDL_bgi 
-# GG, 2017-10-18
+# GG, 2018-05-26
 
 # --- Building, thanks to cmake
 
 cmake_minimum_required (VERSION 3.5.0)
 
 # Project name
-project (SDL_bgi VERSION 2.1.0 LANGUAGES C)
+project (SDL_bgi VERSION 2.1.1 LANGUAGES C)
 
 # Strip the library after building
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
@@ -40,8 +40,6 @@ install (TARGETS ${PROJECT_NAME}
 file (GLOB HEADERS src/graphics.h)
 install (FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 file (GLOB HEADERS src/SDL_bgi.h)
-install (FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/SDL2/)
-file (GLOB HEADERS src/SDL_bgi_font.h)
 install (FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/SDL2/)
 
 # Install documentation files

@@ -63,7 +63,7 @@ void turtle_hello (void)
 {
   int
     len = 20, 
-    c, stop = 0, angle = 0;
+    c, angle = 0;
   
   cleardevice ();
   setcolor (GREEN);

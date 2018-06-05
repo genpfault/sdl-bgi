@@ -8,13 +8,13 @@ CC = gcc
 PLATFORM := $(shell uname)
 
 ifeq ($(PLATFORM),Linux)
-CFLAGS = -O2 -g -I.
+CFLAGS = -O2 -g -I. -Wall
 LIBS = -lSDL_bgi -lSDL2
 endif
 
 ifeq ($(PLATFORM),MINGW64_NT-6.1)
 CFLAGS = -O2 -g -I. -I/mingw64/include/SDL2
-LIBS = -lmingw32 -L/mingw64/bin -lSDL_bgi -lSDL2main -lSDL2 # -mwindows
+LIBS = -lmingw32 -L/mingw64/bin -lSDL_bgi -lSDL2main -lSDL2 -mwindows
 endif
 
 ifeq ($(PLATFORM),Darwin)

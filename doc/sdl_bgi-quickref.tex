@@ -1,7 +1,7 @@
 % sdl_bgi-quickref.tex
 %
 % Guido Gonzato, PhD
-% January 2, 2018
+% June 5, 2018
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -18,7 +18,7 @@
 
 \newcommand{\SDLbgi}{\texttt{SDL\_bgi}}
 
-\newcommand{\version}{2.1.0}        % !!! Change here !!!
+\newcommand{\version}{2.1.2}        % !!! Change here !!!
 
 \newcommand{\V}{\texttt{void}}      % void
 \newcommand{\I}{\texttt{int}}       % int
@@ -67,9 +67,9 @@
 
 \SDLbgi{} is an SDL2-based implementation of Borland Graphics
 Interface (BGI), a graphics library that was part of Turbo/Borland C
-compilers for DOS. BGI represented the \emph{de facto} standard for
-computer graphics in the late eighties--early nineties, especially in
-education.
+compilers for DOS (\texttt{graphics.h}). BGI was the \emph{de facto}
+standard for computer graphics in the late eighties--early nineties,
+especially in education.
 
 \SDLbgi{} is one of the easiest ways to do graphics programming in C.
 It is much simpler (but obviously, less complete) than SDL, OpenGL and
@@ -128,7 +128,7 @@ the following:
 \begin{small}
 \begin{verbatim}
 #define _SDL_BGI_H
-#define SDL_BGI_VERSION 2.1.0
+#define SDL_BGI_VERSION 2.1.2
 
 // everything gets drawn here
 

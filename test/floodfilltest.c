@@ -32,8 +32,7 @@ int main (int argc, char *argv[])
 
   int
     stop = 0,
-    c, p,
-    x, y;
+    p;
   
   initwindow (800, 600);
   setbkcolor (BLACK);

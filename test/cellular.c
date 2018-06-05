@@ -32,14 +32,12 @@
 
 void run_rule (int rule)
 {
-  int i, x, y, maxx, maxy, pixel;
+  int i, x, y, maxx, pixel;
   
   maxx = getmaxx ();
 
   // for an explanation about rules, please see
   // http://mathworld.wolfram.com/CellularAutomaton.html
-  
-  maxy = getmaxy ();
   
   for (y = 20; y < 20 + maxx / 2; y++)
     for (x = 1; x < maxx - 1; x++) {

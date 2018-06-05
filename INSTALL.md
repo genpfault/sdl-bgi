@@ -1,23 +1,48 @@
 # Installing `SDL_bgi`
 
 To install `SDL_bgi`, you normally compile it from sources. Windows
-users (MSYS2 + Mingw-w64 toolchain) may use the provided binary
-package.
+users may use the provided binaries.
 
 
-## Installing `SDL_bgi.dll` (Mingw-w64)
+## Installing for MSYS2 Mingw-w64
 
 To install the precompiled binary for Mingw-w64:
 
+    $ cd bin/Mingw64
     $ make install
 
-which will copy `graphics.h` to `/mingw64/include/`, `SDL_bgi.h` and
-`SDL_bgi_font.h` to `/mingw64/include/SDL2/`, and `SDL_bgi.dll` to
-`/mingw64/bin`.
+which will copy `graphics.h` to `/mingw64/include/`, `SDL_bgi.h`
+to `/mingw64/include/SDL2/`, and `SDL_bgi.dll` to `/mingw64/bin`.
 
-Please note that in order to run a program compiled with `SDL_bgi`
-outside of MSYS2, you will need `SDL_bgi.dll` and `SDL2.dll` in the
-same directory.
+Please note that to run a program compiled with `SDL_bgi` outside
+of the MSYS2 environment, you will need `SDL_bgi.dll` and `SDL2.dll`
+in the same directory.
+
+
+## Installing for Code::Blocks
+
+Let's assume that you installed CodeBlocks in `C:\CodeBlocks` and SDL2
+in `C:\SDL2-2.0.8`. Change the following instructions as needed for
+your installation.
+
+Copy `src/graphics.h` to `C:\CodeBlocks\MinGW\include`,
+`src/SDL_bgi.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2`,
+and `bin/CodeBlocks/SDL_bgi.dll` to `C:\CodeBlocks\MinGW\bin`.
+
+To see how to compile programs, please see `howto_CodeBlocks.md`.
+
+
+## Installing for Dev-C++
+
+Let's assume that you installed Dev-C++ `C:\DevCpp` and SDL2
+in `C:\SDL2-2.0.8`. Change the following instructions as needed for
+your installation.
+
+Copy `src/graphics.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include`,
+`src/SDL_bgi.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2`,
+and `bin/DevCpp/SDL_bgi.dll` to `C:\DevCpp\MinGW64\bin`.
+
+To see how to compile programs, please see `howto_DevCpp.md`.
 
 
 # Compiling from sources
@@ -67,22 +92,19 @@ Files will be installed in appropriate directories, depending on the OS.
 
 GNU/Linux:
 
-`SDL_bgi.h`,
-`SDL_bgi_font.h`   -> `/usr/include/SDL2/`
+`SDL_bgi.h`        -> `/usr/include/SDL2/`
 `graphics.h`       -> `/usr/include/`
 `libSDL_bgi.so`    -> `/usr/lib/`.
 
 Mingw-w64:
 
-`SDL_bgi.h`,
-`SDL_bgi_font.h`   -> `/mingw64/include/SDL2/`
+`SDL_bgi_.h`       -> `/mingw64/include/SDL2/`
 `graphics.h`       -> `/mingw64/include/`
 `SDL_bgi.dll`      -> `/mingw64/bin/`
 
 Mac OS X:
 
-`SDL_bgi.h`,
-`SDL_bgi_font.h`   -> `/library/Frameworks/SDL2.framework/Headers`
+`SDL_bgi.h`        -> `/library/Frameworks/SDL2.framework/Headers`
 `graphics.h`       -> `/usr/include/`
 `libSDL_bgi.so`    -> `/usr/lib/`
 
@@ -99,3 +121,4 @@ Please see the `using.md` file in the `doc/` directory.
 Enjoy!
 
 Guido =8-)
+

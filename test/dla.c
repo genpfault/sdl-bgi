@@ -43,7 +43,6 @@ unsigned long iterations;
 int main (int argc, char *argv[])
 {
   int x, y, stop = 0;
-  unsigned int percent;
   int gd, gm;
   
   srand (time(NULL));
