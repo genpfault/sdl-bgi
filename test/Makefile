@@ -14,7 +14,9 @@ endif
 
 ifeq ($(PLATFORM),MINGW64_NT-6.1)
 CFLAGS = -O2 -g -I. -I/mingw64/include/SDL2
-LIBS = -lmingw32 -L/mingw64/bin -lSDL_bgi -lSDL2main -lSDL2 -mwindows
+# -mconsole = open a console alongside the program
+# -mwindows = Windows-only program (no console)
+LIBS = -lmingw32 -L/mingw64/bin -lSDL_bgi -lSDL2main -lSDL2 # -mwindows
 endif
 
 ifeq ($(PLATFORM),Darwin)
@@ -23,7 +25,8 @@ LIBS = -lSDL_bgi -framework SDL2
 endif
 
 PROGRAMS = cellular dla fern floodfilltest hopalong life \
-mandelbrot mousetest moveit plasma sdlbgidemo simple turtledemo
+           mandelbrot mousetest moveit multiwin plasma \
+	   sdlbgidemo simple turtledemo
 
 all: $(PROGRAMS)
 
@@ -57,6 +60,9 @@ mousetest: mousetest.c
 moveit: moveit.c 
 	$(CC) $(CFLAGS) -o moveit moveit.c $(LIBS)
 
+multiwin: multiwin.c 
+	$(CC) $(CFLAGS) -o multiwin multiwin.c $(LIBS)
+
 plasma: plasma.c 
 	$(CC) $(CFLAGS) -o plasma plasma.c $(LIBS) -lm
 
@@ -67,4 +73,4 @@ turtledemo: turtledemo.c turtle.c
 	$(CC) $(CFLAGS) -o turtledemo turtledemo.c turtle.c $(LIBS) -lm
 
 clean:
-	rm -f $(PROGRAMS) a.out *o
+	rm -f $(PROGRAMS) a.out *o f90_test

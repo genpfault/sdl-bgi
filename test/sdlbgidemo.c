@@ -33,12 +33,33 @@ int gd, gm;
 
 struct viewporttype viewport;
 
+void wait (int);
 void get_click (void);
 void ket_key (void);
 void pause (void);
 void init_sdlbgi (void);
 void message (char *str);
 void mainwindow (void);
+
+// -----
+
+void wait (int msec)
+{
+  int stop = 0;
+  Uint32
+    ticks,
+    now = SDL_GetTicks ();
+  
+  while (! stop) {
+    if (kbhit ())
+      stop = 1;
+    
+    ticks = SDL_GetTicks ();
+    if (ticks - now > msec)
+      stop = 1;
+  }
+  
+} // wait ()
 
 // -----
 
@@ -51,21 +72,6 @@ void get_click (void)
     ;
 
 } // get_click ()
-
-// -----
-
-void get_key (void)
-{
-  // wait for a key press
-  int 
-    ch = getch ();
-  
-  if (KEY_ESC == ch) {
-    closegraph ();
-    exit (0);
-  }
-
-} // get_key ()
 
 // -----
 
@@ -94,6 +100,10 @@ void pause (void)
 void init_sdlbgi (void)
 {
   // initialise SDL_bgi system
+  setwinoptions ("", 
+		 SDL_WINDOWPOS_UNDEFINED,
+		 SDL_WINDOWPOS_UNDEFINED,
+		 SDL_WINDOW_FULLSCREEN);
   detectgraph (&gd, &gm);
   initgraph (&gd, &gm, "");
   sdlbgifast ();
@@ -154,7 +164,22 @@ Uint32 speedtest (void)
   return (pixels);
 }
 
-// ---
+// -----
+
+void load_logo ()
+{
+  setwinoptions ("", 
+  		 SDL_WINDOWPOS_CENTERED,
+  		 SDL_WINDOWPOS_CENTERED,
+  		 SDL_WINDOW_BORDERLESS);
+  initwindow (440, 150);
+  readimagefile ("logo.bmp", 0, 0, 440, 150);
+  wait (2000);
+  closewindow (0);
+  
+}
+
+// -----
 
 void sdlbgi_info (void)
 {
@@ -1207,7 +1232,6 @@ void pagedemo (void)
     outtextxy (xm, ym, title);
     outtextxy (xm, ym + 30, "Left click to go to next page");
     refresh ();
-    // get_key ();
     pause ();
   }
   
@@ -1285,9 +1309,9 @@ void theend (void)
 
 int main (int argc, char *argv[])
 {
+  load_logo ();
   
   init_sdlbgi ();
-  
   sdlbgi_info ();
   colordemo ();
   pixeldemo ();

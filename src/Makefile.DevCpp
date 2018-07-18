@@ -5,7 +5,7 @@
 # MSYS2 shell, run this command:
 # PATH=/c/Dev-Cpp/MinGW64/bin/:$PATH && make -f Makefile.DevCpp
 
-VERSION = 2.1.2
+VERSION := $(shell cat ../VERSION)
 NAME = SDL_bgi
 SRC = $(NAME).c
 OBJ = $(NAME).o

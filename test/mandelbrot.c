@@ -46,8 +46,8 @@ void mandelbrot (double x1, double y1, double x2, double y2)
   int xx, yy, counter;
   double dx, dy, x, y, a, b, tx, d;
 
-  dx = (x2 - x1) / maxx;
   dy = (y2 - y1) / maxy;
+  dx = dy;
   
   x = x1;
   for (xx = 0; xx < maxx; xx++) {
@@ -197,7 +197,7 @@ int main (int argc, char *argv[])
   
   maxx = getmaxx ();
   maxy = getmaxy ();
-  xm = -0.75;
+  xm = -1.2;
   ym = 0.0;
   xstep = 1.6;
   ystep = 1.2;

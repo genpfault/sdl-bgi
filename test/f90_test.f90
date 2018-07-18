@@ -1,7 +1,7 @@
 ! f90_test.f90
 ! 
 ! To compile this program:
-! gfortran -Wall f90_test.f90 -lSDL_bgi -lSDL2
+! gfortran -o f90_test -Wall f90_test.f90 -lSDL_bgi -lSDL2
 !
 ! Kindly provided by Angelo Graziosi, angelo.graziosi "at" alice.it
 

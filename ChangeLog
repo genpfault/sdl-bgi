@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+v. 2.2.0, 2018-07-18
+- added setwinoptions() for window title, position, and SDL flags
+- added support for multiple windows: extended initwindow(),
+  added getcurrentwindow(), setcurrentwindow(), closewindow()
+- SDL_QUIT support in getch(), getevent(), kbhit(), xkbhit()
+- documentation updates
+
 v. 2.1.2, 2018-06-05
 - documentation updates (Code::Blocks, Dev-C++)
 

@@ -1,7 +1,7 @@
 % sdl_bgi-quickref.tex
 %
 % Guido Gonzato, PhD
-% June 5, 2018
+% July 17, 2018
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -18,11 +18,12 @@
 
 \newcommand{\SDLbgi}{\texttt{SDL\_bgi}}
 
-\newcommand{\version}{2.1.2}        % !!! Change here !!!
+\newcommand{\version}{2.2.0}        % !!! <<<=== Change here !!!
 
 \newcommand{\V}{\texttt{void}}      % void
 \newcommand{\I}{\texttt{int}}       % int
-\newcommand{\U}{\texttt{Uint8}}     % Uint8
+\newcommand{\Ue}{\texttt{Uint8}}    % Uint8
+\newcommand{\Ut}{\texttt{Uint32}}   % Uint32
 \newcommand{\C}{\texttt{char *}}    % char *
 \newcommand{\func}[1]{\textbf{#1}}  % function
 \newcommand{\A}[1]{\emph{#1}}       % parameter
@@ -127,8 +128,18 @@ the following:
 
 \begin{small}
 \begin{verbatim}
+#ifndef _SDL_BGI_H
 #define _SDL_BGI_H
-#define SDL_BGI_VERSION 2.1.2
+
+#define SDL_BGI_VERSION 2.2.0
+
+#define NOPE 0
+#define YEAH 1
+#define BGI_WINTITLE_LEN 512 // more than enough
+
+// number of concurrent windows that can be created
+
+#define NUM_BGI_WIN 16
 
 // everything gets drawn here
 
@@ -269,35 +280,41 @@ extern SDL_Texture  *bgi_texture;
 #define KEY_SCR_LOCK    SDLK_SCROLLOCK
 #define KEY_ESC         SDLK_ESCAPE
 
+// SDL_QUIT
+#define QUIT            SDL_QUIT
+
 // graphics modes
 
-#define DETECT          0
+#define DETECT          -1
 #define grOk            0
-#define SDL_CGALO       0
-#define SDL_CGAHI       1
-#define EGA             2
-#define EGAHI           2
-#define EGALO           2
-#define SDL_EGA         2
-#define SDL             3
-#define VGA             3
-#define SDL_VGA         3
-#define SDL_640x480     3
-#define SDL_HERC        4
-#define SDL_PC3270      5
-#define SVGA            6
-#define SDL_SVGALO      6
-#define SDL_800x600     6
-#define SDL_SVGAMED1    7
-#define SDL_1024x768    7
-#define SDL_SVGAMED2    8
-#define SDL_1152x900    8
-#define SDL_SVGAHI      9
-#define SDL_1280x1024   9
-#define SDL_WXGA        10
-#define SDL_1366x768    10
-#define SDL_USER        11
-#define SDL_FULLSCREEN  12
+#define SDL             0
+#define SDL_320x200     1
+#define SDL_CGALO       1
+#define CGA             1
+#define SDL_640x200     2
+#define SDL_CGAHI       2
+#define SDL_640x350     3
+#define SDL_EGA         3
+#define EGA             3
+#define EGALO           3
+#define SDL_640x480     4
+#define SDL_VGA         4
+#define VGA             4
+#define SDL_HERC        5
+#define SDL_PC3270      6
+#define SDL_800x600     7
+#define SDL_SVGALO      7
+#define SVGA            7
+#define SDL_1024x768    8
+#define SDL_SVGAMED1    8
+#define SDL_1152x900    9
+#define SDL_SVGAMED2    9
+#define SDL_1280x1024   10
+#define SDL_SVGAHI      10
+#define SDL_1366x768    11
+#define SDL_WXGA        11
+#define SDL_USER        12
+#define SDL_FULLSCREEN  13
 \end{verbatim}
 \end{small}
 
@@ -492,8 +509,8 @@ Closes the graphics system.
 \V{} \func{detectgraph} (\I{} \A{*graphdriver}, \I{} \A{*graphmode});
 \end{bgi}
 
-Detects the graphics driver and graphics mode to use. In \SDLbgi, the
-default is 800x600 (SVGA).
+Detects the graphics driver and default graphics mode to use; \T{SDL}
+and \T{SDL\_FULLSCREEN}, respectively.
 
 % -----
 
@@ -570,7 +587,7 @@ Gets the coordinates of the last call to \func{arc()}, filling the
 \end{bgi}
 
 Retrieves the current graphics mode's aspect ratio. In \SDLbgi,
-\A{xasp} and \A{yasp} are both 10000 (i.e. the pixels are square).
+\A{xasp} and \A{yasp} are both 10000 (i.e. pixels are squares).
 
 % -----
 
@@ -587,6 +604,14 @@ Returns the current background color.
 \end{bgi}
 
 Returns the current drawing (foreground) color.
+
+% -----
+
+\begin{bgi}
+\I{} \func{getcurrentwindow} (\V{});
+\end{bgi}
+
+Gets the current window's identifier.
 
 % -----
 
@@ -608,7 +633,7 @@ graphics driver.
 % -----
 
 \begin{bgi}
-\V{} \func{getfillpattern} (\C{} \A{pattern}); 
+\V{} \func{getfillpattern} (\C{}\A{pattern}); 
 \end{bgi}
 
 Copies the user-defined fill pattern, as set by setfillpattern, into
@@ -825,24 +850,18 @@ image.
 Initializes the graphics system. In \SDLbgi, you can use SDL as
 \A{graphdriver}, then choose a suitable graphics mode (listed in
 \F{graphics.h}) as \A{graphmode}. The \A{pathtodriver} argument is
-ignored; you can also use NULL for \A{*graphdriver} and
-\A{*graphmode}.
+ignored.
+
+You can also use \T{NULL} for \A{*graphdriver} and \A{*graphmode} to
+get the default resolution (800 $\times$ 600), or use
+\func{detectgraph} (see above) to get fullscreen.
+
+Multiple windows can be created, unless a fullscreen window is already
+present.
 
 After \func{initgraph()}, all graphics commands are immediately
-displayed, as in the original BGI. This makes drawing very slow; you
-may want to use \func{initwindow()} instead.
-
-% -----
-
-\begin{bgi}
-\V{} \func{initwindow} (\I{} \A{width}, \I{} \A{height});
-\end{bgi}
-
-Initializes the graphics system, opening a \A{width}$\times$\A{height}
-window. If either \A{width} or \A{height} is 0, then
-SDL\-\_FULL\-SCREEN will be used.
-
-The user is in charge of updating the screen using \func{refresh()}.
+displayed, as in the original BGI. This could make drawing very slow;
+you may want to use \func{initwindow()} instead.
 
 % -----
 
@@ -1008,7 +1027,8 @@ traveling from \A{stangle} to \A{endangle}.
 \V{} \func{setactivepage} (\I{} \A{page});
 \end{bgi}
 
-Makes \A{page} the active page for all subsequent graphics output.
+Makes \A{page} the active page for all subsequent graphics output. In
+multi-window mode, \func{setactivepage} only works for the first window.
 
 % -----
 
@@ -1042,6 +1062,14 @@ Sets the current background color using the default palette.
 \end{bgi}
 
 Sets the current drawing color using the default palette.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setcurrentwindow} (\I{} \A{window});
+\end{bgi}
+
+Sets the current window.
 
 % -----
 
@@ -1207,7 +1235,8 @@ refresh is performed.
 \end{bgi}
 
 Waits for a key and returns its ASCII code. In ``slow mode'', a screen
-refresh is performed.
+refresh is performed. If an \T{SDL\_QUIT} event occurs, \T{QUIT} is
+returned.
 
 % -----
 
@@ -1215,8 +1244,9 @@ refresh is performed.
 \I{} \func{kbhit} (\V{});
 \end{bgi}
 
-Returns 1 when a key is pressed. In ``slow mode'', a screen refresh is
-performed.
+Returns 1 when a key is pressed, excluding special keys (Ctrl, Shift,
+etc.); in ``slow mode'', a screen refresh is performed. If an
+\T{SDL\_QUIT} event occurs, \T{QUIT} is returned.
 
 % -----
 
@@ -1226,9 +1256,17 @@ performed.
 
 Returns a random number between 0 and \A{range - 1}.
 
-% ----- ----- -----
-	
+% -----
+
 \section{\SDLbgi{} Additions}
+
+\begin{bgi}
+\I{} BLUE\_VALUE (\I{} \A{color})
+\end{bgi}
+
+Returns the blue component of an RGB color.
+
+% -----
 
 \begin{bgi}
 \I{} \func{COLOR} (\I{} \A{r}, \I{} \A{g}, \I{} \A{b});
@@ -1240,15 +1278,7 @@ Can be used as an argument for \func{setcolor()} and
 % -----
 
 \begin{bgi}
-\I{} RED\_VALUE (\I{} \A{color})
-\end{bgi}
-
-Returns the red component of an RGB color.
-
-% -----
-
-\begin{bgi}
-\I{} GREEN\_VALUE (\I{} \A{color})
+\I{} \func{GREEN\_VALUE} (\I{} \A{color})
 \end{bgi}
 
 Returns the green component of an RGB color.
@@ -1256,15 +1286,7 @@ Returns the green component of an RGB color.
 % -----
 
 \begin{bgi}
-\I{} BLUE\_VALUE (\I{} \A{color})
-\end{bgi}
-
-Returns the blue component of an RGB color.
-
-% -----
-
-\begin{bgi}
-\I{} IS\_BGI\_COLOR (\I{} \A{color});
+\I{} \func{IS\_BGI\_COLOR} (\I{} \A{color});
 \end{bgi}
 
 Returns 1 if the current color is a standard BGI color (not RGB). The
@@ -1273,11 +1295,27 @@ argument is actually redundant.
 % -----
 
 \begin{bgi}
-\I{} IS\_RGB\_COLOR (\I{} \A{color});
+\I{} \func{IS\_RGB\_COLOR} (\I{} \A{color});
 \end{bgi}
 
 Returns 1 if the current color is in RGB mode. The argument is
 actually redundant.
+
+% -----
+
+\begin{bgi}
+\I{} \func{RED\_VALUE} (\I{} \A{color})
+\end{bgi}
+
+Returns the red component of an RGB color.
+
+% -----
+
+\begin{bgi}
+\V{} \func{closewindow} (\I{} \A{id});
+\end{bgi}
+
+Closes the window whose identifier is \A{id}.
 
 % -----
 
@@ -1299,27 +1337,35 @@ Returns the type of the last event; either \T{SDL\_KEYPRESS} or
 % -----
 
 \begin{bgi}
+\I{} \func{getcurrentwindow} (\V{});
+\end{bgi}
+
+Returns the integer \A{id} of the current window.
+
+% -----
+
+\begin{bgi}
 \I{} \func{getevent} (\V{});
 \end{bgi}
 
-Waits for a keypress or mouse click, and returns the code of the mouse
-button or key that was pressed.
+Waits for a keypress, mouse click, or \T{SDL\_QUIT} event, and returns
+the code of the key, mouse button, or \T{QUIT}.
 
 % -----
 
-\begin{bgi}
-\I{} \func{getmaxheight} (\V{});
-\end{bgi}
+% \begin{bgi}
+% \I{} \func{getmaxheight} (\V{});
+% \end{bgi}
 
-Returns the screen (root window) height.
+% Returns the screen (root window) height.
 
-% -----
+% % -----
 
-\begin{bgi}
-\I{} \func{getmaxwidth} (\V{});
-\end{bgi}
+% \begin{bgi}
+% \I{} \func{getmaxwidth} (\V{});
+% \end{bgi}
 
-Returns the screen (root window) width.
+% Returns the screen (root window) width.
 
 % -----
 
@@ -1333,10 +1379,15 @@ expected by \func{ismouseclick()}.
 % -----
 
 \begin{bgi}
-\I{} \func{initwindow} (\I{} \A{width}, \I{} \A{height});
+\V{} \func{initwindow} (\I{} \A{width}, \I{} \A{height});
 \end{bgi}
 
-Opens a \A{width}$\times$\A{height} graphics window.
+Initializes the graphics system, opening a \A{width}$\times$\A{height}
+window. If either \A{width} or \A{height} is 0, then
+\T{SDL\-\_FULL\-SCREEN} will be used. Multiple windows can be created,
+unless a fullscreen window is already present.
+
+The user must update the screen as needed using \func{refresh()}.
 
 % -----
 
@@ -1384,7 +1435,7 @@ displayed.
 % -----
 
 \begin{bgi}
-\V{} \func{readimagefile} (\C{} \A{filename}, \I{} \A{x1}, \I{} \A{y1}, 
+\V{} \func{readimagefile} (\C{}\A{filename}, \I{} \A{x1}, \I{} \A{y1}, 
 \I{} \A{x2}, \I{} \A{y2});
 \end{bgi}
 
@@ -1422,13 +1473,12 @@ display graphics.
 % -----
 
 \begin{bgi}
-\V{} \func{setalpha} (\I{} \A{col}, \U{} \A{alpha}); 
+\V{} \func{setalpha} (\I{} \A{col}, \Ue{} \A{alpha}); 
 \end{bgi}
 
 Sets alpha transparency for colour \A{col} to \A{alpha} (0--255).
 
 % -----
-
 
 \begin{bgi}
 \V{} \func{setbkrgbcolor} (\I{} \A{n}); 
@@ -1436,6 +1486,13 @@ Sets alpha transparency for colour \A{col} to \A{alpha} (0--255).
 
 Sets the current background color using using the \A{n}-th color index
 in the RGB palette.
+
+% -----
+\begin{bgi}
+\V{} \func{setcurrentwindow} (\I{} \A{id}); 
+\end{bgi}
+
+Sets the current active window to \I{} \A{id}.
 
 % -----
 
@@ -1461,6 +1518,28 @@ setting colors with \func{setcolor()} with a \func{COLOR()} argument.
 % -----
 
 \begin{bgi}
+\V{} \func{setwinoptions} (\C{}\A{title}, \I{} \A{x}, \I{} \A{y}, 
+  \Ut{} \A{flags});
+\end{bgi}
+
+Sets the window title \A{title}, the initial position to (\A{x},
+\A{y}), and SDL2 flags OR'ed together. \A{x} and \A{y} can be set to
+\T{SDL\_WINDOWPOS\_CENTERED} or \T{SDL\_WINDOWPOS\_UNDEFINED}.
+
+If \A{title} is an empty string, the window title is set to the
+default value \T{SDL\_bgi}.
+
+If either \A{x} or \A{y} are -1, the position parameters are ignored.
+
+If \A{flags} is -1, the parameter is ignored; otherwise, only the
+values \T{SDL\_WINDOW\_FULLSCREEN},
+\T{SDL\_WINDOW\_FULLSCREEN\_DESKTOP}, \T{SDL\_WINDOW\_SHOWN},
+\T{SDL\_WINDOW\_HIDDEN}, \T{SDL\_WINDOW\-\_BORDERLESS}, and
+\T{SDL\_WINDOW\_MINIMIZED} are applied.
+
+% -----
+
+\begin{bgi}
 \I{} \func{swapbuffers} (\V{});
 \end{bgi}
 
@@ -1469,21 +1548,22 @@ Swaps the current active and the current visual graphics pages.
 % -----
 
 \begin{bgi}
-\I{} \func{xkbhit} (\V{});
-\end{bgi}
-
-Returns 1 when any key is pressed, including Ctrl, Shift, etc. In
-``slow mode'', a screen refresh is performed.
-
-% -----
-
-\begin{bgi}
-\V{} \func{writeimagefile} (\C{} \A{filename}, \I{} \A{left}, \I{}
+\V{} \func{writeimagefile} (\C{}\A{filename}, \I{} \A{left}, \I{}
 \A{top}, \I{} \A{right}, \I{} \A{bottom});
 \end{bgi}
 
 Writes a \F{.bmp} file from the screen rectangle defined by
 \A{left},\A{top}---\A{right},\A{bottom}.
+
+% -----
+
+\begin{bgi}
+\I{} \func{xkbhit} (\V{});
+\end{bgi}
+
+Returns 1 when any key is pressed, including special keys (Ctrl, Shift,
+etc.); in ``slow mode'', a screen refresh is performed. If an
+\T{SDL\_QUIT} event occurs, \T{QUIT} is returned.
 
 % -----
 

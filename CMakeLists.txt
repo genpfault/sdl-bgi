@@ -5,8 +5,10 @@
 
 cmake_minimum_required (VERSION 3.5.0)
 
+set (SDL_BGI_VERSION 2.2.0)
+
 # Project name
-project (SDL_bgi VERSION 2.1.1 LANGUAGES C)
+project (SDL_bgi VERSION ${SDL_BGI_VERSION} LANGUAGES C)
 
 # Strip the library after building
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s")
@@ -65,7 +67,7 @@ else ()
   set (CPACK_GENERATOR "RPM;DEB")
 endif()
 
-set (CPACK_PACKAGE_VERSION "2.1.0")
+set (CPACK_PACKAGE_VERSION ${SDL_BGI_VERSION})
 set (CPACK_PACKAGE_NAME ${PROJECT_NAME})
 set (CONTACT "guido.gonzato@gmail.com")
 

@@ -1,10 +1,10 @@
-<!--
+<!---
 
   Convert this file with:
 
   pandoc -V urlcolor=blue using.md -o using.pdf
 
--->
+--->
 
 Using `SDL_bgi`
 ===============
@@ -18,7 +18,7 @@ modern SDL graphics. You don't want a slow library!
 Compiling programs
 ------------------
 
-To compile a program (GNU/Linux):
+To compile a program (GNU/Linux, OS X):
 
     $ gcc -o program program.c -lSDL_bgi -lSDL2
 
@@ -28,12 +28,20 @@ To compile a program (MSYS2 + mingw-w64):
         -lSDL_bgi -lSDL2main -lSDL2 # -mwindows
 
 The `-mwindows` creates a window-only program, i.e. a terminal is not
-started. **Note:** functions provided by `stdio.h` will not work
-if you don't start a terminal!
+started. **Beware:** functions provided by `stdio.h` will not work if
+you don't start a terminal. Your program will have to rely on mouse
+input only!
 
 Code::Blocks users should read the file `howto_CodeBlocks.md`.
 
 Dev-C++ users should read the file `howto_Dev-Cpp.md`.
+
+Windows users **must** provide the `main ()` function as:
+
+    int main (int argc, char **argv)
+
+even if `argc` and `argv` are not used. Your program will not compile
+if you use `int main (void)`.
 
 Most old programs that use the original BGI library should compile
 unmodified. For instance,
@@ -54,6 +62,10 @@ To specify the window size, you can use the new SDL driver:
 
 where `<mode>` can be one of the following:
 
+    CGA             320x200
+    SDL_320x200     320x200
+    EGA             640x350
+    SDL_640x480     640x350
     VGA             640x480
     SDL_640x480     640x480
     SVGA            800x600
@@ -210,7 +222,7 @@ refreshed in slow mode.
 - `random(range)` is defined as macro: `rand()%range`
 
 - `int getch()` waits for a key and returns its ASCII code. Special keys
-are also reported; please see `SDL_bgi.h`.
+and the SDL_QUIT event are also reported; please see `SDL_bgi.h`.
 
 - `void delay(msec)` waits for `msec` milliseconds.
 
@@ -237,8 +249,9 @@ clicked.
 - `void getmouseclick(int kind, int *x, int *y)` sets the x, y
 coordinates of the last button click expected by `ismouseclick()`.
 
-- `int getevent(void)` waits for a keypress or mouse click, and returns
-the code of the mouse button or key that was pressed.
+- `int getevent(void)` waits for a keypress or mouse click, and
+returns the code of the key or mouse button. It also catches
+and returns SDL_QUIT events.
 
 - `int event(void)` is a non-blocking version of `getevent()`.
 
@@ -252,15 +265,41 @@ needed).
 system was opened with `initgraph()`. Calling `refresh()` is needed to
 display graphics.
 
-- `void sdlbgislow (void)` triggers "slow mode" even if the graphics
+- `void sdlbgislow(void)` triggers "slow mode" even if the graphics
 system was opened with `initwindow()`. Calling `refresh()` is not needed.
 
-- `void xkbhit (void)` returns 1 when any key is pressed, including
-Shift, Alt, etc.
+- `void setwinoptions (char *title, int x, int y, Uint32 flags)` lets
+you specify the window title (default is `SDL_bgi`), window position,
+and SDL2 window flags OR'ed together.
 
 - `void writeimagefile(char *filename, int left, int top, int right,
 int bottom)` writes a `.bmp` file from the screen rectangle defined by
 (left,top--right,bottom).
+
+- `void xkbhit(void)` returns 1 when any key is pressed, including
+Shift, Alt, etc.
+
+
+Multiple Windows
+----------------
+
+Subsequent calls to `initgraph ()` make it possible to open several
+windows; only one of them is active (= being drawn on) at any given
+time, regardless of focus.
+
+Functions `setvisualpage()` and `setactivepage()` only work properly
+in single window mode.
+
+- Optionally, use `setwinoptions (char *title, int x, int y, Uint32
+flags)` as explained above;
+
+- `int getcurrentwindow ()` to get an identifier for the current
+window;
+
+- `void setcurrentwindow (int id)` sets the current window. `id` is an
+integer identifier, as returned by `getcurrentwindow ()`;
+
+- `void closewindow (int id)` closes a window of given id.
 
 
 The real thing
@@ -282,7 +321,8 @@ should, since `SDL_UpdateTexture()` doesn't work as expected: instead of
 refreshing an `SDL_Rect` correctly, it only works on entire textures. It
 looks like it's an SDL2 bug.
 
-Unlike the original version, `kbhit()` doesn't buffer key presses.
+In MSYS2 + Mingw64, the `getch()` function hangs; use `getevent()`
+instead. In general, keyboard events may work strangely in Mingw.
 
 Colours don't have the same RGB values as the original BGI colours.
 But they look better (IMHO).

@@ -6,6 +6,12 @@
  * Simple cellular automata, as described at
  * http://mathworld.wolfram.com/ElementaryCellularAutomaton.html
  * 
+ * Run this program as:
+ * 
+ * ./cellular [rule]
+ * 
+ * where [rule] is a cellular automaton rule (1..255).
+ *
  * By Guido Gonzato, May 2015.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -26,35 +32,45 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 #include <graphics.h>
 
 // -----
 
 void run_rule (int rule)
 {
-  int i, x, y, maxx, pixel;
+  int maxx, pixel;
   
   maxx = getmaxx ();
 
   // for an explanation about rules, please see
   // http://mathworld.wolfram.com/CellularAutomaton.html
   
-  for (y = 20; y < 20 + maxx / 2; y++)
-    for (x = 1; x < maxx - 1; x++) {
-      pixel = 0;
-      if (RED == getpixel (x - 1, y - 1))
-	pixel += 4;
-      if (RED == getpixel (x, y - 1))
-	pixel += 2;
-      if (RED == getpixel (x + 1, y - 1))
-	pixel ++;
+  // loop: for every pixel, run the rule
+  for (int y = 20; y < 20 + maxx / 2; y++)
+    for (int x = 1; x < maxx - 1; x++) {
       
-      for (i = 0; i < 8; i++)
-	if ( (rule << i) & 0x80)
-	  if (pixel == 7 - i)
+      pixel = 0;
+      
+      // check the neighbour pixels on the line above
+      // and take note of the ones that are RED
+      if (RED == getpixel (x - 1, y - 1))
+	pixel |= 4; // same as pixel += 4;
+      if (RED == getpixel (x, y - 1))
+	pixel |= 2;
+      if (RED == getpixel (x + 1, y - 1))
+	pixel |= 1;
+      
+      // for every possible state (3 bits: 0-7), if the
+      // corresponding bit in the rule is 1, then
+      // plot the pixel at (x, y)
+      
+      for (int i = 0; i < 8; i++)
+	if ((rule << i) & 0x80) // the bit in the rule is set to 1
+	  if (pixel == 7 - i)   // 'pixel' matches the rule
 	    putpixel (x, y, RED);
 	  
-    } // for
+    } // for x
 }
 
 // -----
@@ -64,31 +80,35 @@ int main (int argc, char **argv)
   
   int 
     rule, 
-    ch,
+    ev,
     stop = NOPE;
-  char s[20];
-  
+  char s[50];
+
+  // set window title and position
+  setwinoptions ("Cellular Automata", 100, 100, -1);
   initwindow (1024, 1024 / 2 + 40);
   setbkcolor (WHITE);
   setcolor (RED);
   cleardevice ();
+  
+  if (2 == argc)
+    rule = atoi (argv [1]);
+  else {
+    srand (time(NULL));
+    rule = random (255);
+  }
 
   while (! stop) {
-    if (2 == argc) {
-      rule = atoi (argv [1]);
-      argc = 0; // only first time!
-      srand (rule);
-    }
-    else
-      rule = random (255);
-    sprintf (s, "Rule: %d", rule);
+    sprintf (s, "Click to continue - Rule: %d", rule);
     outtextxy (0, 0, s);
-    putpixel (getmaxx () / 2, 20, RED);
+    putpixel (getmaxx () / 2, 20, RED); // set initial pixel
     run_rule (rule);
     refresh ();
+    srand (time(NULL));
+    rule = random (255);
     
-    ch = getch ();
-    if (KEY_ESC == ch)
+    ev = getevent();
+    if (KEY_ESC == ev || WM_RBUTTONDOWN == ev || QUIT == ev)
       stop = YEAH;
     cleardevice ();
   }

@@ -64,7 +64,7 @@ int main (int argc, char *argv[])
     print_cells (a);
     refresh ();
     if (++iterations % 1000)
-      if (kbhit ())
+      if (xkbhit ())
 	stop = 1;
   }
   

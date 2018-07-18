@@ -1,6 +1,28 @@
-// plasma.c
-// used to produce the plasma.bmp file
-// gcc plasma.c -lSDL_bgi -lSDL2 -lm
+/* plasma.c  -*- C -*-
+ * 
+ * To compile:
+ * gcc -o plasma plasma.c -lSDL_bgi -lSDL2
+ * 
+ * Used to produce the 'plasma.bmp' file
+ * 
+ * By Guido Gonzato, May 2015.
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * 
+ */
+
 
 #include <math.h>
 #include <graphics.h>
@@ -17,16 +39,14 @@ int main (int argc, char *argv[])
   initwindow (600, 600);
   
   for (i = 0; i < 255; i++) {
-
-    cols[0][i] = (int) fabs( (128.0 - 127.0 * sin ((double) i * PI / 32.0)));
-    cols[1][i] = (int) fabs( (128. - 127. * sin((double) i * PI / 64.)));
-    cols[2][i] = (int) fabs( (128. - 127. * sin((double) i * PI / 128.)));
-	  
+    cols[0][i] = (int) fabs( (128. - 127. * sin ((double) i * PI / 32.0)));
+    cols[1][i] = (int) fabs( (128. - 127. * sin ((double) i * PI / 64.)));
+    cols[2][i] = (int) fabs( (128. - 127. * sin ((double) i * PI / 128.)));
   }
   
   for (y = 0; y < getmaxy (); y++) {
     for (x = 0; x < getmaxx (); x++) {
-      c = (sin(x/35.)*128.+sin(y/28.)*32. + sin((x+y)/16.)*64.);
+      c = (sin(x/35.)*128. + sin(y/28.)*32. + sin((x+y)/16.)*64.);
       if (c > 255)
 	c = c - 256;
       if (c < 0)
@@ -52,7 +72,7 @@ int main (int argc, char *argv[])
   }
   refresh ();
   writeimagefile ("plasma.bmp", 0, 0, 599, 599);
-  getch ();
+  getevent ();
   
   closegraph ();
   return 0;

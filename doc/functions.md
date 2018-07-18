@@ -1,20 +1,17 @@
 SDL_bgi functions and macros
-----------------------------
+============================
 
 This is a list of functions and macros provided by SDL_bgi.
 
+
+Standard BGI
+------------
 
 void arc (int x, int y, int stangle, int endangle, int radius);
 
 void bar3d (int left, int top, int right, int bottom, int depth, int topflag);
 
 void bar (int left, int top, int right, int bottom);
-
-int BLUE_VALUE (int color);
-
-void sdlbgifast (void);
-
-void sdlbgislow (void);
 
 void circle (int x, int y, int radius);
 
@@ -24,8 +21,6 @@ void clearviewport (void);
 
 void closegraph (void);
 
-int COLOR(int r, int g, int b);
-
 void delay(int millisec)
 
 void detectgraph (int *graphdriver, int *graphmode);
@@ -33,10 +28,6 @@ void detectgraph (int *graphdriver, int *graphmode);
 void drawpoly (int numpoints, int *polypoints);
 
 void ellipse (int x, int y, int stangle, int endangle, int xradius, int yradius);
-
-int event (void);
-
-int eventtype (void);
 
 void fillellipse (int x, int y, int xradius, int yradius);
 
@@ -60,8 +51,6 @@ struct palettetype* getdefaultpalette (void);
 
 char* getdrivername (void);
 
-int getevent (void);
-
 void getfillpattern (char *pattern); 
 
 void getfillsettings (struct fillsettingstype *fillinfo);
@@ -84,11 +73,9 @@ char* getmodename (int mode_number);
 
 void getmoderange (int graphdriver, int *lomode, int *himode);
 
-void getmouseclick (int kind, int *x, int *y);
-
-int getpalettesize (void); 
-
 void getpalette (struct palettetype *palette);
+
+int getpalettesize (void);
 
 unsigned int getpixel (int x, int y);
 
@@ -108,23 +95,13 @@ char* grapherrormsg (int errorcode);
 
 int graphresult(void);
 
-int GREEN_VALUE(int color)
-
 unsigned imagesize (int left, int top, int right, int bottom);
 
 void initgraph (int *graphdriver, int *graphmode, char *pathtodriver);
 
-int initwindow (int width, int height);
-
 int installuserdriver (char *name, int huge (*detect)(void)); 
 
 int installuserfont (char *name); 
-
-int IS_BGI_COLOR (int color);
-
-int ismouseclick (int kind);
-
-int IS_RGB_COLOR(int color);
 
 int kbhit (void);
 
@@ -133,12 +110,6 @@ void line (int x1, int y1, int x2, int y2);
 void linerel (int dx, int dy);
 
 void lineto (int x, int y);
-
-int mouseclick(void);
-
-int mousex (void);
-
-int mousey (void);
 
 void moverel (int dx, int dy);
 
@@ -150,8 +121,6 @@ void outtextxy (int x, int y, char *textstring);
 
 void pieslice (int x, int y, int stangle, int endangle, int radius);
 
-void _putpixel (int x, int y);
-
 void putimage (int, int, void *, int);
 
 void putpixel (int x, int y, int color); 
@@ -161,10 +130,6 @@ int random (int range) (macro)
 void readimagefile (char *filename, int left, int top, int right, int bottom);
 
 void rectangle (int left, int top, int right, int bottom);
-
-int RED_VALUE (int color);
-
-void refresh (void);
 
 int registerbgidriver (void (*driver)(void)); 
 
@@ -182,8 +147,6 @@ void setaspectratio (int xasp, int yasp);
 
 void setbkcolor (int color);
 
-void setbkrgbcolor (int color);
-
 void setcolor (int color);
 
 void setfillpattern (char *upattern, int color); 
@@ -198,10 +161,6 @@ void setlinestyle (int linestyle, unsigned upattern, int thickness);
 
 void setpalette (int colornum, int color); 
 
-void setrgbcolor (int color); 
-
-void setrgbpalette (int colornum, int red, int green, int blue); 
-
 void settextjustify (int horiz, int vert);
 
 void settextstyle (int font, int direction, int charsize);
@@ -214,12 +173,72 @@ void setvisualpage (int page);
 
 void setwritemode (int mode);
 
-void swapbuffers (void);
-
 int textheight (char *textstring);
 
 int textwidth (char *textstring);
 
 void writeimagefile (char *filename, int left, int top, int right, int bottom);
+
+
+SDL_bgi extensions
+------------------
+
+int BLUE_VALUE (int color);
+
+void closewindow (int);
+
+int COLOR(int r, int g, int b);
+
+int event (void);
+
+int eventtype (void);
+
+int getcurrentwindow (void);
+
+int getevent (void);
+
+void getmouseclick (int kind, int *x, int *y);
+
+int GREEN_VALUE(int color);
+
+int initwindow (int width, int height);
+
+int IS_BGI_COLOR (int color);
+
+int ismouseclick (int kind);
+
+int IS_RGB_COLOR(int color);
+
+int mouseclick(void);
+
+int mousex (void);
+
+int mousey (void);
+
+void _putpixel (int x, int y);
+
+int RED_VALUE (int color);
+
+void readimagefile (char *filename, int x1, int y1, int x2, int y2);
+
+void refresh (void);
+
+void sdlbgifast (void);
+
+void sdlbgislow (void);
+
+void setalpha (int col, Uint32 alpha);
+
+void setbkrgbcolor (int color);
+
+void setcurrentwindow (int id);
+
+void setrgbcolor (int color); 
+
+void setrgbpalette (int colornum, int red, int green, int blue); 
+
+void setwinoptions (char *title, int x, int y, Uint32 flags);
+
+void swapbuffers (void);
 
 int xkbhit (void);

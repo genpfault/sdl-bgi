@@ -1,6 +1,6 @@
 # Makefile for SDL_bgi
 
-VERSION = 2.1.2
+VERSION := $(shell cat ../VERSION)
 NAME = SDL_bgi
 SRC = $(NAME).c
 OBJ = $(NAME).o

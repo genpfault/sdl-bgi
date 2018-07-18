@@ -32,7 +32,7 @@
 int main (int argc, char *argv[])
 {
 
-  int c, gd, gm, x, y;
+  int c, gd, gm, x, y, stop = NOPE;
   
   gd = SDL;
   gm = SDL_800x600;
@@ -49,7 +49,11 @@ int main (int argc, char *argv[])
     
     setcolor (WHITE);
     circle (x, y, 10);
-    c = getch ();
+    // Mingw64 bug - use getevent() instead
+    // c = getch ();
+    c = getevent ();
+    printf ("Key code: %d\n", c);
+    
     setcolor (RED);
     circle (x, y, 10);
     // added!
@@ -83,7 +87,7 @@ int main (int argc, char *argv[])
       y = getmaxy () - 10;
       break;
     default:
-      printf ("Key code: %d\n", c);
+      ;
     }
     
     if (x < 0)
@@ -95,7 +99,10 @@ int main (int argc, char *argv[])
     if (y > getmaxy ())
       y = 20;
     
-  } while (c != KEY_ESC);
+    if (KEY_ESC == c || QUIT == c)
+      stop = YEAH;
+    
+  } while (!stop);
   
   closegraph ();
   return 0;

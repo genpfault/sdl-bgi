@@ -52,12 +52,12 @@ The main `SDL_bgi` development platform is GNU/Linux, but Windows
 
 Please make sure you have SDL2 development packages. On Debian, Mint,
 Ubuntu and similar distributions, please install `libsdl2-dev` and its
-dependencies; in Fedora, it's `SDL2-devel`. Mingw-w64 users should
-install `mingw-w64-x86_64-SDL2` and `mingw-w64-x86_64-gcc` (*not*
-plain `gcc`). Mac OS X users should install the SDL2 library from the
-latest `.dmg` available.
+dependencies; in Fedora, it's `SDL2-devel`. Obviously, you'll also
+need a C compiler; `gcc` or `clang` are fine.
 
-Obviously, you'll also need a C compiler; `gcc` or `clang` are fine.
+Mingw-w64 users should install `make`, `mingw-w64-x86_64-SDL2`, and
+`mingw-w64-x86_64-gcc` (*not* plain `gcc`). Mac OS X users should
+install the SDL2 library from the latest `.dmg` available.
 
 
 ## With `cmake`, GNU/Linux

@@ -55,6 +55,10 @@ int main (int argc, char *argv[])
     /* p[4] = {0.01, 0.85, 0.07, 0.07}; */
 
 #ifdef _SDL_BGI_H
+  setwinoptions ("This is a fractal fern",
+		 SDL_WINDOWPOS_CENTERED,
+		 SDL_WINDOWPOS_CENTERED,
+		 -1);
   initgraph (NULL, NULL, "");
 #else
   initgraph (&gd, &gm, "");

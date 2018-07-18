@@ -8,7 +8,8 @@ This directory contains a few simple programs that show how to use
 
 
 - `cellular.c` is a cellular automaton program. For more information,
-please see <http://mathworld.wolfram.com/CellularAutomaton.html>
+please see <http://mathworld.wolfram.com/CellularAutomaton.html>. Run
+it as `./cellular [rule]`, where `rule` is the generating rule (1-255).
 
 - `dla.c` is a diffusion limited aggregation program; please see
 <http://en.wikipedia.org/wiki/Diffusion-limited_aggregation>

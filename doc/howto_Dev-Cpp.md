@@ -28,7 +28,7 @@ that is not compatible with current SDL2 development libraries.
 To compile `SDL_bgi` programs, you must upgrade TDM-GCC to the
 latest release.
 
-- remove the directory `C:\Dev-Cpp\MinGW64`, or rename it as
+- remove the directory `C:\Dev-Cpp\MinGW64`, or rename it as\
   `C:\Dev-Cpp\MinGW64_old`
 
 - install TDM-GCC (32 bit) in `C:\Dev-Cpp\MinGW64`
@@ -56,7 +56,8 @@ Compiling `SDL_bgi` Programs
 
 - copy `SDL_bgi.dll` to `C:\Dev-Cpp\MinGW64\lib`
 
-- copy `SDL_bgi.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2`
+- copy `SDL_bgi.h` to\
+  `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2`
 
 - copy `graphics.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include`
 
@@ -70,8 +71,8 @@ Compiling `SDL_bgi` Programs
 - menu `Project/Project options...`, tab `Parameters`, tab `Linker`:
   add the string `-lmingw32 -lSDL_bgi -lSDL2main -lSDL2 -mwindows`
 
-- tab `Directories`, tab `Include Directories`:
-  add `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2` and
+- tab `Directories`, tab `Include Directories`: add\
+  `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2` and\
   `C:\SDL2-2.0.8\i686-w64-mingw32\include`
 
 - tab `Library Directories`: add `C:\SDL2-2.0.8\i686-w64-mingw32\lib`

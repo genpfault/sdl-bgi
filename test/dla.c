@@ -69,7 +69,7 @@ int main (int argc, char *argv[])
     refresh ();
     
     if (iterations % 5000) {
-      if (kbhit ())
+      if (xkbhit ())
 	stop = 1;
     }
   }

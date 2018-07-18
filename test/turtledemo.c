@@ -80,7 +80,7 @@ void turtle_hello (void)
   
   do {
 
-    c = getch ();
+    c = getevent ();
     
     switch (c) {
     case KEY_UP:
@@ -393,10 +393,10 @@ int main (int argc, char *argv[])
     setheading (T_WEST);
     hilbert_left (l, i);
     refresh ();
-    sprintf (s, "Hilbert curve at level %d (press a key to continue)", i);
+    sprintf (s, "Hilbert curve at level %d", i);
     outtextxy (0, 0, s);
     refresh ();
-    getch ();
+    delay (1000);
     cleardevice ();
   }
   outtextxy (0, 0, "PRESS A KEY TO EXIT:");
@@ -413,7 +413,7 @@ int main (int argc, char *argv[])
     star_20 (random (40));
     refresh ();
     delay (50);
-    if (kbhit ())
+    if (xkbhit ())
       stop = 1;
   }
   

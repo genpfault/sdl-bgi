@@ -21,7 +21,7 @@ Links:
 
 - copy `SDL_bgi.dll` to `C:\CodeBlocks\MinGW\bin`
 
-- copy `C:\SDL2-2.0.8\i686-w64-mingw32\bin\SDL2.dll` to
+- copy `C:\SDL2-2.0.8\i686-w64-mingw32\bin\SDL2.dll` to\
   `C:\CodeBlocks\MinGW\bin`
 
 - copy `SDL_bgi.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2`
@@ -46,13 +46,13 @@ Links:
   `Add files...`, pick `fern.c`, then click on `Ok`
 
 - from the menu `Project/Build options...` select the `Search
-  directories` tab, click on `Add`, pick the directory
+  directories` tab, click on `Add`, pick the directory\
   `C:\SDL2-2.0.8\i686-w64-mingw32\include`, and select `No` when asked
   to `Keep this as a relative path?`. Click on `Ok`
 
 - from the menu `Project/Build options...` select the `Linker
-  settings` tab, click on `Add`, pick the files
-  `C:\CodeBlocks\MinGW\bin\SDL_bgi.dll` and
+  settings` tab, click on `Add`, pick the files\
+  `C:\CodeBlocks\MinGW\bin\SDL_bgi.dll` and\
   `C:\CodeBlocks\MinGW\bin\SDL2.dll`, then click on `Ok`
 
 - from the menu `Build`, select `Build`. The executable `fern.exe`
