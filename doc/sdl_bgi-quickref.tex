@@ -1,7 +1,7 @@
 % sdl_bgi-quickref.tex
 %
 % Guido Gonzato, PhD
-% July 17, 2018
+% August 8, 2018
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -18,7 +18,7 @@
 
 \newcommand{\SDLbgi}{\texttt{SDL\_bgi}}
 
-\newcommand{\version}{2.2.0}        % !!! <<<=== Change here !!!
+\newcommand{\version}{2.2.1}        % !!! <<<=== Change here !!!
 
 \newcommand{\V}{\texttt{void}}      % void
 \newcommand{\I}{\texttt{int}}       % int
@@ -131,7 +131,7 @@ the following:
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.2.0
+#define SDL_BGI_VERSION 2.2.1
 
 #define NOPE 0
 #define YEAH 1
@@ -280,7 +280,6 @@ extern SDL_Texture  *bgi_texture;
 #define KEY_SCR_LOCK    SDLK_SCROLLOCK
 #define KEY_ESC         SDLK_ESCAPE
 
-// SDL_QUIT
 #define QUIT            SDL_QUIT
 
 // graphics modes
@@ -1226,7 +1225,8 @@ Returns the height in pixels of a string.
 \end{bgi}
 
 Waits for \A{millisec} milliseconds. In ``slow mode'', a screen
-refresh is performed.
+refresh is performed. Key presses during the delay are passed on to
+\func{kbhit} and \func{xkbhit}.
 
 % -----
 
@@ -1261,7 +1261,16 @@ Returns a random number between 0 and \A{range - 1}.
 \section{\SDLbgi{} Additions}
 
 \begin{bgi}
-\I{} BLUE\_VALUE (\I{} \A{color})
+\I{} \func{ALPHA\_VALUE} (\I{} \A{color})
+\end{bgi}
+
+Returns the alpha (transparency) component of an RGB color.
+
+% -----
+
+
+\begin{bgi}
+\I{} \func{BLUE\_VALUE} (\I{} \A{color})
 \end{bgi}
 
 Returns the blue component of an RGB color.
@@ -1289,8 +1298,8 @@ Returns the green component of an RGB color.
 \I{} \func{IS\_BGI\_COLOR} (\I{} \A{color});
 \end{bgi}
 
-Returns 1 if the current color is a standard BGI color (not RGB). The
-argument is actually redundant.
+Returns 1 if the current drawing color is a standard BGI color (that
+is, not RGB). The argument is actually redundant.
 
 % -----
 
@@ -1298,7 +1307,7 @@ argument is actually redundant.
 \I{} \func{IS\_RGB\_COLOR} (\I{} \A{color});
 \end{bgi}
 
-Returns 1 if the current color is in RGB mode. The argument is
+Returns 1 if the current drawing color is RGB. The argument is
 actually redundant.
 
 % -----
@@ -1323,7 +1332,7 @@ Closes the window whose identifier is \A{id}.
 \V{} \func{event} (\V{});
 \end{bgi}
 
-Returns 1 if an event (mouse click or key press) has occurred.
+Returns 1 if an event (mouse click, key press, or \T{QUIT}) has occurred.
 
 % -----
 
@@ -1429,8 +1438,7 @@ Returns the Y coordinate of the last mouse click.
 \end{bgi}
 
 Plots a point at (\A{x},\A{y}) using the current drawing color. This
-function is faster than \func{putpixel()}, since it is not immediately
-displayed.
+function may be faster than \func{putpixel()}.
 
 % -----
 
@@ -1535,7 +1543,7 @@ If \A{flags} is -1, the parameter is ignored; otherwise, only the
 values \T{SDL\_WINDOW\_FULLSCREEN},
 \T{SDL\_WINDOW\_FULLSCREEN\_DESKTOP}, \T{SDL\_WINDOW\_SHOWN},
 \T{SDL\_WINDOW\_HIDDEN}, \T{SDL\_WINDOW\-\_BORDERLESS}, and
-\T{SDL\_WINDOW\_MINIMIZED} are applied.
+\T{SDL\_WINDOW\_MINIMIZED} can be applied.
 
 % -----
 

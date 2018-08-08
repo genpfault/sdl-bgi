@@ -44,9 +44,14 @@ using all buttons and mouse wheel.
 
 - `plasma.c` writes the window contents to a .bmp file.
 
+- `psychedelia.c` sets up an RGB palette and produces a plasma effect.
+Algorithm described at <https://lodev.org/cgtutor/plasma.html>.
+
 - `sdlbgidemo.c` shows how to use some of `SDL_bgi`'s features.
 
 - `simple.c` displays simple shapes to test `SDL_bgi`'s speed.
+**Note**: this programs hangs in Mingw, because of a bug in its
+console routines (apparently).
 
 - `turtledemo.c` uses a simple yet powerful turtle graphics
 implementation to draw fractals and simple shapes.

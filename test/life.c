@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
   
   closegraph ();
   
-} // main(void) ()
+} // main() ()
 
 // -----
 

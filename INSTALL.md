@@ -1,25 +1,24 @@
 # Installing `SDL_bgi`
 
-To install `SDL_bgi`, you normally compile it from sources. Windows
+To install `SDL_bgi`, you normally compile it from sources; Windows
 users may use the provided binaries.
 
 
-## Installing for MSYS2 Mingw-w64
+## Installing the MSYS2 Mingw-w64 Binaries
 
-To install the precompiled binary for Mingw-w64:
+Let's assume you installed the native package `mingw-w64-x86_64-SDL2`.
 
-    $ cd bin/Mingw64
-    $ make install
-
-which will copy `graphics.h` to `/mingw64/include/`, `SDL_bgi.h`
-to `/mingw64/include/SDL2/`, and `SDL_bgi.dll` to `/mingw64/bin`.
+Start the MSYS2 shell, unzip the archive, then copy 
+`src/graphics.h` to `/mingw64/include/`, `src/SDL_bgi.h`
+to `/mingw64/include/SDL2/`, and `bin/Mingw64/SDL_bgi.dll`
+to `/mingw64/bin`.
 
 Please note that to run a program compiled with `SDL_bgi` outside
 of the MSYS2 environment, you will need `SDL_bgi.dll` and `SDL2.dll`
-in the same directory.
+in the same directory as the program.
 
 
-## Installing for Code::Blocks
+## Installing the Code::Blocks Binaries
 
 Let's assume that you installed CodeBlocks in `C:\CodeBlocks` and SDL2
 in `C:\SDL2-2.0.8`. Change the following instructions as needed for
@@ -32,7 +31,7 @@ and `bin/CodeBlocks/SDL_bgi.dll` to `C:\CodeBlocks\MinGW\bin`.
 To see how to compile programs, please see `howto_CodeBlocks.md`.
 
 
-## Installing for Dev-C++
+## Installing the Dev-C++ Binaries
 
 Let's assume that you installed Dev-C++ `C:\DevCpp` and SDL2
 in `C:\SDL2-2.0.8`. Change the following instructions as needed for
@@ -48,7 +47,8 @@ To see how to compile programs, please see `howto_DevCpp.md`.
 # Compiling from sources
 
 The main `SDL_bgi` development platform is GNU/Linux, but Windows
-(MSYS2 + Mingw-w64 toolchain) and Mac OS X are also supported.
+(MSYS2 + Mingw-w64 toolchain, CodeBlocks, Dev-C++) and Mac OS X are
+also supported.
 
 Please make sure you have SDL2 development packages. On Debian, Mint,
 Ubuntu and similar distributions, please install `libsdl2-dev` and its
@@ -68,10 +68,10 @@ run:
 
     $ ./build.sh
 
-which creates a subdirectory called `build`, cd's to it, runs `cmake`,
-then `cpack`. In a few seconds, in `build` you will find a package
-that should be suitable for your system (`.deb` or `.rpm`). You'll
-want to install that.
+which creates a subdirectory called `build/`, cd's to it, runs
+`cmake`, then `cpack`. In a few seconds, in directory `build/` will
+find a package that should be suitable for your system (`.deb` or
+`.rpm`). You'll want to install that.
 
 If you prefer the usual way:
 

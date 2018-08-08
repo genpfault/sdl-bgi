@@ -1,6 +1,15 @@
 Changelog
 ---------
 
+v. 2.2.1, 2018-08-08
+- renamed getch() to bgi_getch() and added the macro getch()
+  to avoid Mingw bug
+- delay() rewritten to take care of key presses
+- fixed bug in BLUE_VALUE(), GREEN_VALUE(), RED_VALUE(), setalpha()
+- added ALPHA_VALUE()
+- added test/psychedelia.c
+- code revision and cleanup
+
 v. 2.2.0, 2018-07-18
 - added setwinoptions() for window title, position, and SDL flags
 - added support for multiple windows: extended initwindow(),

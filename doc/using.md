@@ -36,12 +36,14 @@ Code::Blocks users should read the file `howto_CodeBlocks.md`.
 
 Dev-C++ users should read the file `howto_Dev-Cpp.md`.
 
-Windows users **must** provide the `main ()` function as:
+Windows users **must** declare the `main()` function as:
 
-    int main (int argc, char **argv)
+    int main (int argc, char *argv[])
 
-even if `argc` and `argv` are not used. Your program will not compile
-if you use `int main (void)`.
+even if `argc` and `argv` will not be used. Your program will not
+compile if you use a different `main()` definition (i.e. `int main
+(void)`), because of conflict with the `WinMain()` definition.
+Please consult <https://wiki.libsdl.org/FAQWindows> for details.
 
 Most old programs that use the original BGI library should compile
 unmodified. For instance,
@@ -78,7 +80,7 @@ where `<mode>` can be one of the following:
 
 You may want to use `initwindow(int width, int height)` instead.
 
-`SDL_bgi.h` defines the `_SDL_BGI_H` constant. You may check for its
+`SDL_bgi.h` defines the `_SDL_BGI_H` constant. You can check for its
 presence and write programs that employ `SDL_bgi` extensions; please
 have a look at the test program `fern.c`.
 
@@ -94,7 +96,7 @@ is done. For example, in SDL2 this action is performed by
 `SDL_RenderPresent()`.
 
 You can choose whether to open the graphics system using
-`initgraph()`, which toggles BGI compatibility and forces a screen
+`initgraph()`, which toggles BGI compatibility on and forces a screen
 refresh after every graphics command, or using `initwindow()` that
 leaves you in charge of refreshing the screen when needed, using the
 new function `refresh()`. The second method is *much* faster and is 
@@ -168,8 +170,6 @@ setgraphbufsize     - unneeded
 to other BGI fonts (e.g. `TRIPLEX_FONT`, and others) have no effect:
 consider using `SDL_ttf`!
 
-- key presses may not be detected correctly during a `delay()`.
-
 
 Additions
 ---------
@@ -209,8 +209,8 @@ and using `setrgbcolor()` is much faster, though.
 - `IS_BGI_COLOR(int c)` and `IS_RGB_COLOR(int c)` return 1 if the
 current colour is standard BGI or RGB, respectively.
 
-- `RED_VALUE(int c)`, `GREEN_VALUE(int c)`, and `BLUE_VALUE(int c)`
-return the R, G, B component of an RGB colour.
+- `ALPHA_VALUE(int c)`, `RED_VALUE(int c)`, `GREEN_VALUE(int c)`,
+and `BLUE_VALUE(int c)` return the A, R, G, B component of an RGB colour.
 
 - `setalpha(int col, Uint8 alpha)` sets the alpha component of colour
 'col'.
@@ -310,7 +310,8 @@ Internet Archive:
 <https://archive.org/details/msdos_borland_turbo_c_2.01>.
 
 The `bgidemo.c` program demonstrates the capabilities of the BGI
-library. You can download it and compile it using `SDL_bgi`.
+library. You can download it and compile it using `SDL_bgi`; in
+Windows, you will have to change its `main()` declaration.
 
 
 Bugs & Issues
@@ -321,8 +322,8 @@ should, since `SDL_UpdateTexture()` doesn't work as expected: instead of
 refreshing an `SDL_Rect` correctly, it only works on entire textures. It
 looks like it's an SDL2 bug.
 
-In MSYS2 + Mingw64, the `getch()` function hangs; use `getevent()`
-instead. In general, keyboard events may work strangely in Mingw.
+Console routines such as `getch()` may hang in Mingw. As far as I can
+tell, it's a bug in Mingw console handling.
 
 Colours don't have the same RGB values as the original BGI colours.
 But they look better (IMHO).

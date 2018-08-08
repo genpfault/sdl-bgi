@@ -75,7 +75,7 @@ void run_rule (int rule)
 
 // -----
 
-int main (int argc, char **argv)
+int main (int argc, char *argv[])
 {
   
   int 

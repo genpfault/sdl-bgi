@@ -7,238 +7,240 @@ This is a list of functions and macros provided by SDL_bgi.
 Standard BGI
 ------------
 
-void arc (int x, int y, int stangle, int endangle, int radius);
+void `arc` (int x, int y, int stangle, int endangle, int radius);
 
-void bar3d (int left, int top, int right, int bottom, int depth, int topflag);
+void `bar3d` (int left, int top, int right, int bottom, int depth, int topflag);
 
-void bar (int left, int top, int right, int bottom);
+void `bar` (int left, int top, int right, int bottom);
 
-void circle (int x, int y, int radius);
+void `circle` (int x, int y, int radius);
 
-void cleardevice (void);
+void `cleardevice` (void);
 
-void clearviewport (void);
+void `clearviewport` (void);
 
-void closegraph (void);
+void `closegraph` (void);
 
-void delay(int millisec)
+void `delay` (int millisec)
 
-void detectgraph (int *graphdriver, int *graphmode);
+void `detectgraph` (int \*graphdriver, int \*graphmode);
 
-void drawpoly (int numpoints, int *polypoints);
+void `drawpoly` (int numpoints, int \*polypoints);
 
-void ellipse (int x, int y, int stangle, int endangle, int xradius, int yradius);
+void `ellipse` (int x, int y, int stangle, int endangle, int xradius, int yradius);
 
-void fillellipse (int x, int y, int xradius, int yradius);
+void `fillellipse` (int x, int y, int xradius, int yradius);
 
-void fillpoly (int numpoints, int *polypoints);
+void `fillpoly` (int numpoints, int \*polypoints);
 
-void floodfill (int x, int y, int border);
+void `floodfill` (int x, int y, int border);
 
-int  getactivepage (void);
+int  `getactivepage` (void);
 
-void getarccoords (struct arccoordstype *arccoords);
+void `getarccoords` (struct arccoordstype \*arccoords);
 
-void getaspectratio (int *xasp, int *yasp);
+void `getaspectratio` (int \*xasp, int \*yasp);
 
-int getbkcolor (void);
+int `getbkcolor` (void);
 
-int getch (void);
+int `getch` (void);
 
-int getcolor (void);
+int `getcolor` (void);
 
-struct palettetype* getdefaultpalette (void);
+struct palettetype\* `getdefaultpalette` (void);
 
-char* getdrivername (void);
+char\* `getdrivername` (void);
 
-void getfillpattern (char *pattern); 
+void `getfillpattern` (char \*pattern); 
 
-void getfillsettings (struct fillsettingstype *fillinfo);
+void `getfillsettings` (struct fillsettingstype \*fillinfo);
 
-void getimage (int left, int top, int right, int bottom, void *bitmap);
+void `getimage` (int left, int top, int right, int bottom, void \*bitmap);
 
-int getgraphmode (void);
+int `getgraphmode` (void);
 
-void getlinesettings (struct linesettingstype *lineinfo);
+void `getlinesettings` (struct linesettingstype \*lineinfo);
 
-int getmaxcolor (void);
+int `getmaxcolor` (void);
 
-int getmaxmode (void); 
+int `getmaxmode` (void); 
 
-int getmaxx (void);
+int `getmaxx` (void);
 
-int getmaxy (void);
+int `getmaxy` (void);
 
-char* getmodename (int mode_number);
+char\* `getmodename` (int mode_number);
 
-void getmoderange (int graphdriver, int *lomode, int *himode);
+void `getmoderange` (int graphdriver, int \*lomode, int \*himode);
 
-void getpalette (struct palettetype *palette);
+void `getpalette` (struct palettetype \*palette);
 
-int getpalettesize (void);
+int `getpalettesize` (void);
 
-unsigned int getpixel (int x, int y);
+unsigned `int` getpixel (int x, int y);
 
-void gettextsettings (struct textsettingstype *texttypeinfo);
+void `gettextsettings` (struct textsettingstype \*texttypeinfo);
 
-void getviewsettings (struct viewporttype *viewport);
+void `getviewsettings` (struct viewporttype \*viewport);
 
-int  getvisualpage (void);
+int  `getvisualpage` (void);
 
-int getx (void);
+int `getx` (void);
 
-int gety (void);
+int `gety` (void);
 
-void graphdefaults (void);
+void `graphdefaults` (void);
 
-char* grapherrormsg (int errorcode);
+char\* `grapherrormsg` (int errorcode);
 
-int graphresult(void);
+int `graphresult`(void);
 
-unsigned imagesize (int left, int top, int right, int bottom);
+unsigned `imagesize` (int left, int top, int right, int bottom);
 
-void initgraph (int *graphdriver, int *graphmode, char *pathtodriver);
+void `initgraph` (int \*graphdriver, int \*graphmode, char \*pathtodriver);
 
-int installuserdriver (char *name, int huge (*detect)(void)); 
+int `installuserdriver` (char \*name, int huge (\*detect)(void)); 
 
-int installuserfont (char *name); 
+int `installuserfont` (char \*name); 
 
-int kbhit (void);
+int `kbhit` (void);
 
-void line (int x1, int y1, int x2, int y2);
+void `line` (int x1, int y1, int x2, int y2);
 
-void linerel (int dx, int dy);
+void `linerel` (int dx, int dy);
 
-void lineto (int x, int y);
+void `lineto` (int x, int y);
 
-void moverel (int dx, int dy);
+void `moverel` (int dx, int dy);
 
-void moveto (int x, int y);
+void `moveto` (int x, int y);
 
-void outtext (char *textstring);
+void `outtext` (char \*textstring);
 
-void outtextxy (int x, int y, char *textstring);
+void `outtextxy` (int x, int y, char \*textstring);
 
-void pieslice (int x, int y, int stangle, int endangle, int radius);
+void `pieslice` (int x, int y, int stangle, int endangle, int radius);
 
-void putimage (int, int, void *, int);
+void `putimage` (int, int, void \*, int);
 
-void putpixel (int x, int y, int color); 
+void `putpixel` (int x, int y, int color); 
 
-int random (int range) (macro)
+int `random` (int range) (macro)
 
-void readimagefile (char *filename, int left, int top, int right, int bottom);
+void `readimagefile` (char \*filename, int left, int top, int right, int bottom);
 
-void rectangle (int left, int top, int right, int bottom);
+void `rectangle` (int left, int top, int right, int bottom);
 
-int registerbgidriver (void (*driver)(void)); 
+int `registerbgidriver` (void (\*driver)(void)); 
 
-int registerbgifont (void (*font)(void)); 
+int `registerbgifont` (void (\*font)(void)); 
 
-void restorecrtmode (void); 
+void `restorecrtmode` (void); 
 
-void sector (int x, int y, int stangle, int endangle, int xradius, int yradius);
+void `sector` (int x, int y, int stangle, int endangle, int xradius, int yradius);
 
-void setactivepage (int page);
+void `setactivepage` (int page);
 
-void setallpalette (struct palettetype *palette); 
+void `setallpalette` (struct palettetype \*palette); 
 
-void setaspectratio (int xasp, int yasp);
+void `setaspectratio` (int xasp, int yasp);
 
-void setbkcolor (int color);
+void `setbkcolor` (int color);
 
-void setcolor (int color);
+void `setcolor` (int color);
 
-void setfillpattern (char *upattern, int color); 
+void `setfillpattern` (char \*upattern, int color); 
 
-void setfillstyle (int pattern, int color); 
+void `setfillstyle` (int pattern, int color); 
 
-unsigned setgraphbufsize (unsigned bufsize); 
+unsigned `setgraphbufsize` (unsigned bufsize); 
 
-void setgraphmode (int mode); 
+void `setgraphmode` (int mode); 
 
-void setlinestyle (int linestyle, unsigned upattern, int thickness);
+void `setlinestyle` (int linestyle, unsigned upattern, int thickness);
 
-void setpalette (int colornum, int color); 
+void `setpalette` (int colornum, int color); 
 
-void settextjustify (int horiz, int vert);
+void `settextjustify` (int horiz, int vert);
 
-void settextstyle (int font, int direction, int charsize);
+void `settextstyle` (int font, int direction, int charsize);
 
-void setusercharsize (int multx, int divx, int multy, int divy);
+void `setusercharsize` (int multx, int divx, int multy, int divy);
 
-void setviewport (int left, int top, int right, int bottom, int clip);
+void `setviewport` (int left, int top, int right, int bottom, int clip);
 
-void setvisualpage (int page);
+void `setvisualpage` (int page);
 
-void setwritemode (int mode);
+void `setwritemode` (int mode);
 
-int textheight (char *textstring);
+int `textheight` (char \*textstring);
 
-int textwidth (char *textstring);
+int `textwidth` (char \*textstring);
 
-void writeimagefile (char *filename, int left, int top, int right, int bottom);
+void `writeimagefile` (char \*filename, int left, int top, int right, int bottom);
 
 
 SDL_bgi extensions
 ------------------
 
-int BLUE_VALUE (int color);
+int `ALPHA_VALUE` (int color);
 
-void closewindow (int);
+int `BLUE_VALUE` (int color);
 
-int COLOR(int r, int g, int b);
+void `closewindow` (int);
 
-int event (void);
+int `COLOR`(int r, int g, int b);
 
-int eventtype (void);
+int `event` (void);
 
-int getcurrentwindow (void);
+int `eventtype` (void);
 
-int getevent (void);
+int `getcurrentwindow` (void);
 
-void getmouseclick (int kind, int *x, int *y);
+int `getevent` (void);
 
-int GREEN_VALUE(int color);
+void `getmouseclick` (int kind, int \*x, int \*y);
 
-int initwindow (int width, int height);
+int `GREEN_VALUE`(int color);
 
-int IS_BGI_COLOR (int color);
+int `initwindow` (int width, int height);
 
-int ismouseclick (int kind);
+int `IS_BGI_COLOR` (int color);
 
-int IS_RGB_COLOR(int color);
+int `ismouseclick` (int kind);
 
-int mouseclick(void);
+int `IS_RGB_COLOR`(int color);
 
-int mousex (void);
+int `mouseclick`(void);
 
-int mousey (void);
+int `mousex` (void);
 
-void _putpixel (int x, int y);
+int `mousey` (void);
 
-int RED_VALUE (int color);
+void `_putpixel` (int x, int y);
 
-void readimagefile (char *filename, int x1, int y1, int x2, int y2);
+int `RED_VALUE` (int color);
 
-void refresh (void);
+void `readimagefile` (char \*filename, int x1, int y1, int x2, int y2);
 
-void sdlbgifast (void);
+void `refresh` (void);
 
-void sdlbgislow (void);
+void `sdlbgifast` (void);
 
-void setalpha (int col, Uint32 alpha);
+void `sdlbgislow` (void);
 
-void setbkrgbcolor (int color);
+void `setalpha` (int col, Uint32 alpha);
 
-void setcurrentwindow (int id);
+void `setbkrgbcolor` (int color);
 
-void setrgbcolor (int color); 
+void `setcurrentwindow` (int id);
 
-void setrgbpalette (int colornum, int red, int green, int blue); 
+void `setrgbcolor` (int color); 
 
-void setwinoptions (char *title, int x, int y, Uint32 flags);
+void `setrgbpalette` (int colornum, int red, int green, int blue); 
 
-void swapbuffers (void);
+void `setwinoptions` (char \*title, int x, int y, Uint32 flags);
 
-int xkbhit (void);
+void `swapbuffers` (void);
+
+int `xkbhit` (void);

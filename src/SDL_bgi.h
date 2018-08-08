@@ -3,7 +3,7 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs.
 // Guido Gonzato, PhD
-// July 18, 2018
+// August 8, 2018
 
 /*
 This software is provided 'as-is', without any express or implied
@@ -23,18 +23,24 @@ freely, subject to the following restrictions:
 3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 
+// SDL2 stuff
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_keycode.h>
+
+// for fprintf()
+#include <stdio.h>
+// for exit(), calloc()
+#include <stdlib.h>
+// for sin(), cos()
+#include <math.h>
+// for strlen(), memcpy()
+#include <string.h>
 
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.2.0
+#define SDL_BGI_VERSION 2.2.1
 
 #define NOPE 0
 #define YEAH 1
@@ -180,7 +186,6 @@ extern SDL_Texture  *bgi_texture;
 #define KEY_SCR_LOCK    SDLK_SCROLLOCK
 #define KEY_ESC         SDLK_ESCAPE
 
-// SDL_QUIT
 #define QUIT            SDL_QUIT
 
 // graphics modes
@@ -308,7 +313,9 @@ int  getactivepage (void);
 void getarccoords (struct arccoordstype *);
 void getaspectratio (int *, int *);
 int  getbkcolor (void);
-int  getch (void);
+int  bgi_getch (void);
+// circumvents Mingw bug
+#define getch bgi_getch
 int  getcolor (void);
 struct palettetype *getdefaultpalette (void);
 char *getdrivername (void);
@@ -379,6 +386,7 @@ void writeimagefile (char *, int, int, int, int);
 
 // SDL_bgi extensions
 
+int  ALPHA_VALUE (int);
 int  BLUE_VALUE (int);
 void closewindow (int);
 int  COLOR (int, int, int);

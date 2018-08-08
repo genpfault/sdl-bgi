@@ -3,8 +3,9 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs
 // and for teaching.
+// 
 // By Guido Gonzato, PhD
-// July 18, 2018
+// August 9, 2018
 
 /*
 
@@ -75,11 +76,14 @@ static Uint32
 // copied to bgi_renderer, and finally bgi_renderer is made present.
 
 // The palette contains the BGI colors, entries 0:MAXCOLORS;
-// then three entries for temporary fg, bg, and fill RGB colors
-// allocated with COLOR(); then user-defined RGB colors
+// then three entries for temporary fg, bg, and fill ARGB colors
+// allocated with COLOR(); then user-defined ARGB colors
+
+#define BGI_COLORS  MAXCOLORS + 1
+#define TMP_COLORS  3
 
 static Uint32
-  palette[1 + MAXCOLORS + 3 + PALETTE_SIZE]; // all colors
+  palette[BGI_COLORS + TMP_COLORS + PALETTE_SIZE]; // all colors
 
 static Uint32
   bgi_palette[1 + MAXCOLORS] = { // 0 - 15
@@ -126,7 +130,7 @@ static int
   bgi_font_width = 8,     // default font width and height
   bgi_font_height = 8,
   bgi_fast_mode = 1,      // needs screen update?
-  bgi_last_event = 0,     // mouse click or keyboard event
+  bgi_last_event = 0,     // mouse click, keyboard event, or QUIT
   bgi_cp_x = 0,           // current position
   bgi_cp_y = 0,
   bgi_maxx,               // screen size
@@ -144,7 +148,9 @@ char
 
 // booleans
 static int
-  window_is_hidden = NOPE;
+  window_is_hidden = NOPE,
+  key_pressed = NOPE,
+  xkey_pressed = NOPE;
 
 static float
   bgi_font_mag_x = 1.0,  // font magnification
@@ -371,10 +377,37 @@ void bar (int left, int top, int right, int bottom)
 
 // -----
 
+int ALPHA_VALUE (int color)
+{
+  // Returns the alpha (transparency) component of an ARGB color.
+  return ((palette[BGI_COLORS + TMP_COLORS + color] >> 24) & 0xFF);
+
+} // ALPHA_VALUE ()
+
+// -----
+
+int RED_VALUE (int color)
+{
+  // return the red component of 'color' in the extended palette
+  return ((palette[BGI_COLORS + TMP_COLORS + color] >> 16) & 0xFF);
+
+} // RED_VALUE ()
+
+// -----
+
+int GREEN_VALUE (int color)
+{
+  // return the green component of 'color' in the extended palette
+  return ((palette[BGI_COLORS + TMP_COLORS + color] >> 8) & 0xFF);
+
+} // GREEN_VALUE ()
+
+// -----
+
 int BLUE_VALUE (int color)
 {
-  // Returns the blue component of an RGB color.
-  return (palette[color] & 0xFF);
+  // Returns the blue component of an ARGB color.
+  return (palette[BGI_COLORS + TMP_COLORS + color] & 0xFF);
 
 } // BLUE_VALUE ()
 
@@ -499,7 +532,7 @@ void closewindow (int id)
     fprintf (stderr, "Window %d does not exist\n", id);
     return;
   }
-  
+
   SDL_DestroyTexture (bgi_txt[id]);
   SDL_DestroyRenderer (bgi_rnd[id]);
   SDL_DestroyWindow (bgi_win[id]);
@@ -513,7 +546,7 @@ void closewindow (int id)
 int COLOR (int r, int g, int b)
 {
   // Can be used as an argument for setcolor() and setbkcolor()
-  // to set an RBG color.
+  // to set an ARGB color.
 
   // set up the temporary color
   bgi_tmp_color_argb = 0xff000000 | r << 16 | g << 8 | b;
@@ -525,22 +558,24 @@ int COLOR (int r, int g, int b)
 
 void delay (int msec)
 {
-  // Waits for msec milliseconds. Takes cares of key presses.
+  // Waits for msec milliseconds. Implemented as a loop,
+  // because apparently SDL_Delay() ignores pending events.
 
   Uint32
-    start, stop;
-  SDL_Event
-    event;
+    stop;
 
   if (! bgi_fast_mode)
     refresh ();
-  
-  start = SDL_GetTicks ();
-  stop = start + msec;
-  
+
+  stop = SDL_GetTicks () + msec;
+
   do {
-    if (SDL_PollEvent (&event))
-      SDL_PushEvent (&event);
+
+    if (kbhit ()) // take care of keypresses
+      key_pressed = YEAH;
+    if (xkbhit ())
+      xkey_pressed = YEAH;
+
   } while (SDL_GetTicks () < stop);
 
 } // delay ()
@@ -638,9 +673,10 @@ int event (void)
   SDL_Event event;
 
   if (SDL_PollEvent (&event)) {
-    if ( (event.type == SDL_KEYDOWN) ||
-         (event.type == SDL_MOUSEBUTTONDOWN) ||
-         (event.type == SDL_MOUSEWHEEL)) {
+    if ( (SDL_KEYDOWN == event.type)         ||
+         (SDL_MOUSEBUTTONDOWN == event.type) ||
+         (SDL_MOUSEWHEEL == event.type)      ||
+	 (SDL_QUIT == event.type) ) {
       SDL_PushEvent (&event); // don't disrupt the event
       bgi_last_event = event.type;
       return YEAH;
@@ -1181,18 +1217,28 @@ int getbkcolor (void)
 
 // -----
 
-int getch (void)
-{
-  // Waits for a key and returns its ASCII value or code
+// this function should be simply named "getch", but this name
+// causes a bug in Mingw.
+// "getch" is defined as a macro in SDL_bgi.h
 
-  int key, type;
-  
+int bgi_getch (void)
+{
+  // Waits for a key and returns its ASCII value or code,
+  // or QUIT if the user asked to close the window
+
+  int
+    key, type;
+
   if (window_is_hidden)
     return (getchar());
-  
+
   do {
     key = getevent ();
     type = eventtype ();
+
+    if (QUIT == type)
+      return QUIT;
+
     if (SDL_KEYDOWN == type &&
 	key != KEY_LEFT_CTRL &&
 	key != KEY_RIGHT_CTRL &&
@@ -1205,7 +1251,7 @@ int getch (void)
 
   // we should never get here...
   return 0;
-} // getch ()
+} // bgi_getch ()
 
 // -----
 
@@ -1513,7 +1559,7 @@ int getpalettesize (struct palettetype *palette)
   // Returns the size of the palette.
 
   // !!! BUG - don't ignore the parameter
-  return 1 + MAXCOLORS + 3 + PALETTE_SIZE;
+  return BGI_COLORS + TMP_COLORS + PALETTE_SIZE;
 } // getpalettesize ()
 
 // -----
@@ -1854,30 +1900,18 @@ void initwindow (int width, int height)
     }
   }
 
-  /* // maximised window? */
-  /* if (window_flags & SDL_WINDOW_MAXIMIZED) { */
-  /*   bgi_maxx = mode.w - 1; */
-  /*   bgi_maxy = mode.h - 1; */
-  /*   window_x = window_y = 0; */
-  /* } */
-
-  bgi_win[current_window] = SDL_CreateWindow (bgi_win_title,
-					      window_x,
-					      window_y,
-					      bgi_maxx + 1,
-					      bgi_maxy + 1,
-					      window_flags);
+  bgi_win[current_window] = 
+    SDL_CreateWindow (bgi_win_title,
+		      window_x,
+		      window_y,
+		      bgi_maxx + 1,
+		      bgi_maxy + 1,
+		      window_flags);
   // is the window OK?
   if (NULL == bgi_win[current_window]) {
     printf ("Could not create window: %s\n", SDL_GetError ());
     return;
   }
-
-  /* // maximised window? */
-  /* if (window_flags & SDL_WINDOW_MAXIMIZED) */
-  /*   SDL_SetWindowPosition (bgi_win[current_window], */
-  /* 			   SDL_WINDOWPOS_CENTERED, */
-  /* 			   SDL_WINDOWPOS_CENTERED); */
 
   // window ok; create renderer
   bgi_rnd[current_window] =
@@ -1930,8 +1964,8 @@ void initwindow (int width, int height)
 
 int IS_BGI_COLOR (int color)
 {
-  // Returns 1 if the current color is a standard BGI color (not RGB)-
-  // the color argument is redundant
+  // Returns 1 if the current color is a standard BGI color 
+  // (not ARGB); the color argument is redundant
   return ! bgi_argb_mode;
 } // IS_BGI_COLOR ()
 
@@ -1948,8 +1982,13 @@ int kbhit (void)
   if (! bgi_fast_mode)
     refresh ();
 
+  if (YEAH == key_pressed) { // a key was pressed during delay()
+    key_pressed = NOPE;
+    return YEAH;
+  }
+  
   if (SDL_PollEvent (&event)) {
-    if (event.type == SDL_KEYDOWN) {
+    if (SDL_KEYDOWN == event.type) {
       key = event.key.keysym.sym;
       if (key != SDLK_LCTRL &&
           key != SDLK_RCTRL &&
@@ -1967,9 +2006,9 @@ int kbhit (void)
         return YEAH;
       else
 	return NOPE;
-    } // if (event.type == SDL_KEYDOWN)
+    } // if (SDL_KEYDOWN == event.type)
     else
-      if (event.type == SDL_WINDOWEVENT) {
+      if (SDL_WINDOWEVENT == event.type) {
 	if (SDL_WINDOWEVENT_CLOSE == event.window.event)
 	  return QUIT;
       }
@@ -1978,49 +2017,6 @@ int kbhit (void)
   }
   return NOPE;
 }
-
-// alternate implementation (defective):
-
-#if 0
-int kbhit (void)
-{
-  // Returns YEAH when a key is pressed.
-
-  const Uint8 *keys;
-  int i, numkeys, pressed = NOPE;
-
-  if (! bgi_fast_mode)
-    refresh ();
-
-  SDL_PumpEvents ();
-  keys = SDL_GetKeyboardState (&numkeys);
-
-  // check if any key is set to 1
-  for (i = 0; i < numkeys; i++)
-    if (keys[i])
-      pressed = YEAH;
-
-  // is that a key that should be ignored?
-
-  if (keys[SDL_SCANCODE_LCTRL] ||
-      keys[SDL_SCANCODE_RCTRL] ||
-      keys[SDL_SCANCODE_LSHIFT] ||
-      keys[SDL_SCANCODE_RSHIFT] ||
-      keys[SDL_SCANCODE_LGUI] ||
-      keys[SDL_SCANCODE_RGUI] ||
-      keys[SDL_SCANCODE_LALT] ||
-      keys[SDL_SCANCODE_RALT] ||
-      keys[SDL_SCANCODE_PAGEUP] ||
-      keys[SDL_SCANCODE_PAGEDOWN] ||
-      keys[SDL_SCANCODE_CAPSLOCK] ||
-      keys[SDL_SCANCODE_MENU] ||
-      keys[SDL_SCANCODE_APPLICATION])
-    pressed = NOPE;
-
-  return pressed;
-
-} // kbhit ()
-#endif
 
 // -----
 
@@ -2435,13 +2431,13 @@ int mouseclick (void)
 
     if (SDL_PollEvent (&event)) {
 
-      if (event.type == SDL_MOUSEBUTTONDOWN) {
+      if (SDL_MOUSEBUTTONDOWN == event.type) {
         bgi_mouse_x = event.button.x;
         bgi_mouse_y = event.button.y;
         return (event.button.button);
       }
       else
-        if (event.type == SDL_MOUSEMOTION) {
+        if (SDL_MOUSEMOTION == event.type) {
           bgi_mouse_x = event.motion.x;
           bgi_mouse_y = event.motion.y;
           return (WM_MOUSEMOVE);
@@ -2787,7 +2783,7 @@ void putimage (int left, int top, void *bitmap, int op)
 
 void _putpixel (int x, int y)
 {
-  // line putpixel (), but not updated
+  // like putpixel (), but not updated
 
   // viewport range is taken care of by this function only,
   // since all others use it to draw.
@@ -2935,7 +2931,8 @@ void putpixel (int x, int y, int color)
     if (x < vp.left || x > vp.right || y < vp.top || y > vp.bottom)
       return;
 
-  if (-1 == color) { // COLOR () set up the WHITE + 1 color
+   // COLOR () set up the BGI_COLORS + 1 color
+  if (-1 == color) {
     bgi_argb_mode = YEAH;
     tmpcolor = WHITE + 1;
     palette[tmpcolor] = bgi_tmp_color_argb;
@@ -3175,14 +3172,18 @@ void setalpha (int col, Uint8 alpha)
 
   Uint32 tmp;
 
-  if (-1 == col) { // COLOR () set up the WHITE + 1 color
+  // alpha is only allowed in argb mode
+  if (col <= BGI_COLORS)
+    return;
+  
+  // COLOR () set up the BGI_COLORS + 1 (temporary) color
+  if (-1 == col) {
     bgi_argb_mode = YEAH;
-    bgi_fg_color = WHITE + 1;
+    bgi_fg_color = BGI_COLORS + 1;
   }
-  else {
-    bgi_argb_mode = NOPE;
-    bgi_fg_color = col;
-  }
+  else
+    bgi_fg_color = BGI_COLORS + TMP_COLORS + col;
+  
   tmp = palette[bgi_fg_color] << 8; // get rid of alpha
   tmp = tmp >> 8;
   palette[bgi_fg_color] = ((Uint32)alpha << 24) | tmp;
@@ -3205,9 +3206,10 @@ void setbkcolor (int col)
 {
   // Sets the current background color using the default palette.
 
-  if (-1 == col) { // COLOR () set up the WHITE + 2 color
+  // COLOR () set up the BGI_COLORS + 2 color
+  if (-1 == col) {
     bgi_argb_mode = YEAH;
-    bgi_bg_color = WHITE + 2;
+    bgi_bg_color = BGI_COLORS + 2;
     palette[bgi_bg_color] = bgi_tmp_color_argb;
   }
   else {
@@ -3221,9 +3223,9 @@ void setbkcolor (int col)
 void setbkrgbcolor (int index)
 {
   // Sets the current background color using using the
-  // n-th color index in the RGB palette.
+  // n-th color index in the ARGB palette.
 
-  bgi_bg_color = 1 + MAXCOLORS + 2 + index;
+  bgi_bg_color = BGI_COLORS + TMP_COLORS + index;
 } // setbkrgbcolor ()
 
 // -----
@@ -3232,7 +3234,8 @@ void setcolor (int col)
 {
   // Sets the current drawing color using the default palette.
 
-  if (-1 == col) { // COLOR () set up the WHITE + 1 color
+  // COLOR () set up the BGI_COLORS + 1 color
+  if (-1 == col) {
     bgi_argb_mode = YEAH;
     bgi_fg_color = WHITE + 1;
     palette[bgi_fg_color] = bgi_tmp_color_argb;
@@ -3278,9 +3281,10 @@ void setfillpattern (char *upattern, int color)
   for (i = 0; i < 8; i++)
     fill_patterns[USER_FILL][i] = (Uint8) *upattern++;
 
-  if (-1 == color) { // COLOR () set up the WHITE + 3 color
+  // COLOR () set up the BGI_COLORS + 3 color
+  if (-1 == color) {
     bgi_argb_mode = YEAH;
-    bgi_fill_color = WHITE + 3;
+    bgi_fill_color = BGI_COLORS + 3;
     palette[bgi_fill_color] = bgi_tmp_color_argb;
     bgi_fill_style.color = bgi_fill_color;
   }
@@ -3301,9 +3305,10 @@ void setfillstyle (int pattern, int color)
 
   bgi_fill_style.pattern = pattern;
 
-  if (-1 == color) { // COLOR () set up the WHITE + 3 color
+  // COLOR () set up the BGI_COLORS + 3 color
+  if (-1 == color) {
     bgi_argb_mode = YEAH;
-    bgi_fill_color = WHITE + 3;
+    bgi_fill_color = BGI_COLORS + 3;
     palette[bgi_fill_color] = bgi_tmp_color_argb;
     bgi_fill_style.color = bgi_fill_color;
   }
@@ -3352,19 +3357,19 @@ void setpalette (int colornum, int color)
 void setrgbcolor (int index)
 {
   // Sets the current drawing color using the n-th color index
-  // in the RGB palette.
+  // in the ARGB palette.
 
-  bgi_fg_color = 1 + MAXCOLORS + 3 + index;
+  bgi_fg_color = BGI_COLORS + TMP_COLORS + index;
 } // setrgbcolor ()
 
 // -----
 
 void setrgbpalette (int colornum, int red, int green, int blue)
 {
-  // Sets the n-th entry in the RGB palette specifying the r, g,
+  // Sets the n-th entry in the ARGB palette specifying the r, g,
   // and b components.
 
-  palette[1 + MAXCOLORS + 3 + colornum] =
+  palette[BGI_COLORS + TMP_COLORS + colornum] =
     0xff000000 | red << 16 | green << 8 | blue;
 } // setrgbpalette ()
 
@@ -3508,24 +3513,6 @@ int textwidth (char *textstring)
 
 // -----
 
-int RED_VALUE (int color)
-{
-  // return the red component of 'color' in the extended palette
-  return ((palette[color] >> 16) & 0xFF);
-
-} // RED_VALUE ()
-
-// -----
-
-int GREEN_VALUE (int color)
-{
-  // return the green component of 'color' in the extended palette
-  return ((palette[color] >> 8) & 0xFF);
-
-} // GREEN_VALUE ()
-
-// -----
-
 void updaterect (int x1, int y1, int x2, int y2)
 {
   // updates a rectangle on the screen. Suffers from SDL2 bug.
@@ -3623,11 +3610,16 @@ int xkbhit (void)
   if (! bgi_fast_mode)
     refresh ();
 
+  if (YEAH == xkey_pressed) { // a key was pressed during delay()
+    xkey_pressed = NOPE;
+    return YEAH;
+  }
+
   if (SDL_PollEvent (&event)) {
-    if (event.type == SDL_KEYDOWN)
+    if (SDL_KEYDOWN == event.type)
       return YEAH;
     else
-      if (event.type == SDL_WINDOWEVENT) {
+      if (SDL_WINDOWEVENT == event.type) {
 	if (SDL_WINDOWEVENT_CLOSE == event.window.event)
 	  return QUIT;
       }

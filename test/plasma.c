@@ -66,13 +66,12 @@ int main (int argc, char *argv[])
 	b = b - 256;
       if (b < 0)
 	b = 256 + c;
-      setcolor (COLOR(r, g, b));
-      _putpixel(x, y);
+      putpixel(x, y, COLOR(r, g, b));
     }
   }
   refresh ();
+  getch ();
   writeimagefile ("plasma.bmp", 0, 0, 599, 599);
-  getevent ();
   
   closegraph ();
   return 0;

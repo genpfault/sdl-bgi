@@ -1,6 +1,7 @@
 BUGS
 ----
 
-In MSYS2 + Mingw64, the getch() function hangs; use getevent() instead.
+In MSYS2 + Mingw64, the getch() function may hang. As far as I can
+tell, it's a problem in Mingw console handling.
 
 Please report bugs if you find any.

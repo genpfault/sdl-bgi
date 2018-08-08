@@ -74,13 +74,13 @@ void turtle_hello (void)
   home ();
   wrap ();
   setheading (angle);
-  turtlesize (50);
+  turtlesize (40);
   showturtle ();
   refresh ();
   
   do {
 
-    c = getevent ();
+    c = getch ();
     
     switch (c) {
     case KEY_UP:
@@ -93,7 +93,7 @@ void turtle_hello (void)
       turnright (5);
       break;
     default:
-      forwd (len);
+      ;
     }
     
     refresh ();
@@ -336,7 +336,7 @@ int main (int argc, char *argv[])
   for (i = 0; i < 14; i++) {
     cleardevice ();
     setcolor (GREEN);
-    outtextxy (0, 0, "Tree:");
+    outtextxy (0, 0, "Fractal tree:");
     setposition (getmaxx ()*4/10, getmaxy ());
     setheading (T_NORTH);
     tree (getmaxy () / 3, i);
@@ -377,6 +377,7 @@ int main (int argc, char *argv[])
     if (kbhit ())
       break;
   }
+  hideturtle ();
   pause ();
   
   // Hilbert
@@ -386,6 +387,7 @@ int main (int argc, char *argv[])
   setcolor (GREEN);
   
   for (i = 1; i < 8; i++) {
+    cleardevice ();
     l = getmaxy () / powerof2 (i);
     x += l / 2;
     y = l / 2;
@@ -396,9 +398,12 @@ int main (int argc, char *argv[])
     sprintf (s, "Hilbert curve at level %d", i);
     outtextxy (0, 0, s);
     refresh ();
-    delay (1000);
-    cleardevice ();
+    delay (200);
   }
+  hideturtle ();
+  pause ();
+
+  cleardevice ();
   outtextxy (0, 0, "PRESS A KEY TO EXIT:");
   refresh ();
   

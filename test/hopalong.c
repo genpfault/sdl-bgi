@@ -33,7 +33,7 @@
 
 // -----
 
-int main (int argc, char **argv)
+int main (int argc, char *argv[])
 {
   int gd, gm, stop;
   unsigned int seed;

@@ -149,7 +149,7 @@ int main (int argc, char *argv[])
   lines ();
   pixels ();
   
-  getevent ();
+  // getevent ();
   closegraph ();
   
 }

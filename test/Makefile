@@ -26,7 +26,7 @@ endif
 
 PROGRAMS = cellular dla fern floodfilltest hopalong life \
            mandelbrot mousetest moveit multiwin plasma \
-	   sdlbgidemo simple turtledemo
+	   psychedelia sdlbgidemo simple turtledemo
 
 all: $(PROGRAMS)
 
@@ -65,6 +65,9 @@ multiwin: multiwin.c
 
 plasma: plasma.c 
 	$(CC) $(CFLAGS) -o plasma plasma.c $(LIBS) -lm
+
+psychedelia: psychedelia.c 
+	$(CC) $(CFLAGS) -o psychedelia psychedelia.c $(LIBS) -lm
 
 simple: simple.c 
 	$(CC) $(CFLAGS) -o simple simple.c $(LIBS)

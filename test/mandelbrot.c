@@ -152,7 +152,7 @@ void explain (void)
 
   settextstyle (GOTHIC_FONT, HORIZ_DIR, 2);
   settextjustify (CENTER_TEXT, CENTER_TEXT);
-  c = textheight ("H");
+  c = 2*textheight ("H");
   outtextxy (maxx / 2, maxy / 2 - 3*c,
 	   "Press '1', '2', or '3' to change the palette;");
   outtextxy (maxx / 2, maxy / 2 - 2*c,
