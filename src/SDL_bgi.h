@@ -3,7 +3,7 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs.
 // Guido Gonzato, PhD
-// August 8, 2018
+// September 10, 2018
 
 /*
 This software is provided 'as-is', without any express or implied
@@ -40,7 +40,7 @@ freely, subject to the following restrictions:
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.2.1
+#define SDL_BGI_VERSION 2.2.2
 
 #define NOPE 0
 #define YEAH 1
@@ -105,6 +105,12 @@ extern SDL_Texture  *bgi_texture;
 #define LIGHTMAGENTA   13
 #define YELLOW         14
 #define WHITE          15
+
+// temporary colours
+
+#define TMP_FG_COL     16
+#define TMP_BG_COL     17
+#define TMP_FILL_COL   18
 
 // line style, thickness, and drawing mode
 

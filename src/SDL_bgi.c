@@ -5,7 +5,7 @@
 // and for teaching.
 // 
 // By Guido Gonzato, PhD
-// August 9, 2018
+// September 10, 2018
 
 /*
 
@@ -1971,6 +1971,15 @@ int IS_BGI_COLOR (int color)
 
 // -----
 
+int IS_RGB_COLOR (int color)
+{
+  // Returns 1 if the current color is a standard BGI color 
+  // (not ARGB); the color argument is redundant
+  return bgi_argb_mode;
+} // IS_RGB_COLOR ()
+
+// -----
+
 int kbhit (void)
 {
   // Returns 1 when a key is pressed, or QUIT
@@ -2934,7 +2943,7 @@ void putpixel (int x, int y, int color)
    // COLOR () set up the BGI_COLORS + 1 color
   if (-1 == color) {
     bgi_argb_mode = YEAH;
-    tmpcolor = WHITE + 1;
+    tmpcolor = TMP_FG_COL;
     palette[tmpcolor] = bgi_tmp_color_argb;
   }
   else {
@@ -3237,7 +3246,7 @@ void setcolor (int col)
   // COLOR () set up the BGI_COLORS + 1 color
   if (-1 == col) {
     bgi_argb_mode = YEAH;
-    bgi_fg_color = WHITE + 1;
+    bgi_fg_color = TMP_FG_COL;
     palette[bgi_fg_color] = bgi_tmp_color_argb;
   }
   else {
@@ -3305,10 +3314,10 @@ void setfillstyle (int pattern, int color)
 
   bgi_fill_style.pattern = pattern;
 
-  // COLOR () set up the BGI_COLORS + 3 color
+  // COLOR () set up the temporary fill colour
   if (-1 == color) {
     bgi_argb_mode = YEAH;
-    bgi_fill_color = BGI_COLORS + 3;
+    bgi_fill_color = TMP_FILL_COL - 1;
     palette[bgi_fill_color] = bgi_tmp_color_argb;
     bgi_fill_style.color = bgi_fill_color;
   }

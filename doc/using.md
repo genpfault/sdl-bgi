@@ -171,6 +171,17 @@ to other BGI fonts (e.g. `TRIPLEX_FONT`, and others) have no effect:
 consider using `SDL_ttf`!
 
 
+Colours
+-------
+
+The default BGI palette includes 16 named colours (`BLACK`...`WHITE`);
+standard BGI functions use this palette.
+
+An extended ARGB palette of `PALETTE_SIZE` additional colours can
+be created and accessed using functions described below. Please see
+the example programs in the `test/` directory.
+
+
 Additions
 ---------
 
@@ -201,16 +212,18 @@ the RGB equivalent of `setcolor(int col)` and `setbkcolor(int col)`.
 `col` is an allocated colour entry in the RGB palette.
 
 - `COLOR(int r, int g, int b)` can be used as an argument whenever a
-colour value is expected (e.g. `setcolor(int col)` and other
+colour value is expected (e.g. `setcolor()` and other
 functions). It's an alternative to `setrgbcolor(int col)` and
 `setbkrgbcolor(int col)`. Allocating colours with `setrgbpalette()`
 and using `setrgbcolor()` is much faster, though.
 
 - `IS_BGI_COLOR(int c)` and `IS_RGB_COLOR(int c)` return 1 if the
-current colour is standard BGI or RGB, respectively.
+current colour is standard BGI or RGB, respectively. The argument is
+actually redundant.
 
 - `ALPHA_VALUE(int c)`, `RED_VALUE(int c)`, `GREEN_VALUE(int c)`,
-and `BLUE_VALUE(int c)` return the A, R, G, B component of an RGB colour.
+and `BLUE_VALUE(int c)` return the A, R, G, B component of an RGB
+colour in the extended palette.
 
 - `setalpha(int col, Uint8 alpha)` sets the alpha component of colour
 'col'.

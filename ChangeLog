@@ -1,6 +1,10 @@
 Changelog
 ---------
 
+v. 2.2.2, 2018-09-10
+- documentation updates (clarification on colours)
+- constants TMP_FG_COL, TMP_BG_COL, and TMP_FILL_COL added
+
 v. 2.2.1, 2018-08-08
 - renamed getch() to bgi_getch() and added the macro getch()
   to avoid Mingw bug

@@ -1,7 +1,7 @@
 % sdl_bgi-quickref.tex
 %
 % Guido Gonzato, PhD
-% August 8, 2018
+% September 11, 2018
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -18,7 +18,7 @@
 
 \newcommand{\SDLbgi}{\texttt{SDL\_bgi}}
 
-\newcommand{\version}{2.2.1}        % !!! <<<=== Change here !!!
+\newcommand{\version}{2.2.2}        % !!! <<<=== Change here !!!
 
 \newcommand{\V}{\texttt{void}}      % void
 \newcommand{\I}{\texttt{int}}       % int
@@ -131,7 +131,7 @@ the following:
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.2.1
+#define SDL_BGI_VERSION 2.2.2
 
 #define NOPE 0
 #define YEAH 1
@@ -197,6 +197,12 @@ extern SDL_Texture  *bgi_texture;
 #define LIGHTMAGENTA   13
 #define YELLOW         14
 #define WHITE          15
+
+// temporary colours
+
+#define TMP_FG_COL     16
+#define TMP_BG_COL     17
+#define TMP_FILL_COL   18
 
 // line style, thickness, and drawing mode
 
@@ -385,6 +391,21 @@ struct rgb_colour {
 
 % -----
 
+\section{Colours}
+
+The default BGI palette includes 16 named colours (\T{BLACK}{\ldots}
+\T{WHITE}); functions \func{setbkcolor()}, \func{setcolor()},
+\func{getbkcolor()}, and \func{getcolor()} use this palette.
+
+An extended RGB palette of `PALETTE\_SIZE` additional colours can be
+created and accessed using the functions described below.
+
+Constants \T{TMP\_FG\_COL}, \T{TMP\_BG\_COL}, and \T{TMP\_FILL\_COL}
+denote the temporary foreground, background, and fill RGB colours that
+can be set up with the \func{COLOR()} function described below.
+
+% -----
+
 \section{Note for SDL2 Programmers}
 
 The following variables, declared in \F{SDL\_bgi.h}, are accessible to
@@ -460,9 +481,9 @@ two-dimensional bar, use \func{bar3d()} with \A{depth} equal to 0.
 
 Draws a three-dimensional, filled-in rectangle (bar), using the
 current fill colour and fill pattern. The three-dimensional outline of
-the bar is drawn in the current line style and color. The bar's depth,
-in pixels, is given by \A{depth}. If \A{topflag} is nonzero, a top is
-put on.
+the bar is drawn in the current line style and colour. The bar's
+depth, in pixels, is given by \A{depth}. If \A{topflag} is nonzero, a
+top is put on.
 
 % -----
 
@@ -483,7 +504,7 @@ used.
 \end{bgi}
 
 Clears the graphics screen, filling it with the current background
-color. The CP is moved to (0, 0).
+colour. The CP is moved to (0, 0).
 
 % -----
 
@@ -491,8 +512,8 @@ color. The CP is moved to (0, 0).
 \V{} \func{clearviewport} (\V{});
 \end{bgi}
 
-Clears the viewport, filling it with the current background color. The
-drawing CP is moved to (0, 0), relative to the viewport.
+Clears the viewport, filling it with the current background colour.
+The drawing CP is moved to (0, 0), relative to the viewport.
 
 % -----
 
@@ -541,7 +562,7 @@ Draws an elliptical arc centered at (\A{x}, \A{y}), with axes given by
 
 Draws an ellipse centered at (\A{x}, \A{y}), with axes given by
 \A{xradius} and \A{yradius}, and fills it using the current fill
-color and fill pattern.
+colour and fill pattern.
 
 % -----
 
@@ -550,7 +571,7 @@ color and fill pattern.
 \end{bgi}
 
 Draws a polygon of \A{numpoints} vertices and fills it using the
-current fill color.
+current fill colour.
 
 % -----
 
@@ -559,8 +580,8 @@ current fill color.
 \end{bgi}
 
 Fills an enclosed area, containing the \A{x} and \A{y} points bounded
-by the \A{border} color. The area is filled using the current fill
-color.
+by the \A{border} colour. The area is filled using the current fill
+colour.
 
 % -----
 
@@ -594,7 +615,7 @@ Retrieves the current graphics mode's aspect ratio. In \SDLbgi,
 \I{} \func{getbkcolor} (\V{});
 \end{bgi}
 
-Returns the current background color.
+Returns the current background colour.
 
 % -----
 
@@ -602,7 +623,7 @@ Returns the current background color.
 \I{} \func{getcolor} (\V{});
 \end{bgi}
 
-Returns the current drawing (foreground) color.
+Returns the current drawing (foreground) colour.
 
 % -----
 
@@ -647,7 +668,7 @@ the 8-byte area pointed to by \A{pattern}.
 
 Fills the \texttt{fillsettingstype} structure pointed to by
 \A{fillinfo} with information about the current fill pattern and fill
-color.
+colour.
 
 % -----
 
@@ -683,8 +704,8 @@ with information about the current line style, pattern, and thickness.
 \I{} \func{getmaxcolor} (\V{});
 \end{bgi}
 
-Returns the maximum color value available (\T{MAXCOLORS}). If RGB
-colors are being used, it returns \T{PALETTE\_SIZE}.
+Returns the maximum colour value available (\T{MAXCOLORS}). If RGB
+colours are being used, it returns \T{PALETTE\_SIZE}.
 
 % -----
 
@@ -737,7 +758,7 @@ is ignored.
 \end{bgi}
 
 Fills the \texttt{palettetype} structure pointed by \A{palette} with
-information about the current palette's size and colors.
+information about the current palette's size and colours.
 
 % -----
 
@@ -754,7 +775,7 @@ Returns the size of the palette (\T{MAXCOLORS} + 1 or
 \I{} \func{getpixel} (\I{} \A{x}, \I{} \A{y});
 \end{bgi}
 
-Returns the color of the pixel located at (\A{x}, \A{y}).
+Returns the colour of the pixel located at (\A{x}, \A{y}).
 
 % -----
 
@@ -808,7 +829,7 @@ Returns the current viewport's \A{y} coordinate.
 
 Resets all graphics settings to their defaults: sets the viewport to
 the entire screen, moves the CP to (0, 0), sets the default palette
-colors, the default drawing and background color, the default fill
+colours, the default drawing and background colour, the default fill
 style and pattern, the default text font and justification.
 
 % -----
@@ -965,7 +986,7 @@ specifies the drawing mode (COPY\_PUT, etc).
 \V{} \func{putpixel} (\I{} \A{x}, \I{} \A{y}, \I{} \A{color}); 
 \end{bgi}
 
-Plots a point at (\A{x},\A{y}) in the color defined by \A{color}.
+Plots a point at (\A{x},\A{y}) in the colour defined by \A{color}.
 
 % -----
 
@@ -976,14 +997,6 @@ Plots a point at (\A{x},\A{y}) in the color defined by \A{color}.
 
 Draws a rectangle delimited by (\A{left},\A{top}) and
 (\A{right},\A{bottom}).
-
-% -----
-
-\begin{bgi}
-\V{} \func{refresh} (\V{});
-\end{bgi}
-
-Updates the screen.
 
 % -----
 
@@ -1052,7 +1065,7 @@ function is not necessary since the pixels are square.
 \V{} \func{setbkcolor} (\I{} \A{color});
 \end{bgi}
 
-Sets the current background color using the default palette.
+Sets the current background colour using the default palette.
 
 % -----
 
@@ -1060,7 +1073,7 @@ Sets the current background color using the default palette.
 \V{} \func{setcolor} (\I{} \A{color});
 \end{bgi}
 
-Sets the current drawing color using the default palette.
+Sets the current drawing colour using the default palette.
 
 % -----
 
@@ -1086,7 +1099,7 @@ each bit set to 1 is plotted as a pixel.
 \V{} \func{setfillstyle} (\I{} \A{upattern}, \I{} \A{color}); 
 \end{bgi}
 
-Sets the fill pattern and fill color. \A{upattern} is a pointer to a
+Sets the fill pattern and fill colour. \A{upattern} is a pointer to a
 sequence of 8 bytes, with each byte corresponding to 8 pixels in the
 pattern.
 
@@ -1264,7 +1277,8 @@ Returns a random number between 0 and \A{range - 1}.
 \I{} \func{ALPHA\_VALUE} (\I{} \A{color})
 \end{bgi}
 
-Returns the alpha (transparency) component of an RGB color.
+Returns the alpha (transparency) component of an RGB colour in the
+extended palette.
 
 % -----
 
@@ -1273,7 +1287,7 @@ Returns the alpha (transparency) component of an RGB color.
 \I{} \func{BLUE\_VALUE} (\I{} \A{color})
 \end{bgi}
 
-Returns the blue component of an RGB color.
+Returns the blue component of an RGB colour in the extended palette.
 
 % -----
 
@@ -1281,8 +1295,14 @@ Returns the blue component of an RGB color.
 \I{} \func{COLOR} (\I{} \A{r}, \I{} \A{g}, \I{} \A{b});
 \end{bgi}
 
-Can be used as an argument for \func{setcolor()} and
-\func{setbkcolor()} to set an RBG color.
+Can be used as an argument for \func{setcolor()}, \func{setbkcolor()},
+and \func{setfillstyle()} to set an RBG colour. Temporary colours are
+\T{TMP\_FG\_COL}, \T{TMP\_BG\_COL}, and \T{TMP\_FILL\_COL},
+respectively.
+
+Functions \func{ALPHA\_VALUE}, \func{BLUE\_VALUE},
+\func{GREEN\_VALUE}, and \func{RED\_VALUE} do not work on temporary
+colours.
 
 % -----
 
@@ -1290,7 +1310,7 @@ Can be used as an argument for \func{setcolor()} and
 \I{} \func{GREEN\_VALUE} (\I{} \A{color})
 \end{bgi}
 
-Returns the green component of an RGB color.
+Returns the green component of an RGB colour in the extended palette.
 
 % -----
 
@@ -1298,8 +1318,9 @@ Returns the green component of an RGB color.
 \I{} \func{IS\_BGI\_COLOR} (\I{} \A{color});
 \end{bgi}
 
-Returns 1 if the current drawing color is a standard BGI color (that
-is, not RGB). The argument is actually redundant.
+Returns 1 if the \emph{current} drawing colour is a standard BGI
+colour (that is, not RGB). The \A{color} argument is actually
+redundant.
 
 % -----
 
@@ -1307,8 +1328,8 @@ is, not RGB). The argument is actually redundant.
 \I{} \func{IS\_RGB\_COLOR} (\I{} \A{color});
 \end{bgi}
 
-Returns 1 if the current drawing color is RGB. The argument is
-actually redundant.
+Returns 1 if the \emph{current} drawing colour is RGB. The \A{color}
+argument is actually redundant.
 
 % -----
 
@@ -1316,7 +1337,7 @@ actually redundant.
 \I{} \func{RED\_VALUE} (\I{} \A{color})
 \end{bgi}
 
-Returns the red component of an RGB color.
+Returns the red component of an RGB colour in the extended palette.
 
 % -----
 
@@ -1437,7 +1458,7 @@ Returns the Y coordinate of the last mouse click.
 \V{} \func{\_putpixel} (\I{} \A{x}, \I{} \A{y}); 
 \end{bgi}
 
-Plots a point at (\A{x},\A{y}) using the current drawing color. This
+Plots a point at (\A{x},\A{y}) using the current drawing colour. This
 function may be faster than \func{putpixel()}.
 
 % -----
@@ -1492,8 +1513,8 @@ Sets alpha transparency for colour \A{col} to \A{alpha} (0--255).
 \V{} \func{setbkrgbcolor} (\I{} \A{n}); 
 \end{bgi}
 
-Sets the current background color using using the \A{n}-th color index
-in the RGB palette.
+Sets the current background colour using using the \A{n}-th colour
+index in the RGB palette.
 
 % -----
 \begin{bgi}
@@ -1508,7 +1529,7 @@ Sets the current active window to \I{} \A{id}.
 \V{} \func{setrgbcolor} (\I{} \A{n}); 
 \end{bgi}
 
-Sets the current drawing color using the \A{n}-th color index in the
+Sets the current drawing colour using the \A{n}-th colour index in the
 RGB palette.
 
 % -----
@@ -1521,7 +1542,7 @@ Sets the \A{n}-th entry in the RGB palette specifying the \A{r},
 \A{g}, and \A{b} components.
 
 Using \func{setrgbpalette()} and \func{setrgbcolor()} is faster than
-setting colors with \func{setcolor()} with a \func{COLOR()} argument.
+setting colours with \func{setcolor()} with a \func{COLOR()} argument.
 
 % -----
 

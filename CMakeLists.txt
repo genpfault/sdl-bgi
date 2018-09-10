@@ -5,7 +5,7 @@
 
 cmake_minimum_required (VERSION 3.5.0)
 
-set (SDL_BGI_VERSION 2.2.1)
+set (SDL_BGI_VERSION 2.2.2)
 
 # Project name
 project (SDL_bgi VERSION ${SDL_BGI_VERSION} LANGUAGES C)
