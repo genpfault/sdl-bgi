@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+v. 2.2.3, 2018-09-18
+- fixed bug in setalpha()
+- rewritten readimagefile() to change unwanted behaviour
+  (reported by Fanourios Attard)
+
 v. 2.2.2, 2018-09-10
 - documentation updates (clarification on colours)
 - constants TMP_FG_COL, TMP_BG_COL, and TMP_FILL_COL added

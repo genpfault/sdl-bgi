@@ -281,7 +281,7 @@ display graphics.
 - `void sdlbgislow(void)` triggers "slow mode" even if the graphics
 system was opened with `initwindow()`. Calling `refresh()` is not needed.
 
-- `void setwinoptions (char *title, int x, int y, Uint32 flags)` lets
+- `void setwinoptions(char *title, int x, int y, Uint32 flags)` lets
 you specify the window title (default is `SDL_bgi`), window position,
 and SDL2 window flags OR'ed together.
 
@@ -296,23 +296,22 @@ Shift, Alt, etc.
 Multiple Windows
 ----------------
 
-Subsequent calls to `initgraph ()` make it possible to open several
+Subsequent calls to `initgraph()` make it possible to open several
 windows; only one of them is active (= being drawn on) at any given
 time, regardless of focus.
 
 Functions `setvisualpage()` and `setactivepage()` only work properly
 in single window mode.
 
-- Optionally, use `setwinoptions (char *title, int x, int y, Uint32
+- Optionally, use `setwinoptions(char *title, int x, int y, Uint32
 flags)` as explained above;
 
-- `int getcurrentwindow ()` to get an identifier for the current
-window;
+- `int getcurrentwindow()` returns the current window identifier;
 
-- `void setcurrentwindow (int id)` sets the current window. `id` is an
-integer identifier, as returned by `getcurrentwindow ()`;
+- `void setcurrentwindow(int id)` sets the current window. `id` is an
+integer identifier, as returned by `getcurrentwindow()`;
 
-- `void closewindow (int id)` closes a window of given id.
+- `void closewindow(int id)` closes a window of given id.
 
 
 The real thing

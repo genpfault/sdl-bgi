@@ -3,7 +3,7 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs.
 // Guido Gonzato, PhD
-// September 10, 2018
+// September 18, 2018
 
 /*
 This software is provided 'as-is', without any express or implied
@@ -40,7 +40,7 @@ freely, subject to the following restrictions:
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.2.2
+#define SDL_BGI_VERSION 2.2.3
 
 #define NOPE 0
 #define YEAH 1

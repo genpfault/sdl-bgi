@@ -27,7 +27,7 @@ int main (int argc, char *argv[])
 {
 
   int gd, gm = SDL_320x200;
-  int win1, win2, win3;
+  int win1, win2, win3, x, y;
 
   setwinoptions ("First Window", 10, 10, -1);
   initgraph (&gd, &gm, "");
@@ -35,6 +35,9 @@ int main (int argc, char *argv[])
   circle (50, 100, 50);
   win1 = getcurrentwindow ();
   printf ("Current window: %d\n", win1);
+  x = getmaxx () - 110;
+  y = getmaxy () - 60;
+  readimagefile ("logo.bmp", x, y, x + 100, y + 50);
   getevent ();
   delay (500);
   
@@ -45,6 +48,7 @@ int main (int argc, char *argv[])
   circle (100, 100, 50);
   win2 = getcurrentwindow ();
   printf ("Current window: %d\n", win2);
+  readimagefile ("logo.bmp", x, y, x + 100, y + 50);
   getevent ();
   delay (500);
 
@@ -56,12 +60,15 @@ int main (int argc, char *argv[])
   circle (150, 100, 50);
   win3 = getcurrentwindow ();
   printf ("Current window: %d\n", win3);
+  x = getmaxx () - 110;
+  y = getmaxy () - 60;
+  readimagefile ("logo.bmp", x, y, x + 100, y + 50);
   getevent ();
   delay (500);
   
   setcurrentwindow (win1);
   setcolor (WHITE);
-  circle (200, 100, 50);
+  circle (150, 100, 50);
   win1 = getcurrentwindow ();
   printf ("Current window: %d\n", win1);
   outtextxy (0, 10, "Back to the FIRST window; press a key");

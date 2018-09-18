@@ -4,7 +4,7 @@
 
 Summary:       BGI-compatible 2D graphics C library
 Name:          SDL_bgi
-Version:       2.2.2
+Version:       2.2.3
 Release:       1
 License:       ZLib
 Group:         Libraries

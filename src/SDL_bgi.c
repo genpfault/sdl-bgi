@@ -5,7 +5,7 @@
 // and for teaching.
 // 
 // By Guido Gonzato, PhD
-// September 10, 2018
+// September 18, 2018
 
 /*
 
@@ -1824,7 +1824,11 @@ void initwindow (int width, int height)
 
   if (YEAH == first_run) {
     first_run = NOPE;
-    SDL_Init (SDL_INIT_VIDEO); // initialize SDL2
+     // initialise SDL2
+    if (SDL_Init (SDL_INIT_VIDEO) != 0) {
+      SDL_Log ("SDL_Init failed: %s", SDL_GetError());
+      exit (1);
+    }
     // initialise active_windows[]
     for (int i = 0; i < NUM_BGI_WIN; i++)
       active_windows[i] = NOPE;
@@ -1916,6 +1920,7 @@ void initwindow (int width, int height)
   // window ok; create renderer
   bgi_rnd[current_window] =
     SDL_CreateRenderer (bgi_win[current_window], -1,
+			 // slow but guaranteed to exist
 			SDL_RENDERER_SOFTWARE);
 
   if (NULL == bgi_rnd[current_window]) {
@@ -2987,11 +2992,11 @@ void readimagefile (char *bitmapname, int x1, int y1, int x2, int y2)
   // Reads a .bmp file and displays it immediately at (x1, y1 ).
 
   SDL_Surface
-    *bm_surface;
-  SDL_Texture
-    *bm_texture;
+    *bm_surface,
+    *cur_surface;
   SDL_Rect
-    src_rect, dest_rect;
+    src_rect,
+    dest_rect;
 
   // load bitmap
   bm_surface = SDL_LoadBMP (bitmapname);
@@ -3000,14 +3005,7 @@ void readimagefile (char *bitmapname, int x1, int y1, int x2, int y2)
     return;
   }
 
-  // create texture
-  bm_texture = SDL_CreateTextureFromSurface
-    (bgi_rnd[current_window], bm_surface);
-  if (NULL == bm_texture) {
-    printf ("SDL_CreateTextureFromSurface error: %s\n", SDL_GetError ());
-    return;
-  }
-
+  // source rect, position and size
   src_rect.x = 0;
   src_rect.y = 0;
   src_rect.w = bm_surface->w;
@@ -3022,8 +3020,8 @@ void readimagefile (char *bitmapname, int x1, int y1, int x2, int y2)
     dest_rect.h = src_rect.h;
   }
   else { // change size
-    dest_rect.w = x2 - x1;
-    dest_rect.h = y2 - y1;
+    dest_rect.w = x2 - x1 + 1;
+    dest_rect.h = y2 - y1 + 1;
   }
 
   // clip it if necessary
@@ -3032,15 +3030,19 @@ void readimagefile (char *bitmapname, int x1, int y1, int x2, int y2)
   if (y1 + vp.top + src_rect.h > vp.bottom && vp.clip)
     dest_rect.h = vp.bottom - y1 - vp.top + 1;
 
-  SDL_RenderCopy (bgi_rnd[current_window],
-		  bm_texture,
+  // get SDL surface from current window
+  cur_surface = SDL_GetWindowSurface (bgi_win[current_window]);
+  
+  // blit bitmap surface to current surface
+  SDL_BlitScaled (bm_surface,
 		  &src_rect,
+		  cur_surface,
 		  &dest_rect);
+  
+  bgi_activepage[current_window] = cur_surface->pixels;
+  refresh ();
   SDL_FreeSurface (bm_surface);
-  SDL_DestroyTexture (bm_texture);
-  // this is needed - we're not working with bgi_activepage
-  SDL_RenderPresent (bgi_rnd[current_window]);
-
+  
 } // readimagefile ()
 
 // -----
@@ -3181,18 +3183,15 @@ void setalpha (int col, Uint8 alpha)
 
   Uint32 tmp;
 
-  // alpha is only allowed in argb mode
-  if (col <= BGI_COLORS)
-    return;
-  
-  // COLOR () set up the BGI_COLORS + 1 (temporary) color
+  // COLOR () set up the WHITE + 1 color
   if (-1 == col) {
     bgi_argb_mode = YEAH;
-    bgi_fg_color = BGI_COLORS + 1;
+    bgi_fg_color = WHITE + 1;
   }
-  else
-    bgi_fg_color = BGI_COLORS + TMP_COLORS + col;
-  
+  else {
+    bgi_argb_mode = NOPE;
+    bgi_fg_color = col;
+  }
   tmp = palette[bgi_fg_color] << 8; // get rid of alpha
   tmp = tmp >> 8;
   palette[bgi_fg_color] = ((Uint32)alpha << 24) | tmp;
@@ -3553,8 +3552,8 @@ void updaterect (int x1, int y1, int x2, int y2)
 		     &dest_rect,
 		     bgi_activepage[current_window],
 		     pitch);
-  // SDL_UpdateTexture (bgi_txt, NULL, bgi_activepage[current_window], pitch);
-  SDL_SetTextureBlendMode (bgi_txt[current_window], SDL_BLENDMODE_BLEND);
+  SDL_SetTextureBlendMode (bgi_txt[current_window],
+			   SDL_BLENDMODE_BLEND);
   SDL_RenderCopy (bgi_rnd[current_window],
 		  bgi_txt[current_window],
 		  &src_rect,
