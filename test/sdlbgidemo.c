@@ -279,6 +279,74 @@ void sdlbgi_info (void)
 
 // -----
 
+void modedemo ()
+{
+  int
+    dx, y, size;
+  void
+    *m;
+  
+  message ("Plotting Bitwise Operators Demonstration");
+  mainwindow ();
+  getviewsettings (&viewport);
+  dx = (viewport.right - viewport.left - 100) / 5;
+  y = (viewport.bottom - viewport.top) / 3;
+  
+  /* draw a red rectangle and store it */
+  settextjustify (LEFT_TEXT, TOP_TEXT);
+  setfillstyle (SOLID_FILL, RED);
+  bar (50, y, 50 + dx - 10, y + dx - 10);
+  size = imagesize (50, y, 50 + dx - 10, y + dx - 10);
+  m = malloc (size);
+  getimage (50, y, 50 + dx - 10, y + dx - 10, m);
+  
+  /* draw five yellow rectangles */
+  setcolor (WHITE);
+  setfillstyle (SOLID_FILL, YELLOW);
+  for (int i = 0 ; i < 5; i++)
+    bar (50 + i*dx, y, 50 + i*dx + dx - 10, y + dx - 10);
+  
+  outtextxy (50 + 0*dx, y - 20, "COPY_PUT");
+  outtextxy (50 + 1*dx, y - 20, "XOR_PUT");
+  outtextxy (50 + 2*dx, y - 20, "OR_PUT");
+  outtextxy (50 + 3*dx, y - 20, "AND_PUT");
+  outtextxy (50 + 4*dx, y - 20, "NOT_PUT");
+  setcolor (BLACK);
+  
+  outtextxy (60, y + 10, "ffff00 (yellow)");
+  
+  // COPY_PUT: red: ff0000
+  putimage  (50 + 0*dx, y + dx/2, m, COPY_PUT);
+  outtextxy (60 + 0*dx, y + dx/2 + 20, "ff0000");
+  outtextxy (60 + 0*dx, y + dx/2 + 30, "(red)");
+  
+  // XOR_PUT: red xor yellow: ff0000 ^ ffff00 = 00ff00 (green)
+  putimage  (50 + 1*dx, y + dx/2, m, XOR_PUT);
+  outtextxy (60 + 1*dx, y + dx/2 + 20, "ff0000 ^ ffff00 = 00ff00");
+  outtextxy (60 + 1*dx, y + dx/2 + 30, "(green)");
+  
+  // OR_PUT: red or yellow: ff0000 | ffff00 = ffff00 (yellow)
+  putimage  (50 + 2*dx, y + dx/2, m, OR_PUT);
+  outtextxy (60 + 2*dx, y + dx/2 + 20, "ff0000 | ffff00 = ffff00");
+  outtextxy (60 + 2*dx, y + dx/2 + 30, "(yellow)");
+  
+  // AND_PUT: red and yellow: ff0000 & ffff00 = ff0000 (red)
+  putimage  (50 + 3*dx, y + dx/2, m, AND_PUT);
+  outtextxy (60 + 3*dx, y + dx/2 + 20, "ff0000 & ffff00 = 00ff00");
+  outtextxy (60 + 3*dx, y + dx/2 + 30, "(red)");
+  
+  // NOT_PUT: ~ red: 00ffff (cyan)
+  putimage  (50 + 4*dx, y + dx/2, m, NOT_PUT);
+  outtextxy (60 + 4*dx, y + dx/2 + 20, "~ ff0000 = 00ffff");
+  outtextxy (60 + 4*dx, y + dx/2 + 30, "(cyan)");
+
+  refresh ();
+  pause ();
+  
+} // modedemo ()
+
+// -----
+
 void colordemo (void)
 {
   // show RGB colours
@@ -863,14 +931,12 @@ void floodfilldemo (void)
       exit (1);
     }
     
-    
   } // while
   
   refresh ();
-  if (! stop)
-    get_click ();
+  pause ();
   
-} // ellipsedemo ()
+} // floodfilldemo ()
 
 // -----
 
@@ -914,7 +980,7 @@ void alphademo (void)
 
 // -----
 
-void loadimagedemo (void)
+void readimagedemo (void)
 {
   // load a .bmp file
   int
@@ -949,7 +1015,7 @@ void loadimagedemo (void)
   refresh ();
   get_click ();
 
-} // loadimagedemo ()
+} // readimagedemo ()
 
 // -----
 
@@ -1220,7 +1286,6 @@ void pagedemo (void)
   
   for (num_page = 0; num_page < VPAGES; num_page++) {
     setactivepage (num_page);
-    setvisualpage (num_page);
     setbkcolor (COLOR (20*num_page, 20*num_page, 20*num_page));
     clearviewport ();
     setcolor (BLUE + num_page);
@@ -1228,9 +1293,13 @@ void pagedemo (void)
     sprintf (title, "P A G E   %d", num_page);
     outtextxy (xm, ym/2, title);
     settextstyle (DEFAULT_FONT, HORIZ_DIR, 2);
-    sprintf (title, "This is active page (and visual page) %d", num_page);
+    sprintf (title, "This is page %d", num_page);
     outtextxy (xm, ym, title);
     outtextxy (xm, ym + 30, "Left click to go to next page");
+  }
+
+  for (num_page = 0; num_page < VPAGES; num_page++) {
+    setvisualpage (num_page);
     refresh ();
     pause ();
   }
@@ -1313,6 +1382,7 @@ int main (int argc, char *argv[])
   
   init_sdlbgi ();
   sdlbgi_info ();
+  modedemo ();
   colordemo ();
   pixeldemo ();
   linedemo ();
@@ -1323,7 +1393,7 @@ int main (int argc, char *argv[])
   ellipsedemo ();
   floodfilldemo ();
   alphademo ();
-  loadimagedemo ();
+  readimagedemo ();
   putimagedemo ();
   sdlmixdemo ();
   textdemo ();

@@ -1,6 +1,18 @@
 Changelog
 ---------
 
+v. 2.2.4, 2018-11-15
+- added some graphics modes for better compatibility
+  with old programs
+- fixed bug in setvisualpage()
+- minor fix in getch()
+- fix in putimage() bitwise operations
+- modified readimagefile() again
+  (reported by Carlos Gustavo Ramirez Rodriguez)
+- added test/kaleido.c
+- added savestate() and restorestate() in turtle.c
+- documentation updates and improvements
+
 v. 2.2.3, 2018-09-18
 - fixed bug in setalpha()
 - rewritten readimagefile() to change unwanted behaviour

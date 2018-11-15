@@ -1,11 +1,11 @@
 # CMakeLists.txt for SDL_bgi 
-# GG, 2018-05-26
+# GG, 2018-12-18
 
 # --- Building, thanks to cmake
 
 cmake_minimum_required (VERSION 3.5.0)
 
-set (SDL_BGI_VERSION 2.2.2)
+set (SDL_BGI_VERSION 2.2.4)
 
 # Project name
 project (SDL_bgi VERSION ${SDL_BGI_VERSION} LANGUAGES C)

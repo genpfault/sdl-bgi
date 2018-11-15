@@ -25,7 +25,7 @@ LIBS = -lSDL_bgi -framework SDL2
 endif
 
 PROGRAMS = cellular dla fern floodfilltest hopalong life \
-           mandelbrot mousetest moveit multiwin plasma \
+           kaleido mandelbrot mousetest moveit multiwin plasma \
 	   psychedelia sdlbgidemo simple turtledemo
 
 all: $(PROGRAMS)
@@ -50,6 +50,9 @@ hopalong: hopalong.c
 
 life: life.c 
 	$(CC) $(CFLAGS) -o life life.c $(LIBS)
+
+kaleido: kaleido.c 
+	$(CC) $(CFLAGS) -o kaleido kaleido.c $(LIBS)
 
 mandelbrot: mandelbrot.c 
 	$(CC) $(CFLAGS) -o mandelbrot mandelbrot.c $(LIBS)

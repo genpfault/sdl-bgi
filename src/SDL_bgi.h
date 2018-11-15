@@ -3,7 +3,7 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs.
 // Guido Gonzato, PhD
-// September 18, 2018
+// November 15, 2018
 
 /*
 This software is provided 'as-is', without any express or implied
@@ -40,10 +40,9 @@ freely, subject to the following restrictions:
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.2.3
+#define SDL_BGI_VERSION 2.2.4
 
-#define NOPE 0
-#define YEAH 1
+enum { NOPE, YEAH };
 #define BGI_WINTITLE_LEN 512 // more than enough
 
 // number of concurrent windows that can be created
@@ -62,88 +61,49 @@ extern SDL_Texture  *bgi_texture;
 
 // BGI fonts
 
-#define DEFAULT_FONT     0 // 8x8
-#define TRIPLEX_FONT     1 // all other fonts are not implemented
-#define SMALL_FONT       2
-#define SANSSERIF_FONT   3
-#define GOTHIC_FONT      4
-#define BIG_FONT         5
-#define SCRIPT_FONT      6
-#define SIMPLEX_FONT     7
-#define TRIPLEX_SCR_FONT 8
-#define COMPLEX_FONT     9
-#define EUROPEAN_FONT    10
-#define BOLD_FONT        11
+// only DEFAULT_FONT (8x8) is implemented
+enum {
+  DEFAULT_FONT, TRIPLEX_FONT, SMALL_FONT, SANSSERIF_FONT,
+  GOTHIC_FONT, BIG_FONT, SCRIPT_FONT, SIMPLEX_FONT,
+  TRIPLEX_SCR_FONT, COMPLEX_FONT, EUROPEAN_FONT, BOLD_FONT
+};
 
-#define HORIZ_DIR      0
-#define VERT_DIR       1
+enum { HORIZ_DIR, VERT_DIR };
 
 #define USER_CHAR_SIZE 0
 
-#define LEFT_TEXT      0
-#define CENTER_TEXT    1
-#define RIGHT_TEXT     2
-#define BOTTOM_TEXT    0
-#define TOP_TEXT       2
+enum {
+  LEFT_TEXT, CENTER_TEXT, RIGHT_TEXT,
+  BOTTOM_TEXT = 0, TOP_TEXT = 2
+};
 
 // BGI colours
 
-#define MAXCOLORS      15
-#define BLACK           0
-#define BLUE            1
-#define GREEN           2
-#define CYAN            3
-#define RED             4
-#define MAGENTA         5
-#define BROWN           6
-#define LIGHTGRAY       7
-#define DARKGRAY        8
-#define LIGHTBLUE       9
-#define LIGHTGREEN     10
-#define LIGHTCYAN      11
-#define LIGHTRED       12
-#define LIGHTMAGENTA   13
-#define YELLOW         14
-#define WHITE          15
+enum {
+  BLACK, BLUE, GREEN, CYAN, RED, MAGENTA, BROWN,
+  LIGHTGRAY, DARKGRAY, LIGHTBLUE, LIGHTGREEN, LIGHTCYAN,
+  LIGHTRED, LIGHTMAGENTA, YELLOW, WHITE, MAXCOLORS = 15
+};
 
 // temporary colours
 
-#define TMP_FG_COL     16
-#define TMP_BG_COL     17
-#define TMP_FILL_COL   18
+enum { TMP_FG_COL = 16, TMP_BG_COL = 17, TMP_FILL_COL = 18 };
 
 // line style, thickness, and drawing mode
 
-#define NORM_WIDTH      1
-#define THICK_WIDTH     3
+enum { NORM_WIDTH = 1, THICK_WIDTH = 3 };
 
-#define SOLID_LINE      0
-#define DOTTED_LINE     1
-#define CENTER_LINE     2
-#define DASHED_LINE     3
-#define USERBIT_LINE    4
+enum { SOLID_LINE, DOTTED_LINE, CENTER_LINE, DASHED_LINE, USERBIT_LINE };
 
-#define COPY_PUT        0
-#define XOR_PUT         1
-#define OR_PUT          2
-#define AND_PUT         3
-#define NOT_PUT         4
+enum { COPY_PUT, XOR_PUT, OR_PUT, AND_PUT, NOT_PUT };
 
 // fill styles
 
-#define EMPTY_FILL      0
-#define SOLID_FILL      1
-#define LINE_FILL       2
-#define LTSLASH_FILL    3
-#define SLASH_FILL      4
-#define BKSLASH_FILL    5
-#define LTBKSLASH_FILL  6
-#define HATCH_FILL      7
-#define XHATCH_FILL     8
-#define INTERLEAVE_FILL 9
-#define WIDE_DOT_FILL   10
-#define CLOSE_DOT_FILL  11
-#define USER_FILL       12
+enum {
+  EMPTY_FILL, SOLID_FILL, LINE_FILL, LTSLASH_FILL, SLASH_FILL,
+  BKSLASH_FILL, LTBKSLASH_FILL, HATCH_FILL, XHATCH_FILL,
+  INTERLEAVE_FILL, WIDE_DOT_FILL, CLOSE_DOT_FILL, USER_FILL
+};
 
 // mouse buttons
 
@@ -179,12 +139,17 @@ extern SDL_Texture  *bgi_texture;
 #define KEY_F10         SDLK_F10
 #define KEY_F11         SDLK_F11
 #define KEY_F12         SDLK_F12
+#define KEY_CAPSLOCK    SDLK_CAPSLOCK
 #define KEY_LEFT_CTRL   SDLK_LCTRL
 #define KEY_RIGHT_CTRL  SDLK_RCTRL
 #define KEY_LEFT_SHIFT  SDLK_LSHIFT
 #define KEY_RIGHT_SHIFT SDLK_RSHIFT
 #define KEY_LEFT_ALT    SDLK_LALT
+#define KEY_RIGHT_ALT   SDLK_RALT
 #define KEY_ALT_GR      SDLK_MODE
+#define KEY_LGUI        SDLK_LGUI
+#define KEY_RGUI        SDLK_RGUI
+#define KEY_MENU        SDLK_MENU
 #define KEY_TAB         SDLK_TAB
 #define KEY_BS          SDLK_BACKSPACE
 #define KEY_RET         SDLK_RETURN
@@ -194,38 +159,41 @@ extern SDL_Texture  *bgi_texture;
 
 #define QUIT            SDL_QUIT
 
-// graphics modes
+// graphics modes. Expanded from the original GRAPHICS.H
 
-#define DETECT          -1
-#define grOk            0
-#define SDL             0
-#define SDL_320x200     1
-#define SDL_CGALO       1
-#define CGA             1
-#define SDL_640x200     2
-#define SDL_CGAHI       2
-#define SDL_640x350     3
-#define SDL_EGA         3
-#define EGA             3
-#define EGALO           3
-#define SDL_640x480     4
-#define SDL_VGA         4
-#define VGA             4
-#define SDL_HERC        5
-#define SDL_PC3270      6
-#define SDL_800x600     7
-#define SDL_SVGALO      7
-#define SVGA            7
-#define SDL_1024x768    8
-#define SDL_SVGAMED1    8
-#define SDL_1152x900    9
-#define SDL_SVGAMED2    9
-#define SDL_1280x1024   10
-#define SDL_SVGAHI      10
-#define SDL_1366x768    11
-#define SDL_WXGA        11
-#define SDL_USER        12
-#define SDL_FULLSCREEN  13
+enum {
+  DETECT = -1,
+  grOk = 0, SDL = 0,
+  // all modes @ 320x200 
+  SDL_320x200 = 1, SDL_CGALO = 1, CGA = 1, CGAC0 = 1, CGAC1 = 1,
+  CGAC2 = 1, CGAC3 = 1, MCGAC0 = 1, MCGAC1 = 1, MCGAC2 = 1,
+  MCGAC3 = 1, ATT400C0 = 1, ATT400C1 = 1, ATT400C2 = 1, ATT400C3 = 1,
+  // all modes @ 640x200
+  SDL_640x200 = 2, SDL_CGAHI = 2, CGAHI = 2, MCGAMED = 2,
+  EGALO = 2, EGA64LO = 2,
+  // all modes @ 640x350
+  SDL_640x350 = 3, SDL_EGA = 3, EGA = 3, EGAHI = 3,
+  EGA64HI = 3, EGAMONOHI = 3,
+  // all modes @ 640x480
+  SDL_640x480 = 4, SDL_VGA = 4, VGA = 4, MCGAHI = 4, VGAHI = 4,
+  IBM8514LO = 4,
+  // all modes @ 720x348
+  SDL_720x348 = 5, SDL_HERC = 5,
+  // all modes @ 720x350
+  SDL_720x350 = 6, SDL_PC3270 = 6, HERCMONOHI = 6,
+  // all modes @ 800x600
+  SDL_800x600 = 7, SDL_SVGALO = 7, SVGA = 7,
+  // all modes @ 1024x768
+  SDL_1024x768 = 8, SDL_SVGAMED1 = 8,
+  // all modes @ 1152x900
+  SDL_1152x900 = 9, SDL_SVGAMED2 = 9,
+  // all modes @ 1280x1024
+  SDL_1280x1024 = 10, SDL_SVGAHI = 10,
+  // all modes @ 1366x768
+  SDL_1366x768 = 11, SDL_WXGA = 11,
+  // other
+  SDL_USER = 12, SDL_FULLSCREEN = 13
+};
 
 // libXbgi compatibility
 
@@ -417,6 +385,7 @@ void sdlbgifast (void);
 void sdlbgislow (void);
 void setalpha (int, Uint8);
 void setbkrgbcolor (int);
+void setblendmode (int);
 void setcurrentwindow (int);
 void setrgbcolor (int);
 void setrgbpalette (int, int, int, int);

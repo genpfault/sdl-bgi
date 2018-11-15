@@ -170,6 +170,10 @@ setgraphbufsize     - unneeded
 to other BGI fonts (e.g. `TRIPLEX_FONT`, and others) have no effect:
 consider using `SDL_ttf`!
 
+- `putimage()` bitwise operations (`XOR_PUT`, `OR_PUT` etc.) are
+applied to RGB colour components. This is apparently not the same
+behaviour as old Turbo C.
+
 
 Colours
 -------
@@ -227,6 +231,9 @@ colour in the extended palette.
 
 - `setalpha(int col, Uint8 alpha)` sets the alpha component of colour
 'col'.
+
+- `setblendmode(int blendmode)` sets the blending mode for screen
+refresh.
 
 - `void _putpixel(int x, int y)` is equivalent to `putpixel(int x, int
 y, int col)`, but uses the current drawing colour and the pixel is not

@@ -233,6 +233,8 @@ void `setalpha` (int col, Uint32 alpha);
 
 void `setbkrgbcolor` (int color);
 
+void `setblendmode` (int blendmode);
+
 void `setcurrentwindow` (int id);
 
 void `setrgbcolor` (int color); 

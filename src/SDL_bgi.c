@@ -1,11 +1,11 @@
-// SDL_bgi.c	-*- C -*-
+// SDL_bgi.c        -*- C -*-
 
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs
 // and for teaching.
 // 
 // By Guido Gonzato, PhD
-// September 18, 2018
+// November 15, 2018
 
 /*
 
@@ -31,8 +31,7 @@ freely, subject to the following restrictions:
 
 #include "SDL_bgi.h"
 
-// stuff gets drawn here; these variables
-// are available to the programmer.
+// stuff gets drawn here; these variables are available to the programmer.
 // All the rest is hidden.
 
 SDL_Window   *bgi_window;
@@ -41,9 +40,9 @@ SDL_Texture  *bgi_texture;
 
 // static variables
 
-SDL_Window   *bgi_win[NUM_BGI_WIN];
-SDL_Renderer *bgi_rnd[NUM_BGI_WIN];
-SDL_Texture  *bgi_txt[NUM_BGI_WIN];
+static SDL_Window   *bgi_win[NUM_BGI_WIN];
+static SDL_Renderer *bgi_rnd[NUM_BGI_WIN];
+static SDL_Texture  *bgi_txt[NUM_BGI_WIN];
 
 static short int
   current_window = -1, // id of current window
@@ -87,23 +86,24 @@ static Uint32
 
 static Uint32
   bgi_palette[1 + MAXCOLORS] = { // 0 - 15
-  0xff000000, // BLACK
-  0xff0000ff, // BLUE
-  0xff00ff00, // GREEN
-  0xff00ffff, // CYAN
-  0xffff0000, // RED
-  0xffff00ff, // MAGENTA
-  0xffa52a2a, // BROWN
-  0xffd3d3d3, // LIGHTGRAY
-  0xffa9a9a9, // DARKGRAY
-  0xffadd8e6, // LIGHTBLUE
-  0xff90ee90, // LIGHTGREEN
-  0xffe0ffff, // LIGHTCYAN
-  0xfff08080, // LIGHTRED
-  0xffdb7093, // LIGHTMAGENTA
-  0xffffff00, // YELLOW
-  0xffffffff  // WHITE
-};
+    // ARGB
+    0xff000000, // BLACK
+    0xff0000ff, // BLUE
+    0xff00ff00, // GREEN
+    0xff00ffff, // CYAN
+    0xffff0000, // RED
+    0xffff00ff, // MAGENTA
+    0xffa52a2a, // BROWN
+    0xffd3d3d3, // LIGHTGRAY
+    0xffa9a9a9, // DARKGRAY
+    0xffadd8e6, // LIGHTBLUE
+    0xff90ee90, // LIGHTGREEN
+    0xffe0ffff, // LIGHTCYAN
+    0xfff08080, // LIGHTRED
+    0xffdb7093, // LIGHTMAGENTA
+    0xffffff00, // YELLOW
+    0xffffffff  // WHITE
+  };
 
 static Uint16
   line_patterns[1 + USERBIT_LINE] =
@@ -119,9 +119,9 @@ static Uint32
 
 static int
   window_x =              // window initial position
-  SDL_WINDOWPOS_CENTERED,
+    SDL_WINDOWPOS_CENTERED,
   window_y =
-  SDL_WINDOWPOS_CENTERED,
+    SDL_WINDOWPOS_CENTERED,
   bgi_fg_color = WHITE,   // index of BGI foreground color
   bgi_bg_color = BLACK,   // index of BGI background color
   bgi_fill_color = WHITE, // index of BGI fill color
@@ -138,6 +138,8 @@ static int
   bgi_gm,                 // graphics mode
   bgi_argb_mode = NOPE,   // BGI or ARGB colors
   bgi_writemode,          // plotting method (COPY_PUT, XOR_PUT...)
+  bgi_blendmode = 
+    SDL_BLENDMODE_BLEND,  // blending mode
   bgi_ap,                 // active page number
   bgi_vp,                 // visual page number
   bgi_np = 0;             // # of actual pages
@@ -294,9 +296,9 @@ void arc (int x, int y, int stangle, int endangle, int radius)
 
   for (angle = stangle; angle < endangle; angle++)
     line_fast (x + floor (0.5 + (radius * cos (angle * PI_CONV))),
-	       y - floor (0.5 + (radius * sin (angle * PI_CONV))),
-	       x + floor (0.5 + (radius * cos ((angle+1) * PI_CONV))),
-	       y - floor (0.5 + (radius * sin ((angle+1) * PI_CONV))));
+               y - floor (0.5 + (radius * sin (angle * PI_CONV))),
+               x + floor (0.5 + (radius * cos ((angle+1) * PI_CONV))),
+               y - floor (0.5 + (radius * sin ((angle+1) * PI_CONV))));
 
   if (! bgi_fast_mode)
     refresh ();
@@ -600,10 +602,10 @@ void drawpoly (int numpoints, int *polypoints)
 
   for (n = 0; n < numpoints - 1; n++)
     line_fast (polypoints[2*n], polypoints[2*n + 1],
-	       polypoints[2*n + 2], polypoints[2*n + 3]);
+               polypoints[2*n + 2], polypoints[2*n + 3]);
   // close the polygon
   line_fast (polypoints[2*n], polypoints[2*n + 1],
-	     polypoints[0], polypoints[1]);
+             polypoints[0], polypoints[1]);
 
   if (! bgi_fast_mode)
     refresh ();
@@ -655,9 +657,9 @@ void ellipse (int x, int y, int stangle, int endangle,
 
   for (angle = stangle; angle < endangle; angle++)
     line_fast (x + (xradius * cos (angle * PI_CONV)),
-	       y - (yradius * sin (angle * PI_CONV)),
-	       x + (xradius * cos ((angle+1) * PI_CONV)),
-	       y - (yradius * sin ((angle+1) * PI_CONV)));
+               y - (yradius * sin (angle * PI_CONV)),
+               x + (xradius * cos ((angle+1) * PI_CONV)),
+               y - (yradius * sin ((angle+1) * PI_CONV)));
 
   if (! bgi_fast_mode)
     refresh ();
@@ -676,7 +678,7 @@ int event (void)
     if ( (SDL_KEYDOWN == event.type)         ||
          (SDL_MOUSEBUTTONDOWN == event.type) ||
          (SDL_MOUSEWHEEL == event.type)      ||
-	 (SDL_QUIT == event.type) ) {
+         (SDL_QUIT == event.type) ) {
       SDL_PushEvent (&event); // don't disrupt the event
       bgi_last_event = event.type;
       return YEAH;
@@ -772,7 +774,7 @@ void _ellipse (int cx, int cy, int xradius, int yradius)
     xchange +=TwoBSquare;
     if ((2*ellipseerror + ychange) > 0) {
       y--,
-	StoppingY -= TwoASquare;
+        StoppingY -= TwoASquare;
       ellipseerror += ychange;
       ychange +=TwoASquare;
     }
@@ -855,7 +857,7 @@ void fillellipse (int cx, int cy, int xradius, int yradius)
     xchange +=TwoBSquare;
     if ((2*ellipseerror + ychange) > 0) {
       y--,
-	StoppingY -= TwoASquare;
+        StoppingY -= TwoASquare;
       ellipseerror += ychange;
       ychange +=TwoASquare;
     }
@@ -935,10 +937,10 @@ void fillpoly (int numpoints, int *polypoints)
            (float) polypoints[j + 1] >= (float) pixelY) ||
           ((float) polypoints[j + 1] < (float)  pixelY &&
            (float) polypoints[i + 1] >= (float) pixelY))
-	nodeX[nodes++] =
-	(int) (polypoints[i] + (pixelY - (float) polypoints[i + 1]) /
-	       ((float) polypoints[j + 1] - (float) polypoints[i + 1]) *
-	       (polypoints[j] - polypoints[i]));
+        nodeX[nodes++] =
+        (int) (polypoints[i] + (pixelY - (float) polypoints[i + 1]) /
+               ((float) polypoints[j + 1] - (float) polypoints[i + 1]) *
+               (polypoints[j] - polypoints[i]));
       j = i;
     }
 
@@ -1099,7 +1101,7 @@ void _floodfill (int x, int y, int border)
     }
     do {
       for (x1 = x; x <= vp.right && getpixel (x, y) != border; x++)
-	ff_putpixel (x, y);
+        ff_putpixel (x, y);
       ff_push (y, start, x - 1, dy);
       if (x > x2 + 1)
         ff_push (y, x2 + 1, x - 1, -dy);    // leak on right?
@@ -1151,10 +1153,10 @@ void floodfill (int x, int y, int border)
       // than the border and the background
       found = NOPE;
       while (!found) {
-	bgi_fill_style.color = BLUE + random (WHITE);
-	if (oldcol != bgi_fill_style.color &&
-	    border != bgi_fill_style.color)
-	  found = YEAH;
+        bgi_fill_style.color = BLUE + random (WHITE);
+        if (oldcol != bgi_fill_style.color &&
+            border != bgi_fill_style.color)
+          found = YEAH;
       }
       _floodfill (x, y, border);
       // ...then pattern fill
@@ -1240,14 +1242,19 @@ int bgi_getch (void)
       return QUIT;
 
     if (SDL_KEYDOWN == type &&
-	key != KEY_LEFT_CTRL &&
-	key != KEY_RIGHT_CTRL &&
-	key != KEY_LEFT_SHIFT &&
-	key != KEY_RIGHT_SHIFT &&
-	key != KEY_LEFT_ALT &&
-	key != KEY_ALT_GR)
+        key != KEY_LEFT_CTRL &&
+        key != KEY_RIGHT_CTRL &&
+        key != KEY_LEFT_SHIFT &&
+        key != KEY_RIGHT_SHIFT &&
+        key != KEY_LEFT_ALT &&
+        key != KEY_RIGHT_ALT &&
+        key != KEY_CAPSLOCK &&
+        key != KEY_LGUI &&
+        key != KEY_RGUI &&
+        key != KEY_MENU &&
+        key != KEY_ALT_GR) // can't catch AltGr!
       return (int) key;
-  } while (SDL_KEYDOWN != type);
+  } while (1);
 
   // we should never get here...
   return 0;
@@ -1304,44 +1311,44 @@ int getevent (void)
 
       case SDL_WINDOWEVENT:
 
-	switch (event.window.event) {
+        switch (event.window.event) {
 
-	case SDL_WINDOWEVENT_SHOWN:
-	case SDL_WINDOWEVENT_EXPOSED:
-	  refresh ();
-	  break;
+        case SDL_WINDOWEVENT_SHOWN:
+        case SDL_WINDOWEVENT_EXPOSED:
+          refresh ();
+          break;
 
-	case SDL_WINDOWEVENT_CLOSE:
-	  bgi_last_event = QUIT;
-	  return QUIT;
-	  break;
+        case SDL_WINDOWEVENT_CLOSE:
+          bgi_last_event = QUIT;
+          return QUIT;
+          break;
 
-	default:
-	  ;
+        default:
+          ;
 
-	} // switch (event.window.event)
+        } // switch (event.window.event)
 
-	break;
+        break;
 
       case SDL_KEYDOWN:
-	bgi_last_event = SDL_KEYDOWN;
+        bgi_last_event = SDL_KEYDOWN;
         bgi_mouse_x = bgi_mouse_y = -1;
         return event.key.keysym.sym;
         break;
 
       case SDL_MOUSEBUTTONDOWN:
-	bgi_last_event = SDL_MOUSEBUTTONDOWN;
+        bgi_last_event = SDL_MOUSEBUTTONDOWN;
         bgi_mouse_x = event.button.x;
         bgi_mouse_y = event.button.y;
         return event.button.button;
         break;
 
       case SDL_MOUSEWHEEL:
-	bgi_last_event = SDL_MOUSEWHEEL;
-	SDL_GetMouseState (&bgi_mouse_x, &bgi_mouse_y);
-	if (1 == event.wheel.y) // up
-	  return (WM_WHEELUP);
-	else
+        bgi_last_event = SDL_MOUSEWHEEL;
+        SDL_GetMouseState (&bgi_mouse_x, &bgi_mouse_y);
+        if (1 == event.wheel.y) // up
+          return (WM_WHEELUP);
+        else
           return (WM_WHEELDOWN);
         break;
 
@@ -1758,12 +1765,24 @@ void initgraph (int *graphdriver, int *graphmode, char *pathtodriver)
     initwindow (320, 200);
     break;
 
+  case SDL_640x200:
+    initwindow (640, 200);
+    break;
+
   case SDL_640x350:
     initwindow (640, 350);
     break;
 
   case SDL_640x480:
     initwindow (640, 480);
+    break;
+
+  case SDL_720x348:
+    initwindow (720, 348);
+    break;
+
+  case SDL_720x350:
+    initwindow (720, 350);
     break;
 
   case SDL_1024x768:
@@ -1906,11 +1925,11 @@ void initwindow (int width, int height)
 
   bgi_win[current_window] = 
     SDL_CreateWindow (bgi_win_title,
-		      window_x,
-		      window_y,
-		      bgi_maxx + 1,
-		      bgi_maxy + 1,
-		      window_flags);
+                      window_x,
+                      window_y,
+                      bgi_maxx + 1,
+                      bgi_maxy + 1,
+                      window_flags);
   // is the window OK?
   if (NULL == bgi_win[current_window]) {
     printf ("Could not create window: %s\n", SDL_GetError ());
@@ -1920,8 +1939,8 @@ void initwindow (int width, int height)
   // window ok; create renderer
   bgi_rnd[current_window] =
     SDL_CreateRenderer (bgi_win[current_window], -1,
-			 // slow but guaranteed to exist
-			SDL_RENDERER_SOFTWARE);
+                         // slow but guaranteed to exist
+                        SDL_RENDERER_SOFTWARE);
 
   if (NULL == bgi_rnd[current_window]) {
     printf ("Could not create renderer: %s\n", SDL_GetError ());
@@ -1931,10 +1950,10 @@ void initwindow (int width, int height)
   // last, create the texture
   bgi_txt[current_window] =
     SDL_CreateTexture (bgi_rnd[current_window],
-		       SDL_PIXELFORMAT_ARGB8888,
-		       SDL_TEXTUREACCESS_TARGET,
-		       bgi_maxx + 1,
-		       bgi_maxy + 1);
+                       SDL_PIXELFORMAT_ARGB8888,
+                       SDL_TEXTUREACCESS_TARGET,
+                       bgi_maxx + 1,
+                       bgi_maxy + 1);
   if (NULL == bgi_txt[current_window]) {
     printf ("Could not create texture: %s\n", SDL_GetError ());
     return;
@@ -2019,12 +2038,12 @@ int kbhit (void)
           key != SDLK_APPLICATION)
         return YEAH;
       else
-	return NOPE;
+        return NOPE;
     } // if (SDL_KEYDOWN == event.type)
     else
       if (SDL_WINDOWEVENT == event.type) {
-	if (SDL_WINDOWEVENT_CLOSE == event.window.event)
-	  return QUIT;
+        if (SDL_WINDOWEVENT_CLOSE == event.window.event)
+          return QUIT;
       }
     else
       SDL_PushEvent (&event); // don't disrupt the mouse
@@ -2057,7 +2076,7 @@ void line_copy (int x1, int y1, int x2, int y2)
       putpixel_copy (x1, y1, palette[bgi_fg_color]);
     else
       if ((line_patterns[bgi_line_style.linestyle] >> counter % 16) & 1)
-	putpixel_copy (x1, y1, palette[bgi_fg_color]);
+        putpixel_copy (x1, y1, palette[bgi_fg_color]);
 
     counter++;
 
@@ -2095,7 +2114,7 @@ void line_xor (int x1, int y1, int x2, int y2)
       putpixel_xor (x1, y1, palette[bgi_fg_color]);
     else
       if ((line_patterns[bgi_line_style.linestyle] >> counter % 16) & 1)
-	putpixel_xor (x1, y1, palette[bgi_fg_color]);
+        putpixel_xor (x1, y1, palette[bgi_fg_color]);
 
     counter++;
 
@@ -2133,7 +2152,7 @@ void line_and (int x1, int y1, int x2, int y2)
       putpixel_and (x1, y1, palette[bgi_fg_color]);
     else
       if ((line_patterns[bgi_line_style.linestyle] >> counter % 16) & 1)
-	putpixel_and (x1, y1, palette[bgi_fg_color]);
+        putpixel_and (x1, y1, palette[bgi_fg_color]);
 
     counter++;
 
@@ -2171,7 +2190,7 @@ void line_or (int x1, int y1, int x2, int y2)
       putpixel_or (x1, y1, palette[bgi_fg_color]);
     else
       if ((line_patterns[bgi_line_style.linestyle] >> counter % 16) & 1)
-	putpixel_or (x1, y1, palette[bgi_fg_color]);
+        putpixel_or (x1, y1, palette[bgi_fg_color]);
 
     counter++;
 
@@ -2209,7 +2228,7 @@ void line_not (int x1, int y1, int x2, int y2)
       putpixel_not (x1, y1, palette[bgi_fg_color]);
     else
       if ((line_patterns[bgi_line_style.linestyle] >> counter % 16) & 1)
-	putpixel_not (x1, y1, palette[bgi_fg_color]);
+        putpixel_not (x1, y1, palette[bgi_fg_color]);
 
     counter++;
 
@@ -2337,25 +2356,25 @@ void line (int x1, int y1, int x2, int y2)
     case 8:
       switch (bgi_writemode) {
       case COPY_PUT:
-	line_copy (x1, y1 - 1, x2, y2 - 1);
-	line_copy (x1, y1 + 1, x2, y2 + 1);
-	break;
+        line_copy (x1, y1 - 1, x2, y2 - 1);
+        line_copy (x1, y1 + 1, x2, y2 + 1);
+        break;
       case AND_PUT:
-	line_and (x1, y1 - 1, x2, y2 - 1);
-	line_and (x1, y1 + 1, x2, y2 + 1);
-	break;
+        line_and (x1, y1 - 1, x2, y2 - 1);
+        line_and (x1, y1 + 1, x2, y2 + 1);
+        break;
       case XOR_PUT:
-	line_xor (x1, y1 - 1, x2, y2 - 1);
-	line_xor (x1, y1 + 1, x2, y2 + 1);
-	break;
+        line_xor (x1, y1 - 1, x2, y2 - 1);
+        line_xor (x1, y1 + 1, x2, y2 + 1);
+        break;
       case OR_PUT:
-	line_or (x1, y1 - 1, x2, y2 - 1);
-	line_or (x1, y1 + 1, x2, y2 + 1);
-	break;
+        line_or (x1, y1 - 1, x2, y2 - 1);
+        line_or (x1, y1 + 1, x2, y2 + 1);
+        break;
       case NOT_PUT:
-	line_not (x1, y1 - 1, x2, y2 - 1);
-	line_not (x1, y1 + 1, x2, y2 + 1);
-	break;
+        line_not (x1, y1 - 1, x2, y2 - 1);
+        line_not (x1, y1 + 1, x2, y2 + 1);
+        break;
       } // switch
       break;
 
@@ -2365,25 +2384,25 @@ void line (int x1, int y1, int x2, int y2)
     case 7:
       switch (bgi_writemode) {
       case COPY_PUT:
-	line_copy (x1 - 1, y1, x2 - 1, y2);
-	line_copy (x1 + 1, y1, x2 + 1, y2);
-	break;
+        line_copy (x1 - 1, y1, x2 - 1, y2);
+        line_copy (x1 + 1, y1, x2 + 1, y2);
+        break;
       case AND_PUT:
-	line_and (x1 - 1, y1, x2 - 1, y2);
-	line_and (x1 + 1, y1, x2 + 1, y2);
-	break;
+        line_and (x1 - 1, y1, x2 - 1, y2);
+        line_and (x1 + 1, y1, x2 + 1, y2);
+        break;
       case XOR_PUT:
-	line_xor (x1 - 1, y1, x2 - 1, y2);
-	line_xor (x1 + 1, y1, x2 + 1, y2);
-	break;
+        line_xor (x1 - 1, y1, x2 - 1, y2);
+        line_xor (x1 + 1, y1, x2 + 1, y2);
+        break;
       case OR_PUT:
-	line_or (x1 - 1, y1, x2 - 1, y2);
-	line_or (x1 + 1, y1, x2 + 1, y2);
-	break;
+        line_or (x1 - 1, y1, x2 - 1, y2);
+        line_or (x1 + 1, y1, x2 + 1, y2);
+        break;
       case NOT_PUT:
-	line_not (x1 - 1, y1, x2 - 1, y2);
-	line_not (x1 + 1, y1, x2 + 1, y2);
-	break;
+        line_not (x1 - 1, y1, x2 - 1, y2);
+        line_not (x1 + 1, y1, x2 + 1, y2);
+        break;
       } // switch
       break;
 
@@ -2586,18 +2605,18 @@ void drawchar (unsigned char ch)
     for (j = 0; j < 8; j++)
 
       if ( (k << j) & 0x80) { // bit set to 1
-	if (HORIZ_DIR == bgi_txt_style.direction) {
-	  x = bgi_cp_x + j * bgi_font_mag_x;
-	  y = bgi_cp_y + i * bgi_font_mag_y;
-	  // putpixel (x, y, bgi_fg_color);
-	  _bar (x, y, x + bgi_font_mag_x - 1, y + bgi_font_mag_y - 1);
-	}
+        if (HORIZ_DIR == bgi_txt_style.direction) {
+          x = bgi_cp_x + j * bgi_font_mag_x;
+          y = bgi_cp_y + i * bgi_font_mag_y;
+          // putpixel (x, y, bgi_fg_color);
+          _bar (x, y, x + bgi_font_mag_x - 1, y + bgi_font_mag_y - 1);
+        }
         else {
-	  x = bgi_cp_x + i * bgi_font_mag_y;
-	  y = bgi_cp_y - j * bgi_font_mag_x;
-	  // putpixel (bgi_cp_x + i, bgi_cp_y - j, bgi_fg_color);
-	  _bar (x, y, x + bgi_font_mag_x - 1, y + bgi_font_mag_y - 1);
-	}
+          x = bgi_cp_x + i * bgi_font_mag_y;
+          y = bgi_cp_y - j * bgi_font_mag_x;
+          // putpixel (bgi_cp_x + i, bgi_cp_y - j, bgi_fg_color);
+          _bar (x, y, x + bgi_font_mag_x - 1, y + bgi_font_mag_y - 1);
+        }
       }
   }
 
@@ -2729,16 +2748,16 @@ void pieslice (int x, int y, int stangle, int endangle, int radius)
 
   for (angle = stangle; angle < endangle; angle++)
     line_fast (x + (radius * cos (angle * PI_CONV)),
-	       y - (radius * sin (angle * PI_CONV)),
-	       x + (radius * cos ((angle+1) * PI_CONV)),
-	       y - (radius * sin ((angle+1) * PI_CONV)));
+               y - (radius * sin (angle * PI_CONV)),
+               x + (radius * cos ((angle+1) * PI_CONV)),
+               y - (radius * sin ((angle+1) * PI_CONV)));
   line_fast (x, y, bgi_last_arc.xstart, bgi_last_arc.ystart);
   line_fast (x, y, bgi_last_arc.xend, bgi_last_arc.yend);
 
   angle = (stangle + endangle) / 2;
   floodfill (x + (radius * cos (angle * PI_CONV)) / 2,
-	     y - (radius * sin (angle * PI_CONV)) / 2,
-	     bgi_fg_color);
+             y - (radius * sin (angle * PI_CONV)) / 2,
+             bgi_fg_color);
 
   if (! bgi_fast_mode)
     refresh ();
@@ -2759,34 +2778,39 @@ void putimage (int left, int top, void *bitmap, int op)
   // get width and height info from bitmap
   memcpy (&bitmap_w, tmp, sizeof (Uint32));
   memcpy (&bitmap_h, tmp + 1, sizeof (Uint32));
-
+  
   // put bitmap to the screen
-  for (y = top + vp.top; y < top + vp.top + bitmap_h; y++)
-    for (x = left + vp.left; x < left + vp.left + bitmap_w; x++) {
+  for (int yy = 0; yy < bitmap_h; yy++)
+    for (int xx = 0; xx < bitmap_w; xx++) {
 
+      x = left + vp.left + xx;
+      y = top + vp.top + yy;
+	
       switch (op) {
 
       case COPY_PUT:
-	putpixel_copy (x, y, tmp[i++]);
-	break;
+        putpixel_copy (x, y, tmp[i++]);
+        break;
 
       case AND_PUT:
-	putpixel_and (x, y, tmp[i++]);
-	break;
+        putpixel_and (x, y, tmp[i++]);
+        break;
 
       case XOR_PUT:
-	putpixel_xor (x, y, tmp[i++]);
-	break;
+        putpixel_xor (x, y, tmp[i++]);
+        break;
 
       case OR_PUT:
-	putpixel_or (x, y, tmp[i++]);
-	break;
+        putpixel_or (x, y, tmp[i++]);
+        break;
 
       case NOT_PUT:
-	putpixel_not (x, y, tmp[i++]);
-	break;
+        putpixel_not (x, y, tmp[i++]);
+        break;
+      
       } // switch
-    }
+    
+    } // for x
 
   if (! bgi_fast_mode)
     refresh ();
@@ -2845,7 +2869,8 @@ void putpixel_copy (int x, int y, Uint32 pixel)
     if (x < vp.left || x > vp.right || y < vp.top || y > vp.bottom)
       return;
 
-  bgi_activepage[current_window][y * (bgi_maxx + 1) + x] = pixel;
+  bgi_activepage[current_window][y * (bgi_maxx + 1) + x] =
+    pixel;
 
   // we could use the native function:
   // SDL_RenderDrawPoint (bgi_rnd, x, y);
@@ -2887,7 +2912,7 @@ void putpixel_and (int x, int y, Uint32 pixel)
       return;
 
   bgi_activepage[current_window][y * (bgi_maxx + 1) + x] &=
-    (pixel & 0x00ffffff);
+    pixel;
 
 } // putpixel_and ()
 
@@ -2924,8 +2949,8 @@ void putpixel_not (int x, int y, Uint32 pixel)
     if (x < vp.left || x > vp.right || y < vp.top || y > vp.bottom)
       return;
 
-  bgi_activepage[current_window][y * (bgi_maxx + 1) + x] =
-    ~ bgi_activepage[current_window][y * (bgi_maxx + 1) + x];
+  bgi_activepage[current_window][y * (bgi_maxx + 1) + x] = ~
+    (pixel & 0x00ffffff);
 
 } // putpixel_not ()
 
@@ -2991,9 +3016,11 @@ void readimagefile (char *bitmapname, int x1, int y1, int x2, int y2)
 {
   // Reads a .bmp file and displays it immediately at (x1, y1 ).
 
+  Uint32
+    *pixels;
   SDL_Surface
     *bm_surface,
-    *cur_surface;
+    *tmp_surface;
   SDL_Rect
     src_rect,
     dest_rect;
@@ -3031,15 +3058,22 @@ void readimagefile (char *bitmapname, int x1, int y1, int x2, int y2)
     dest_rect.h = vp.bottom - y1 - vp.top + 1;
 
   // get SDL surface from current window
-  cur_surface = SDL_GetWindowSurface (bgi_win[current_window]);
+  tmp_surface = SDL_GetWindowSurface (bgi_win[current_window]);
   
   // blit bitmap surface to current surface
   SDL_BlitScaled (bm_surface,
-		  &src_rect,
-		  cur_surface,
-		  &dest_rect);
+                  &src_rect,
+                  tmp_surface,
+                  &dest_rect);
+
+  // copy pixel data from the new surface
+  pixels = tmp_surface->pixels;
   
-  bgi_activepage[current_window] = cur_surface->pixels;
+  for (int y = dest_rect.y; y < dest_rect.y + dest_rect.h; y++)
+    for (int x = dest_rect.x; x < dest_rect.x + dest_rect.w; x++)
+      bgi_activepage[current_window][y * (bgi_maxx + 1) + x] = 
+    pixels[y * (bgi_maxx + 1) + x] | 0xff000000;
+  
   refresh ();
   SDL_FreeSurface (bm_surface);
   
@@ -3130,9 +3164,9 @@ void sector (int x, int y, int stangle, int endangle,
 
   for (angle = stangle; angle < endangle; angle++)
     line_fast (x + (xradius * cos (angle * PI_CONV)),
-	       y - (yradius * sin (angle * PI_CONV)),
-	       x + (xradius * cos ((angle+1) * PI_CONV)),
-	       y - (yradius * sin ((angle+1) * PI_CONV)));
+               y - (yradius * sin (angle * PI_CONV)),
+               x + (xradius * cos ((angle+1) * PI_CONV)),
+               y - (yradius * sin ((angle+1) * PI_CONV)));
   line_fast (x, y, bgi_last_arc.xstart, bgi_last_arc.ystart);
   line_fast (x, y, bgi_last_arc.xend, bgi_last_arc.yend);
 
@@ -3141,8 +3175,8 @@ void sector (int x, int y, int stangle, int endangle,
   angle = (stangle + endangle) / 2;
   // find a point within the sector
   floodfill (x + (xradius * cos (angle * PI_CONV)) / 2,
-	     y - (yradius * sin (angle * PI_CONV)) / 2,
-	     tmpcolor);
+             y - (yradius * sin (angle * PI_CONV)) / 2,
+             tmpcolor);
 
   if (! bgi_fast_mode)
     refresh ();
@@ -3155,9 +3189,12 @@ void setactivepage (int page)
 {
   // Makes 'page' the active page for all subsequent graphics output.
 
-  if (page > -1 && page < bgi_np) {
-    bgi_activepage[current_window] = bgi_vpage[page]->pixels;
+  if (! bgi_fast_mode)
+    bgi_blendmode = SDL_BLENDMODE_NONE; // like in Turbo C
+    
+  if (page > -1 && page < bgi_np + 1) {
     bgi_ap = page;
+    bgi_activepage[current_window] = bgi_vpage[bgi_ap]->pixels;
   }
 
 } // setactivepage ()
@@ -3235,6 +3272,15 @@ void setbkrgbcolor (int index)
 
   bgi_bg_color = BGI_COLORS + TMP_COLORS + index;
 } // setbkrgbcolor ()
+
+// -----
+
+void setblendmode (int blendmode)
+{
+  // Sets the blending mode; SDL_BLENDMODE_NONE or SDL_BLENDMODE_BLEND
+
+  bgi_blendmode = blendmode;
+} // setblendmode ()
 
 // -----
 
@@ -3443,7 +3489,7 @@ void setvisualpage (int page)
 {
   // Sets the visual graphics page number.
 
-  if (page > -1 && page < bgi_np) {
+  if (page > -1 && page < bgi_np + 1) {
     bgi_vp = page;
     bgi_visualpage[current_window] = bgi_vpage[bgi_vp]->pixels;
   }
@@ -3471,11 +3517,11 @@ void setwinoptions (char *title, int x, int y, Uint32 flags)
   if (-1 != flags)
     // only a subset of flag is supported for now
     if (flags & SDL_WINDOW_FULLSCREEN         ||
-	flags & SDL_WINDOW_FULLSCREEN_DESKTOP ||
-	flags & SDL_WINDOW_SHOWN              ||
-	flags & SDL_WINDOW_HIDDEN             ||
-	flags & SDL_WINDOW_BORDERLESS         ||
-	flags & SDL_WINDOW_MINIMIZED)
+        flags & SDL_WINDOW_FULLSCREEN_DESKTOP ||
+        flags & SDL_WINDOW_SHOWN              ||
+        flags & SDL_WINDOW_HIDDEN             ||
+        flags & SDL_WINDOW_BORDERLESS         ||
+        flags & SDL_WINDOW_MINIMIZED)
       window_flags = flags;
 
 } // setwinopts ()
@@ -3523,11 +3569,13 @@ int textwidth (char *textstring)
 
 void updaterect (int x1, int y1, int x2, int y2)
 {
-  // updates a rectangle on the screen. Suffers from SDL2 bug.
+  // Updates a rectangle on the screen. Suffers from SDL2 bug.
 
-  SDL_Rect src_rect, dest_rect;
-  int pitch = (bgi_maxx + 1) * sizeof (Uint32);
-
+  SDL_Rect
+    src_rect, dest_rect;
+  int
+    pitch = (bgi_maxx + 1) * sizeof (Uint32);
+  
   swap_if_greater (&x1, &x2);
   swap_if_greater (&y1, &y2);
 
@@ -3549,15 +3597,14 @@ void updaterect (int x1, int y1, int x2, int y2)
   dest_rect.h = y2 + 1;
 
   SDL_UpdateTexture (bgi_txt[current_window],
-		     &dest_rect,
-		     bgi_activepage[current_window],
-		     pitch);
-  SDL_SetTextureBlendMode (bgi_txt[current_window],
-			   SDL_BLENDMODE_BLEND);
+                     &dest_rect,
+                     bgi_visualpage[current_window],
+                     pitch);
+  SDL_SetTextureBlendMode (bgi_txt[current_window], bgi_blendmode);
   SDL_RenderCopy (bgi_rnd[current_window],
-		  bgi_txt[current_window],
-		  &src_rect,
-		  &src_rect);
+                  bgi_txt[current_window],
+                  &src_rect,
+                  &src_rect);
   SDL_RenderPresent (bgi_rnd[current_window]);
 
 } // updaterect ()
@@ -3565,7 +3612,7 @@ void updaterect (int x1, int y1, int x2, int y2)
 // -----
 
 void writeimagefile (char *filename,
-		     int left, int top, int right, int bottom)
+                     int left, int top, int right, int bottom)
 {
   // Writes a .bmp file from the screen rectangle defined by
   // left, top, right, bottom.
@@ -3593,10 +3640,10 @@ void writeimagefile (char *filename,
   }
 
   SDL_RenderReadPixels (bgi_rnd[current_window],
-			NULL,
-			SDL_GetWindowPixelFormat (bgi_win[current_window]),
-			bgi_vpage[bgi_vp]->pixels,
-			bgi_vpage[bgi_vp]->pitch);
+                        NULL,
+                        SDL_GetWindowPixelFormat (bgi_win[current_window]),
+                        bgi_vpage[bgi_vp]->pixels,
+                        bgi_vpage[bgi_vp]->pitch);
   // blit and save
   SDL_BlitSurface (bgi_vpage[bgi_vp], &rect, dest, NULL);
   SDL_SaveBMP (dest, filename);
@@ -3628,8 +3675,8 @@ int xkbhit (void)
       return YEAH;
     else
       if (SDL_WINDOWEVENT == event.type) {
-	if (SDL_WINDOWEVENT_CLOSE == event.window.event)
-	  return QUIT;
+        if (SDL_WINDOWEVENT_CLOSE == event.window.event)
+          return QUIT;
       }
     else
       SDL_PushEvent (&event); // don't disrupt the mouse

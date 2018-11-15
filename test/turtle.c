@@ -5,7 +5,7 @@
  * Tested with SDL_bgi, xbgi, and grx
  * 
  * By Guido Gonzato <guido.gonzato at gmail.com>
- * June 27, 2017
+ * Latest update: October 2018
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,21 +25,24 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <graphics.h>
 
 #include "turtle.h"
 
 // -----
 
-static int t_pos[2];                   // turtle coordinates
-static int t_heading = 0;              // turtle heading
+static int t_pos[2];                    // turtle coordinates
+static int t_heading = 0;               // turtle heading
 
-static int t_show_turtle = T_FALSE;    // draw the turtle?
-static int t_pen_down = T_TRUE;        // draw?
-static int t_turtle_drawn = T_TRUE;    // has the turtle been drawn?
-static int t_turtle_wrap = T_FALSE;    // wrap around the window?
-static int t_turtle_size = 21;         // turtle size in pixels
+static int t_tmp_pos[2] = {-1, -1};     // saved turtle coordinates
+static int t_tmp_heading = 0;           // saved turtle heading
+
+static int t_show_turtle = T_FALSE;     // draw the turtle?
+static int t_pen_down = T_TRUE;         // draw?
+static int t_turtle_drawn = T_TRUE;     // has the turtle been drawn?
+static int t_turtle_wrap = T_FALSE;     // wrap around the window?
+static int t_turtle_size = 21;          // turtle size in pixels
+static int t_turtle_shape = T_TRIANGLE; // turtle size in pixels
 
 static void draw_turtle (void);
 
@@ -399,6 +402,30 @@ int heading (void)
 
 // -----
 
+void savestate (void)
+{
+  t_tmp_pos[0] = t_pos[0];
+  t_tmp_pos[1] = t_pos[1];
+  t_tmp_heading = t_heading;
+}
+
+// -----
+
+void restorestate (void)
+{
+  // has the state been saved?
+  
+  if (-1 != t_tmp_pos[0]) {
+    t_pos[0] = t_tmp_pos[0];
+    t_pos[1] = t_tmp_pos[1];
+    t_heading = t_tmp_heading;
+  }
+  else
+    home ();
+}
+
+// -----
+
 void pendown (void)
 {
   t_pen_down = T_TRUE;
@@ -436,6 +463,27 @@ inline void up (void)
 int isdown (void)
 {
   return t_pen_down;
+}
+
+// -----
+
+void turtleshape (int shape)
+{
+  t_turtle_shape = shape;
+}
+
+// -----
+
+void draw_turtle_circle (void)
+{
+  int col = getcolor ();
+  if (RED != getbkcolor ())
+    setcolor (RED);
+  else
+    setcolor (WHITE);
+  circle (t_pos[0], t_pos[1], t_turtle_size);
+  setcolor (col);
+
 }
 
 // -----
@@ -491,9 +539,22 @@ void draw_turtle (void)
   int tmp_heading = t_heading;
     
   setwritemode (XOR_PUT);
-  draw_turtle_triangle (); // more shapes to be implemented
-  setwritemode (COPY_PUT);
   
+  switch (t_turtle_shape) {
+
+  case T_CIRCLE:
+    draw_turtle_circle ();
+    break;
+    
+  case T_TRIANGLE:
+  
+  default:
+    draw_turtle_triangle ();
+    ;
+    
+  }
+
+  setwritemode (COPY_PUT);
   t_turtle_drawn = T_TRUE;
   t_heading = tmp_heading;
 }

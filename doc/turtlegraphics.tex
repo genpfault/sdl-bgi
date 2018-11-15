@@ -1,0 +1,317 @@
+% sdl_bgi-quickref.tex
+%
+% Guido Gonzato, PhD
+% October 13, 2018
+
+\documentclass[a4paper,11pt]{article}
+\usepackage{graphicx}
+\thispagestyle{empty}
+\usepackage{color}
+\usepackage{alltt}
+\usepackage{framed}
+\usepackage{setspace}
+\usepackage[margin=3cm]{geometry}
+\usepackage[colorlinks,urlcolor=blue]{hyperref}
+
+\frenchspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{3pt}
+
+\newcommand{\SDLbgi}{\texttt{SDL\_bgi}}
+
+\newcommand{\version}{2.2.4}        % !!! <<<=== Change here !!!
+
+\newcommand{\V}{\texttt{void}}      % void
+\newcommand{\I}{\texttt{int}}       % int
+\newcommand{\Ue}{\texttt{Uint8}}    % Uint8
+\newcommand{\Ut}{\texttt{Uint32}}   % Uint32
+\newcommand{\C}{\texttt{char *}}    % char *
+\newcommand{\func}[1]{\textbf{\texttt{#1}}}  % function
+\newcommand{\A}[1]{\emph{#1}}       % parameter
+\newcommand{\F}[1]{\texttt{#1}}     % file
+\newcommand{\T}[1]{\texttt{#1}}     % constant
+
+\newcommand{\file}[1]{\texttt{#1}}
+
+\definecolor{defaultshadecolor}{rgb}{0.85,0.85,1}
+\definecolor{shadecolor}{rgb}{0.85,0.85,1}
+\definecolor{gray}{rgb}{0.7,0.7,0.7}
+\definecolor{charcolor}{rgb}{1,0.85,0.85}
+\definecolor{lightred}{rgb}{1,0.7,0.7}
+\definecolor{darkblue}{rgb}{0,0,0.5}
+\definecolor{darkred}{rgb}{0.75,0,0}
+
+\newenvironment{bgi}
+{ % beg def
+  \begin{snugshade}
+}
+{ % end def
+  \end{snugshade}
+}
+
+% =====
+
+\begin{document}
+
+\title{Turtle Graphics Quick Reference}
+
+\author{Guido Gonzato, PhD}
+
+\date{\today}
+
+\maketitle
+
+\begin{center}
+  \includegraphics[width=0.5\textwidth]{SDL_bgi_logo.png}  
+\end{center}
+
+% =====
+
+\section{Turtle Graphics}
+
+The \SDLbgi{} sources archive includes a \file{test/} directory that
+contains test programs and also a turtle graphics implementation
+(files \file{turtle.h} and \file{turtle.c}).
+
+Turtle graphics is based on polar coordinates: lines are drawn
+specifying the distance in pixels and an angle in degrees, called
+\emph{heading} (0-359). Heading is the same as the bearing of a
+compass: it starts from 0 (``North'') and increases clockwise. For
+more information: \url{https://en.wikipedia.org/wiki/Turtle_graphics}
+
+Some functions have aliases with the same name as their Python
+counterparts; \url{https://docs.python.org/2/library/turtle.html}
+
+% -----
+
+\begin{bgi}
+\V{} \func{back} (\I{} \A{px})
+\end{bgi}
+
+Moves the turtle backwards by \A{px} pixels.
+
+Aliases: \func{backward()}, \func{bk()}
+
+% -----
+
+\begin{bgi}
+\V{} \func{forwd} (\I{} \A{px})
+\end{bgi}
+
+Moves the turtle backwards by \A{px} pixels.
+
+Aliases: \func{forward()}, \func{fd()}
+
+% -----
+
+\begin{bgi}
+\V{} \func{turnleft} (\I{} \A{deg})
+\end{bgi}
+
+Turns the turtle left by \A{deg} degrees.
+
+Aliases: \func{left()}, \func{lt()}
+
+% -----
+
+\begin{bgi}
+\V{} \func{turnright} (\I{} \A{deg})
+\end{bgi}
+
+Turns the turtle right by \A{deg} degrees.
+
+Aliases: \func{right()}, \func{rt()}
+
+% -----
+
+\begin{bgi}
+\V{} \func{setposition} (\I{} \A{x} \I{} \A{y})
+\end{bgi}
+
+Moves the turtle to new coordinates \A{x}, \A{y}.
+
+Aliases: \func{go\_to()}, \func{setpos()}
+
+% -----
+
+\begin{bgi}
+\V{} \func{setx} (\I{} \A{x})
+\end{bgi}
+
+Sets the turtle's \A{x} coordinate.
+
+% -----
+
+\begin{bgi}
+\V{} \func{sety} (\I{} \A{y})
+\end{bgi}
+
+Sets the turtle's \A{y} coordinate.
+
+% -----
+
+\begin{bgi}
+\V{} \func{setheading} (\I{} \A{deg})
+\end{bgi}
+
+Sets the turtle heading to \A{deg} degrees.
+
+Alias: \func{seth()}
+
+% -----
+
+\begin{bgi}
+\V{} \func{home} (\V{})
+\end{bgi}
+
+Moves the turtle to the screen centre and sets the heading to 0.
+
+% -----
+
+\begin{bgi}
+\I{} \func{* position} (\V{})
+\end{bgi}
+
+Returns a pointer to a 2-element integer array containing the turtle
+coordinates.
+
+% -----
+
+\begin{bgi}
+\I{} \func{xcor} (\V{})
+\end{bgi}
+
+Returns the turtle's \A{x} coordinate.
+
+% -----
+
+\begin{bgi}
+\I{} \func{ycor} (\V{})
+\end{bgi}
+
+Returns the turtle's \A{y} coordinate.
+
+% -----
+
+\begin{bgi}
+\I{} \func{heading} (\V{})
+\end{bgi}
+
+Returns the turtle's heading in degrees.
+
+% -----
+
+\begin{bgi}
+\V{} \func{savestate} (\V{})
+\end{bgi}
+
+Saves the turtle state, i.e.\ its coordinates and heading.
+
+TODO: make this a stack?
+
+% -----
+
+\begin{bgi}
+\V{} \func{restorestate} (\V{})
+\end{bgi}
+
+Restore previously saved state. If no state has been saved, this
+function is equivalent to \func{home()}.
+
+% -----
+
+\begin{bgi}
+\V{} \func{pendown} (\V{})
+\end{bgi}
+
+Activates drawing (puts the pen down).
+
+Aliases: \func{pd()}, \func{down()}
+
+% -----
+
+\begin{bgi}
+\V{} \func{penup} (\V{})
+\end{bgi}
+
+Suspends drawing (lifts the pen down).
+
+Aliases: \func{pu()}, \func{up()}
+
+% -----
+
+\begin{bgi}
+\I{} \func{isdown} (\V{})
+\end{bgi}
+
+Returns 1 if the pen is down.
+
+% -----
+
+\begin{bgi}
+\V{} \func{hideturtle} (\V{})
+\end{bgi}
+
+Hides the turtle.
+
+% -----
+
+\begin{bgi}
+\V{} \func{showturtle} (\V{})
+\end{bgi}
+
+Draws the turtle.
+
+% -----
+
+\begin{bgi}
+\I{} \func{isvisible} (\V{})
+\end{bgi}
+
+Returns 1 if the turtle is visible.
+
+% -----
+
+\begin{bgi}
+\I{} \func{turtleshape} (\I{} \A{shape})
+\end{bgi}
+
+Sets the turtle shape; available shapes are \T{T\_CIRCLE} or
+\T{T\_TRIANGLE}.
+
+% -----
+
+\begin{bgi}
+\I{} \func{turtlesize} (\I{} \A{px})
+\end{bgi}
+
+Sets the turtle size (radius or side) to \A{px} pixels.
+
+% -----
+
+\begin{bgi}
+\V{} \func{wrap} (\V{})
+\end{bgi}
+
+Wraps around the screen.
+
+% -----
+
+\begin{bgi}
+\V{} \func{wrap} (\V{})
+\end{bgi}
+
+Does not wrap around the screen.
+
+% =====
+
+\bigskip
+
+\rule{\linewidth}{0.2pt}
+
+This document is a free manual, released under the GNU Free
+Documentation License (FDL) v. 1.3 or later.
+
+\end{document}
+
+% ----- end of file sdl_bgi-quickref.tex

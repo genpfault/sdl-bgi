@@ -64,4 +64,4 @@ test: all
 	cd test; make
 
 clean:
-	rm -f $(OBJ) $(LIB)
+	rm -f $(OBJ) $(LIB) a.out

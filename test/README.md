@@ -26,6 +26,9 @@ the (horribly slow) GNU libgraph.
 presented in the September 1986 issue of Scientific American. Run it
 as `./hopalong <seed>`, where `<seed>` is an integer number.
 
+- `kaleido.c` shows how to use alpha (transparency) to implement a
+fade away effect.
+
 - `life.c` is an implementation of Conway's Game of Life,
 <https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life>. Run it as
 `./life [number]`, where `[number]` is the initial percentage of living
@@ -99,6 +102,8 @@ int *position (void)          return the turtle's position
 int  xcor (void);             return the turtle's X coordinate
 int  ycor (void);             return the turtle's Y coordinate
 int  heading (void);          get the turtle heading (0-359)
+void savestate (void);        save turtle state, i.e. position and heading
+void restorestate (void);     restore saved state
 void pendown (void);          activate drawing (put the pen down)
 void pd (void);
 void down (void);
