@@ -2,10 +2,6 @@
 
 #define far
 
-// provide missing declaration
-
-void RandomBars(void);
-
 // ADDED:
 int itoa (int val, char* buf, int ignore_me)
 {

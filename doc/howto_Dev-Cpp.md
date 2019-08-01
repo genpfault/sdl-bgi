@@ -6,17 +6,19 @@ Dev-C++; we will use `fern.c`, provided in the `test/`
 directory.
 
 Let's assume that Dev-C++ is installed in `C:\Dev-Cpp`, and that the
-SDL2 development libraries (MinGW) are installed in `C:\SDL2-2.0.8`.
+SDL2 development libraries (MinGW) are installed in `C:\SDL2-2.0.10`.
 If you installed the software in different directories, change the
 following instructions accordingly.
 
 The procedure was tested with Orwell Dev-Cpp 5.11, TDM-GCC 5.1.0-3,
-and SDL2-devel-2.0.8-mingw.
+and SDL2-devel-2.0.10-mingw.
 
 Links:
 
 <https://sourceforge.net/projects/orwelldevcpp/>
+
 <http://tdm-gcc.tdragon.net/download>
+
 <https://libsdl.org/download-2.0.php>
 
 
@@ -57,9 +59,9 @@ Compiling `SDL_bgi` Programs
 - copy `SDL_bgi.dll` to `C:\Dev-Cpp\MinGW64\lib`
 
 - copy `SDL_bgi.h` to\
-  `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2`
+  `C:\SDL2-2.0.10\i686-w64-mingw32\include\SDL2`
 
-- copy `graphics.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include`
+- copy `graphics.h` to `C:\SDL2-2.0.10\i686-w64-mingw32\include`
 
 - Run Dev-C++ and start an empty project called `Fern`: menu
   `File/New/Project...`, tick "C Project", select "Empty Project",
@@ -72,10 +74,10 @@ Compiling `SDL_bgi` Programs
   add the string `-lmingw32 -lSDL_bgi -lSDL2main -lSDL2 -mwindows`
 
 - tab `Directories`, tab `Include Directories`: add\
-  `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2` and\
-  `C:\SDL2-2.0.8\i686-w64-mingw32\include`
+  `C:\SDL2-2.0.10\i686-w64-mingw32\include\SDL2` and\
+  `C:\SDL2-2.0.10\i686-w64-mingw32\include`
 
-- tab `Library Directories`: add `C:\SDL2-2.0.8\i686-w64-mingw32\lib`
+- tab `Library Directories`: add `C:\SDL2-2.0.10\i686-w64-mingw32\lib`
   then click on Ok
 
 - compile the program: menu `Execute/Compile`

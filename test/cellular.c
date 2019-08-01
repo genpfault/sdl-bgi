@@ -104,7 +104,7 @@ int main (int argc, char *argv[])
     putpixel (getmaxx () / 2, 20, RED); // set initial pixel
     run_rule (rule);
     refresh ();
-    srand (time(NULL));
+    // srand (time(NULL));
     rule = random (255);
     
     ev = getevent();

@@ -6,7 +6,7 @@ SRC = $(NAME).c
 OBJ = $(NAME).o
 HEADERS = SDL_bgi.h 
 
-# Detect the platform: GNU/Linux, Darwin (OS X), Mingw-w64
+# Detect the platform: GNU/Linux, Darwin (OS X), MSYS2
 PLATFORM := $(shell uname)
 
 ifeq ($(PLATFORM),Linux)
@@ -27,7 +27,9 @@ LDFLAGS = -framework SDL2
 STRIP   = echo # don't strip the library
 endif
 
-ifeq ($(PLATFORM),MINGW64_NT-6.1)
+# MSYS2 includes version number in uname - dumb idea indeed
+OS := $(shell uname -o)
+ifeq ($(OS),Msys)
 INC_DIR = /mingw64/include
 SDL_INC = $(INC_DIR)/SDL2
 LIB_DIR = /mingw64/bin

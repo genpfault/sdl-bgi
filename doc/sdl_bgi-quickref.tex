@@ -1,7 +1,7 @@
 % sdl_bgi-quickref.tex
 %
 % Guido Gonzato, PhD
-% November 15, 2018
+% August 1, 2019
 
 \documentclass[a4paper,11pt]{article}
 \usepackage{graphicx}
@@ -19,7 +19,7 @@
 
 \newcommand{\SDLbgi}{\texttt{SDL\_bgi}}
 
-\newcommand{\version}{2.2.4}        % !!! <<<=== Change here !!!
+\newcommand{\version}{2.3.0}        % !!! <<<=== Change here !!!
 
 \newcommand{\V}{\texttt{void}}      % void
 \newcommand{\I}{\texttt{int}}       % int
@@ -139,7 +139,7 @@ the following:
 #ifndef _SDL_BGI_H
 #define _SDL_BGI_H
 
-#define SDL_BGI_VERSION 2.2.4
+#define SDL_BGI_VERSION 2.3.0
 
 enum { NOPE, YEAH };
 #define BGI_WINTITLE_LEN 512 // more than enough
@@ -373,7 +373,7 @@ The default BGI palette includes 16 named colours (\T{BLACK}{\ldots}
 \T{WHITE}); functions \func{setbkco\-lor()}, \func{setcolor()},
 \func{getbkcolor()}, and \func{getcolor()} use this palette.
 
-An extended RGB palette of `PALETTE\_SIZE` additional colours can be
+An extended RGB palette of \T{PALETTE\_SIZE} additional colours can be
 created and accessed using the functions described below.
 
 Constants \T{TMP\_FG\_COL}, \T{TMP\_BG\_COL}, and \T{TMP\_FILL\_COL}
@@ -495,7 +495,7 @@ colour. The CP is moved to (0, 0).
 \end{bgi}
 
 Clears the viewport, filling it with the current background colour.
-The drawing CP is moved to (0, 0), relative to the viewport.
+The CP is moved to (0, 0), relative to the viewport.
 
 % -----
 
@@ -864,6 +864,18 @@ present.
 After \func{initgraph()}, all graphics commands are immediately
 displayed, as in the original BGI. This could make drawing very slow;
 you may want to use \func{initwindow()} instead.
+
+Alternatively, automatic screen refresh can be performed according to
+the value of the \T{SDL\_BGI\_RATE} environment variable. If the
+variable is set to \T{auto}, screen refresh is automatically performed
+every \A{msec} milliseconds; this value is the current screen refresh
+rate, as given by \T{SDL\_GetDisplayMode()}. If the variable is set to
+an integer value \A{msec}, automatic screen refresh will be performed
+every \A{msec} milliseconds.
+
+Automatic screen refresh is much faster than the default behaviour;
+however, it is an experimental feature that may not work on some
+graphic cards.
 
 % -----
 
@@ -1400,7 +1412,8 @@ window. If either \A{width} or \A{height} is 0, then
 \T{SDL\-\_FULL\-SCREEN} will be used. Multiple windows can be created,
 unless a fullscreen window is already present.
 
-The user must update the screen as needed using \func{refresh()}.
+The user must update the screen as needed using \func{refresh()}, or
+use \func{sdlbgiauto()}.
 
 % -----
 
@@ -1463,6 +1476,15 @@ clipped as necessary.
 \end{bgi}
 
 Updates the screen contents, i.e.\ displays all graphics.
+
+% -----
+
+\begin{bgi}
+\V{} \func{sdlbgiauto} (\V{}); 
+\end{bgi}
+
+Triggers ``auto mode'', i.e.\ \func{refresh()} is performed
+automatically.
 
 % -----
 
@@ -1560,6 +1582,15 @@ values \T{SDL\_WINDOW\_FULLSCREEN},
 \T{SDL\_WINDOW\_FULLSCREEN\_DESKTOP}, \T{SDL\_WINDOW\_SHOWN},
 \T{SDL\_WINDOW\_HIDDEN}, \T{SDL\_WINDOW\-\_BORDERLESS}, and
 \T{SDL\_WINDOW\_MINIMIZED} can be applied.
+
+% -----
+
+\begin{bgi}
+\V{} \func{showerrorbox} (const \C{}\A{message}); 
+\end{bgi}
+
+Opens an error message box with the specified message. The message box
+waits for the user to click on the OK button.
 
 % -----
 

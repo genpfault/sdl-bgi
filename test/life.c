@@ -30,7 +30,7 @@
 
 #include <graphics.h>
 
-#define SIZE 500
+#define SIZE  500
 #define ALIVE 1
 #define DEAD  0
 

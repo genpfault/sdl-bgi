@@ -81,7 +81,8 @@ int main (int argc, char *argv[])
     stop = NOPE;
   
   srand (time(NULL));
-  initwindow (0, 0); // fullscreen
+  setwinoptions ("", -1, -1, SDL_WINDOW_FULLSCREEN);
+  initwindow (1024, 768); // fullscreen
   setbkcolor (BLACK);
   cleardevice ();
   refresh ();

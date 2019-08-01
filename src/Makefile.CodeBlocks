@@ -12,8 +12,8 @@ OBJ = $(NAME).o
 HEADERS = SDL_bgi.h 
 
 # We assume that CodeBlocks is installed in C:\CodeBlocks,
-# while SDL2 is installed in C:\SDL2-2.0.8
-SDL_DIR = /c/SDL2-2.0.8
+# while SDL2 is installed in C:\SDL2-2.0.10
+SDL_DIR = /c/SDL2-2.0.10
 INC_DIR = /c/CodeBlocks/MinGW/include/
 SDL_INC = $(SDL_DIR)/i686-w64-mingw32/include/
 SDL_LIB = $(SDL_DIR)/i686-w64-mingw32/lib/

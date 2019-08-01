@@ -69,7 +69,7 @@ int main (int argc, char *argv[])
 	  refresh ();
 	}
     }
-    if (kbhit ())
+    if (xkbhit ())
       stop = 1;
     
   } // while

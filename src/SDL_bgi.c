@@ -3,13 +3,14 @@
 // A BGI (Borland Graphics Library) implementation based on SDL2.
 // Easy to use, pretty fast, and useful for porting old programs
 // and for teaching.
-// 
+//
 // By Guido Gonzato, PhD
-// November 15, 2018
+// Automatic refresh patch by Marco Diego Aurélio Mesquita
+// August 1, 2019
 
 /*
 
-Copyright (c) 2014-2018 Guido Gonzato, PhD
+Copyright (c) 2014-2019 Guido Gonzato, PhD
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -138,11 +139,17 @@ static int
   bgi_gm,                 // graphics mode
   bgi_argb_mode = NOPE,   // BGI or ARGB colors
   bgi_writemode,          // plotting method (COPY_PUT, XOR_PUT...)
-  bgi_blendmode = 
+  bgi_blendmode =
     SDL_BLENDMODE_BLEND,  // blending mode
   bgi_ap,                 // active page number
   bgi_vp,                 // visual page number
-  bgi_np = 0;             // # of actual pages
+  bgi_np = 0,             // # of actual pages
+  refresh_needed = NOPE,  // update callback should be called
+  refresh_rate = 0;       // window refresh rate
+
+// mutex for update timer/thread
+static SDL_mutex
+  *update_mutex = NULL;
 
 // BGI window title
 char
@@ -159,6 +166,274 @@ static float
   bgi_font_mag_y = 1.0;
 
 // pointer to font array. Should I add more (ugly) bitmap fonts?
+
+// 8x8 font definition
+
+/*  ZLIB (c) A. Schiffler 2012 */
+
+#define GFX_FONTDATAMAX (8*256)
+
+static unsigned char gfxPrimitivesFontdata[GFX_FONTDATAMAX] = {
+
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 0 0x00 '^@'
+  0x7e,0x81,0xa5,0x81,0xbd,0x99,0x81,0x7e, // 1 0x01 '^A'
+  0x7e,0xff,0xdb,0xff,0xc3,0xe7,0xff,0x7e, // 2 0x02 '^B'
+  0x6c,0xfe,0xfe,0xfe,0x7c,0x38,0x10,0x00, // 3 0x03 '^C'
+  0x10,0x38,0x7c,0xfe,0x7c,0x38,0x10,0x00, // 4 0x04 '^D'
+  0x38,0x7c,0x38,0xfe,0xfe,0xd6,0x10,0x38, // 5 0x05 '^E'
+  0x10,0x38,0x7c,0xfe,0xfe,0x7c,0x10,0x38, // 6 0x06 '^F'
+  0x00,0x00,0x18,0x3c,0x3c,0x18,0x00,0x00, // 7 0x07 '^G'
+  0xff,0xff,0xe7,0xc3,0xc3,0xe7,0xff,0xff, // 8 0x08 '^H'
+  0x00,0x3c,0x66,0x42,0x42,0x66,0x3c,0x00, // 9 0x09 '^I'
+  0xff,0xc3,0x99,0xbd,0xbd,0x99,0xc3,0xff, // 10 0x0a '^J'
+  0x0f,0x07,0x0f,0x7d,0xcc,0xcc,0xcc,0x78, // 11 0x0b '^K'
+  0x3c,0x66,0x66,0x66,0x3c,0x18,0x7e,0x18, // 12 0x0c '^L'
+  0x3f,0x33,0x3f,0x30,0x30,0x70,0xf0,0xe0, // 13 0x0d '^M'
+  0x7f,0x63,0x7f,0x63,0x63,0x67,0xe6,0xc0, // 14 0x0e '^N'
+  0x18,0xdb,0x3c,0xe7,0xe7,0x3c,0xdb,0x18, // 15 0x0f '^O'
+  0x80,0xe0,0xf8,0xfe,0xf8,0xe0,0x80,0x00, // 16 0x10 '^P'
+  0x02,0x0e,0x3e,0xfe,0x3e,0x0e,0x02,0x00, // 17 0x11 '^Q'
+  0x18,0x3c,0x7e,0x18,0x18,0x7e,0x3c,0x18, // 18 0x12 '^R'
+  0x66,0x66,0x66,0x66,0x66,0x00,0x66,0x00, // 19 0x13 '^S'
+  0x7f,0xdb,0xdb,0x7b,0x1b,0x1b,0x1b,0x00, // 20 0x14 '^T'
+  0x3e,0x61,0x3c,0x66,0x66,0x3c,0x86,0x7c, // 21 0x15 '^U'
+  0x00,0x00,0x00,0x00,0x7e,0x7e,0x7e,0x00, // 22 0x16 '^V'
+  0x18,0x3c,0x7e,0x18,0x7e,0x3c,0x18,0xff, // 23 0x17 '^W'
+  0x18,0x3c,0x7e,0x18,0x18,0x18,0x18,0x00, // 24 0x18 '^X'
+  0x18,0x18,0x18,0x18,0x7e,0x3c,0x18,0x00, // 25 0x19 '^Y'
+  0x00,0x18,0x0c,0xfe,0x0c,0x18,0x00,0x00, // 26 0x1a '^Z'
+  0x00,0x30,0x60,0xfe,0x60,0x30,0x00,0x00, // 27 0x1b '^['
+  0x00,0x00,0xc0,0xc0,0xc0,0xfe,0x00,0x00, // 28 0x1c '^\'
+  0x00,0x24,0x66,0xff,0x66,0x24,0x00,0x00, // 29 0x1d '^]'
+  0x00,0x18,0x3c,0x7e,0xff,0xff,0x00,0x00, // 30 0x1e '^^'
+  0x00,0xff,0xff,0x7e,0x3c,0x18,0x00,0x00, // 31 0x1f '^_'
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 32 0x20 ' '
+  0x18,0x3c,0x3c,0x18,0x18,0x00,0x18,0x00, // 33 0x21 '!'
+  0x66,0x66,0x24,0x00,0x00,0x00,0x00,0x00, // 34 0x22 '"'
+  0x6c,0x6c,0xfe,0x6c,0xfe,0x6c,0x6c,0x00, // 35 0x23 '#'
+  0x18,0x3e,0x60,0x3c,0x06,0x7c,0x18,0x00, // 36 0x24 '$'
+  0x00,0xc6,0xcc,0x18,0x30,0x66,0xc6,0x00, // 37 0x25 '%'
+  0x38,0x6c,0x38,0x76,0xdc,0xcc,0x76,0x00, // 38 0x26 '&'
+  0x18,0x18,0x30,0x00,0x00,0x00,0x00,0x00, // 39 0x27 '''
+  0x0c,0x18,0x30,0x30,0x30,0x18,0x0c,0x00, // 40 0x28 '('
+  0x30,0x18,0x0c,0x0c,0x0c,0x18,0x30,0x00, // 41 0x29 ')'
+  0x00,0x66,0x3c,0xff,0x3c,0x66,0x00,0x00, // 42 0x2a '*'
+  0x00,0x18,0x18,0x7e,0x18,0x18,0x00,0x00, // 43 0x2b '+'
+  0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x30, // 44 0x2c ','
+  0x00,0x00,0x00,0x7e,0x00,0x00,0x00,0x00, // 45 0x2d '-'
+  0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x00, // 46 0x2e '.'
+  0x06,0x0c,0x18,0x30,0x60,0xc0,0x80,0x00, // 47 0x2f '/'
+  0x38,0x6c,0xc6,0xd6,0xc6,0x6c,0x38,0x00, // 48 0x30 '0'
+  0x18,0x38,0x18,0x18,0x18,0x18,0x7e,0x00, // 49 0x31 '1'
+  0x7c,0xc6,0x06,0x1c,0x30,0x66,0xfe,0x00, // 50 0x32 '2'
+  0x7c,0xc6,0x06,0x3c,0x06,0xc6,0x7c,0x00, // 51 0x33 '3'
+  0x1c,0x3c,0x6c,0xcc,0xfe,0x0c,0x1e,0x00, // 52 0x34 '4'
+  0xfe,0xc0,0xc0,0xfc,0x06,0xc6,0x7c,0x00, // 53 0x35 '5'
+  0x38,0x60,0xc0,0xfc,0xc6,0xc6,0x7c,0x00, // 54 0x36 '6'
+  0xfe,0xc6,0x0c,0x18,0x30,0x30,0x30,0x00, // 55 0x37 '7'
+  0x7c,0xc6,0xc6,0x7c,0xc6,0xc6,0x7c,0x00, // 56 0x38 '8'
+  0x7c,0xc6,0xc6,0x7e,0x06,0x0c,0x78,0x00, // 57 0x39 '9'
+  0x00,0x18,0x18,0x00,0x00,0x18,0x18,0x00, // 58 0x3a ':'
+  0x00,0x18,0x18,0x00,0x00,0x18,0x18,0x30, // 59 0x3b ';'
+  0x06,0x0c,0x18,0x30,0x18,0x0c,0x06,0x00, // 60 0x3c '<'
+  0x00,0x00,0x7e,0x00,0x00,0x7e,0x00,0x00, // 61 0x3d '='
+  0x60,0x30,0x18,0x0c,0x18,0x30,0x60,0x00, // 62 0x3e '>'
+  0x7c,0xc6,0x0c,0x18,0x18,0x00,0x18,0x00, // 63 0x3f '?'
+  0x7c,0xc6,0xde,0xde,0xde,0xc0,0x78,0x00, // 64 0x40 '@'
+  0x38,0x6c,0xc6,0xfe,0xc6,0xc6,0xc6,0x00, // 65 0x41 'A'
+  0xfc,0x66,0x66,0x7c,0x66,0x66,0xfc,0x00, // 66 0x42 'B'
+  0x3c,0x66,0xc0,0xc0,0xc0,0x66,0x3c,0x00, // 67 0x43 'C'
+  0xf8,0x6c,0x66,0x66,0x66,0x6c,0xf8,0x00, // 68 0x44 'D'
+  0xfe,0x62,0x68,0x78,0x68,0x62,0xfe,0x00, // 69 0x45 'E'
+  0xfe,0x62,0x68,0x78,0x68,0x60,0xf0,0x00, // 70 0x46 'F'
+  0x3c,0x66,0xc0,0xc0,0xce,0x66,0x3a,0x00, // 71 0x47 'G'
+  0xc6,0xc6,0xc6,0xfe,0xc6,0xc6,0xc6,0x00, // 72 0x48 'H'
+  0x3c,0x18,0x18,0x18,0x18,0x18,0x3c,0x00, // 73 0x49 'I'
+  0x1e,0x0c,0x0c,0x0c,0xcc,0xcc,0x78,0x00, // 74 0x4a 'J'
+  0xe6,0x66,0x6c,0x78,0x6c,0x66,0xe6,0x00, // 75 0x4b 'K'
+  0xf0,0x60,0x60,0x60,0x62,0x66,0xfe,0x00, // 76 0x4c 'L'
+  0xc6,0xee,0xfe,0xfe,0xd6,0xc6,0xc6,0x00, // 77 0x4d 'M'
+  0xc6,0xe6,0xf6,0xde,0xce,0xc6,0xc6,0x00, // 78 0x4e 'N'
+  0x7c,0xc6,0xc6,0xc6,0xc6,0xc6,0x7c,0x00, // 79 0x4f 'O'
+  0xfc,0x66,0x66,0x7c,0x60,0x60,0xf0,0x00, // 80 0x50 'P'
+  0x7c,0xc6,0xc6,0xc6,0xc6,0xce,0x7c,0x0e, // 81 0x51 'Q'
+  0xfc,0x66,0x66,0x7c,0x6c,0x66,0xe6,0x00, // 82 0x52 'R'
+  0x3c,0x66,0x30,0x18,0x0c,0x66,0x3c,0x00, // 83 0x53 'S'
+  0x7e,0x7e,0x5a,0x18,0x18,0x18,0x3c,0x00, // 84 0x54 'T'
+  0xc6,0xc6,0xc6,0xc6,0xc6,0xc6,0x7c,0x00, // 85 0x55 'U'
+  0xc6,0xc6,0xc6,0xc6,0xc6,0x6c,0x38,0x00, // 86 0x56 'V'
+  0xc6,0xc6,0xc6,0xd6,0xd6,0xfe,0x6c,0x00, // 87 0x57 'W'
+  0xc6,0xc6,0x6c,0x38,0x6c,0xc6,0xc6,0x00, // 88 0x58 'X'
+  0x66,0x66,0x66,0x3c,0x18,0x18,0x3c,0x00, // 89 0x59 'Y'
+  0xfe,0xc6,0x8c,0x18,0x32,0x66,0xfe,0x00, // 90 0x5a 'Z'
+  0x3c,0x30,0x30,0x30,0x30,0x30,0x3c,0x00, // 91 0x5b '['
+  0xc0,0x60,0x30,0x18,0x0c,0x06,0x02,0x00, // 92 0x5c '\'
+  0x3c,0x0c,0x0c,0x0c,0x0c,0x0c,0x3c,0x00, // 93 0x5d ']'
+  0x10,0x38,0x6c,0xc6,0x00,0x00,0x00,0x00, // 94 0x5e '^'
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff, // 95 0x5f '_'
+  0x30,0x18,0x0c,0x00,0x00,0x00,0x00,0x00, // 96 0x60 '`'
+  0x00,0x00,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 97 0x61 'a'
+  0xe0,0x60,0x7c,0x66,0x66,0x66,0xdc,0x00, // 98 0x62 'b'
+  0x00,0x00,0x7c,0xc6,0xc0,0xc6,0x7c,0x00, // 99 0x63 'c'
+  0x1c,0x0c,0x7c,0xcc,0xcc,0xcc,0x76,0x00, // 100 0x64 'd'
+  0x00,0x00,0x7c,0xc6,0xfe,0xc0,0x7c,0x00, // 101 0x65 'e'
+  0x3c,0x66,0x60,0xf8,0x60,0x60,0xf0,0x00, // 102 0x66 'f'
+  0x00,0x00,0x76,0xcc,0xcc,0x7c,0x0c,0xf8, // 103 0x67 'g'
+  0xe0,0x60,0x6c,0x76,0x66,0x66,0xe6,0x00, // 104 0x68 'h'
+  0x18,0x00,0x38,0x18,0x18,0x18,0x3c,0x00, // 105 0x69 'i'
+  0x06,0x00,0x06,0x06,0x06,0x66,0x66,0x3c, // 106 0x6a 'j'
+  0xe0,0x60,0x66,0x6c,0x78,0x6c,0xe6,0x00, // 107 0x6b 'k'
+  0x38,0x18,0x18,0x18,0x18,0x18,0x3c,0x00, // 108 0x6c 'l'
+  0x00,0x00,0xec,0xfe,0xd6,0xd6,0xd6,0x00, // 109 0x6d 'm'
+  0x00,0x00,0xdc,0x66,0x66,0x66,0x66,0x00, // 110 0x6e 'n'
+  0x00,0x00,0x7c,0xc6,0xc6,0xc6,0x7c,0x00, // 111 0x6f 'o'
+  0x00,0x00,0xdc,0x66,0x66,0x7c,0x60,0xf0, // 112 0x70 'p'
+  0x00,0x00,0x76,0xcc,0xcc,0x7c,0x0c,0x1e, // 113 0x71 'q'
+  0x00,0x00,0xdc,0x76,0x60,0x60,0xf0,0x00, // 114 0x72 'r'
+  0x00,0x00,0x7e,0xc0,0x7c,0x06,0xfc,0x00, // 115 0x73 's'
+  0x30,0x30,0xfc,0x30,0x30,0x36,0x1c,0x00, // 116 0x74 't'
+  0x00,0x00,0xcc,0xcc,0xcc,0xcc,0x76,0x00, // 117 0x75 'u'
+  0x00,0x00,0xc6,0xc6,0xc6,0x6c,0x38,0x00, // 118 0x76 'v'
+  0x00,0x00,0xc6,0xd6,0xd6,0xfe,0x6c,0x00, // 119 0x77 'w'
+  0x00,0x00,0xc6,0x6c,0x38,0x6c,0xc6,0x00, // 120 0x78 'x'
+  0x00,0x00,0xc6,0xc6,0xc6,0x7e,0x06,0xfc, // 121 0x79 'y'
+  0x00,0x00,0x7e,0x4c,0x18,0x32,0x7e,0x00, // 122 0x7a 'z'
+  0x0e,0x18,0x18,0x70,0x18,0x18,0x0e,0x00, // 123 0x7b '{'
+  0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x00, // 124 0x7c '|'
+  0x70,0x18,0x18,0x0e,0x18,0x18,0x70,0x00, // 125 0x7d '}'
+  0x76,0xdc,0x00,0x00,0x00,0x00,0x00,0x00, // 126 0x7e '~'
+  0x00,0x10,0x38,0x6c,0xc6,0xc6,0xfe,0x00, // 127 0x7f ''
+  0x7c,0xc6,0xc0,0xc0,0xc6,0x7c,0x0c,0x78, // 128 0x80 ''
+  0xcc,0x00,0xcc,0xcc,0xcc,0xcc,0x76,0x00, // 129 0x81 ''
+  0x0c,0x18,0x7c,0xc6,0xfe,0xc0,0x7c,0x00, // 130 0x82 ''
+  0x7c,0x82,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 131 0x83 ''
+  0xc6,0x00,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 132 0x84 ''
+  0x30,0x18,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 133 0x85 ''
+  0x30,0x30,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 134 0x86 ''
+  0x00,0x00,0x7e,0xc0,0xc0,0x7e,0x0c,0x38, // 135 0x87 ''
+  0x7c,0x82,0x7c,0xc6,0xfe,0xc0,0x7c,0x00, // 136 0x88 ''
+  0xc6,0x00,0x7c,0xc6,0xfe,0xc0,0x7c,0x00, // 137 0x89 ''
+  0x30,0x18,0x7c,0xc6,0xfe,0xc0,0x7c,0x00, // 138 0x8a ''
+  0x66,0x00,0x38,0x18,0x18,0x18,0x3c,0x00, // 139 0x8b ''
+  0x7c,0x82,0x38,0x18,0x18,0x18,0x3c,0x00, // 140 0x8c ''
+  0x30,0x18,0x00,0x38,0x18,0x18,0x3c,0x00, // 141 0x8d ''
+  0xc6,0x38,0x6c,0xc6,0xfe,0xc6,0xc6,0x00, // 142 0x8e ''
+  0x38,0x6c,0x7c,0xc6,0xfe,0xc6,0xc6,0x00, // 143 0x8f ''
+  0x18,0x30,0xfe,0xc0,0xf8,0xc0,0xfe,0x00, // 144 0x90 ''
+  0x00,0x00,0x7e,0x18,0x7e,0xd8,0x7e,0x00, // 145 0x91 ''
+  0x3e,0x6c,0xcc,0xfe,0xcc,0xcc,0xce,0x00, // 146 0x92 ''
+  0x7c,0x82,0x7c,0xc6,0xc6,0xc6,0x7c,0x00, // 147 0x93 ''
+  0xc6,0x00,0x7c,0xc6,0xc6,0xc6,0x7c,0x00, // 148 0x94 ''
+  0x30,0x18,0x7c,0xc6,0xc6,0xc6,0x7c,0x00, // 149 0x95 ''
+  0x78,0x84,0x00,0xcc,0xcc,0xcc,0x76,0x00, // 150 0x96 ''
+  0x60,0x30,0xcc,0xcc,0xcc,0xcc,0x76,0x00, // 151 0x97 ''
+  0xc6,0x00,0xc6,0xc6,0xc6,0x7e,0x06,0xfc, // 152 0x98 ''
+  0xc6,0x38,0x6c,0xc6,0xc6,0x6c,0x38,0x00, // 153 0x99 ''
+  0xc6,0x00,0xc6,0xc6,0xc6,0xc6,0x7c,0x00, // 154 0x9a ''
+  0x18,0x18,0x7e,0xc0,0xc0,0x7e,0x18,0x18, // 155 0x9b ''
+  0x38,0x6c,0x64,0xf0,0x60,0x66,0xfc,0x00, // 156 0x9c ''
+  0x66,0x66,0x3c,0x7e,0x18,0x7e,0x18,0x18, // 157 0x9d ''
+  0xf8,0xcc,0xcc,0xfa,0xc6,0xcf,0xc6,0xc7, // 158 0x9e ''
+  0x0e,0x1b,0x18,0x3c,0x18,0xd8,0x70,0x00, // 159 0x9f ''
+  0x18,0x30,0x78,0x0c,0x7c,0xcc,0x76,0x00, // 160 0xa0 ' '
+  0x0c,0x18,0x00,0x38,0x18,0x18,0x3c,0x00, // 161 0xa1 '¡'
+  0x0c,0x18,0x7c,0xc6,0xc6,0xc6,0x7c,0x00, // 162 0xa2 '¢'
+  0x18,0x30,0xcc,0xcc,0xcc,0xcc,0x76,0x00, // 163 0xa3 '£'
+  0x76,0xdc,0x00,0xdc,0x66,0x66,0x66,0x00, // 164 0xa4 '¤'
+  0x76,0xdc,0x00,0xe6,0xf6,0xde,0xce,0x00, // 165 0xa5 '¥'
+  0x3c,0x6c,0x6c,0x3e,0x00,0x7e,0x00,0x00, // 166 0xa6 '¦'
+  0x38,0x6c,0x6c,0x38,0x00,0x7c,0x00,0x00, // 167 0xa7 '§'
+  0x18,0x00,0x18,0x18,0x30,0x63,0x3e,0x00, // 168 0xa8 '¨'
+  0x00,0x00,0x00,0xfe,0xc0,0xc0,0x00,0x00, // 169 0xa9 '©'
+  0x00,0x00,0x00,0xfe,0x06,0x06,0x00,0x00, // 170 0xaa 'ª'
+  0x63,0xe6,0x6c,0x7e,0x33,0x66,0xcc,0x0f, // 171 0xab '«'
+  0x63,0xe6,0x6c,0x7a,0x36,0x6a,0xdf,0x06, // 172 0xac '¬'
+  0x18,0x00,0x18,0x18,0x3c,0x3c,0x18,0x00, // 173 0xad '­'
+  0x00,0x33,0x66,0xcc,0x66,0x33,0x00,0x00, // 174 0xae '®'
+  0x00,0xcc,0x66,0x33,0x66,0xcc,0x00,0x00, // 175 0xaf '¯'
+  0x22,0x88,0x22,0x88,0x22,0x88,0x22,0x88, // 176 0xb0 '°'
+  0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa, // 177 0xb1 '±'
+  0x77,0xdd,0x77,0xdd,0x77,0xdd,0x77,0xdd, // 178 0xb2 '²'
+  0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18, // 179 0xb3 '³'
+  0x18,0x18,0x18,0x18,0xf8,0x18,0x18,0x18, // 180 0xb4 '´'
+  0x18,0x18,0xf8,0x18,0xf8,0x18,0x18,0x18, // 181 0xb5 'µ'
+  0x36,0x36,0x36,0x36,0xf6,0x36,0x36,0x36, // 182 0xb6 '¶'
+  0x00,0x00,0x00,0x00,0xfe,0x36,0x36,0x36, // 183 0xb7 '·'
+  0x00,0x00,0xf8,0x18,0xf8,0x18,0x18,0x18, // 184 0xb8 '¸'
+  0x36,0x36,0xf6,0x06,0xf6,0x36,0x36,0x36, // 185 0xb9 '¹'
+  0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36, // 186 0xba 'º'
+  0x00,0x00,0xfe,0x06,0xf6,0x36,0x36,0x36, // 187 0xbb '»'
+  0x36,0x36,0xf6,0x06,0xfe,0x00,0x00,0x00, // 188 0xbc '¼'
+  0x36,0x36,0x36,0x36,0xfe,0x00,0x00,0x00, // 189 0xbd '½'
+  0x18,0x18,0xf8,0x18,0xf8,0x00,0x00,0x00, // 190 0xbe '¾'
+  0x00,0x00,0x00,0x00,0xf8,0x18,0x18,0x18, // 191 0xbf '¿'
+  0x18,0x18,0x18,0x18,0x1f,0x00,0x00,0x00, // 192 0xc0 'À'
+  0x18,0x18,0x18,0x18,0xff,0x00,0x00,0x00, // 193 0xc1 'Á'
+  0x00,0x00,0x00,0x00,0xff,0x18,0x18,0x18, // 194 0xc2 'Â'
+  0x18,0x18,0x18,0x18,0x1f,0x18,0x18,0x18, // 195 0xc3 'Ã'
+  0x00,0x00,0x00,0x00,0xff,0x00,0x00,0x00, // 196 0xc4 'Ä'
+  0x18,0x18,0x18,0x18,0xff,0x18,0x18,0x18, // 197 0xc5 'Å'
+  0x18,0x18,0x1f,0x18,0x1f,0x18,0x18,0x18, // 198 0xc6 'Æ'
+  0x36,0x36,0x36,0x36,0x37,0x36,0x36,0x36, // 199 0xc7 'Ç'
+  0x36,0x36,0x37,0x30,0x3f,0x00,0x00,0x00, // 200 0xc8 'È'
+  0x00,0x00,0x3f,0x30,0x37,0x36,0x36,0x36, // 201 0xc9 'É'
+  0x36,0x36,0xf7,0x00,0xff,0x00,0x00,0x00, // 202 0xca 'Ê'
+  0x00,0x00,0xff,0x00,0xf7,0x36,0x36,0x36, // 203 0xcb 'Ë'
+  0x36,0x36,0x37,0x30,0x37,0x36,0x36,0x36, // 204 0xcc 'Ì'
+  0x00,0x00,0xff,0x00,0xff,0x00,0x00,0x00, // 205 0xcd 'Í'
+  0x36,0x36,0xf7,0x00,0xf7,0x36,0x36,0x36, // 206 0xce 'Î'
+  0x18,0x18,0xff,0x00,0xff,0x00,0x00,0x00, // 207 0xcf 'Ï'
+  0x36,0x36,0x36,0x36,0xff,0x00,0x00,0x00, // 208 0xd0 'Ð'
+  0x00,0x00,0xff,0x00,0xff,0x18,0x18,0x18, // 209 0xd1 'Ñ'
+  0x00,0x00,0x00,0x00,0xff,0x36,0x36,0x36, // 210 0xd2 'Ò'
+  0x36,0x36,0x36,0x36,0x3f,0x00,0x00,0x00, // 211 0xd3 'Ó'
+  0x18,0x18,0x1f,0x18,0x1f,0x00,0x00,0x00, // 212 0xd4 'Ô'
+  0x00,0x00,0x1f,0x18,0x1f,0x18,0x18,0x18, // 213 0xd5 'Õ'
+  0x00,0x00,0x00,0x00,0x3f,0x36,0x36,0x36, // 214 0xd6 'Ö'
+  0x36,0x36,0x36,0x36,0xff,0x36,0x36,0x36, // 215 0xd7 '×'
+  0x18,0x18,0xff,0x18,0xff,0x18,0x18,0x18, // 216 0xd8 'Ø'
+  0x18,0x18,0x18,0x18,0xf8,0x00,0x00,0x00, // 217 0xd9 'Ù'
+  0x00,0x00,0x00,0x00,0x1f,0x18,0x18,0x18, // 218 0xda 'Ú'
+  0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // 219 0xdb 'Û'
+  0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff, // 220 0xdc 'Ü'
+  0xf0,0xf0,0xf0,0xf0,0xf0,0xf0,0xf0,0xf0, // 221 0xdd 'Ý'
+  0x0f,0x0f,0x0f,0x0f,0x0f,0x0f,0x0f,0x0f, // 222 0xde 'Þ'
+  0xff,0xff,0xff,0xff,0x00,0x00,0x00,0x00, // 223 0xdf 'ß'
+  0x00,0x00,0x76,0xdc,0xc8,0xdc,0x76,0x00, // 224 0xe0 'à'
+  0x78,0xcc,0xcc,0xd8,0xcc,0xc6,0xcc,0x00, // 225 0xe1 'á'
+  0xfe,0xc6,0xc0,0xc0,0xc0,0xc0,0xc0,0x00, // 226 0xe2 'â'
+  0x00,0x00,0xfe,0x6c,0x6c,0x6c,0x6c,0x00, // 227 0xe3 'ã'
+  0xfe,0xc6,0x60,0x30,0x60,0xc6,0xfe,0x00, // 228 0xe4 'ä'
+  0x00,0x00,0x7e,0xd8,0xd8,0xd8,0x70,0x00, // 229 0xe5 'å'
+  0x00,0x00,0x66,0x66,0x66,0x66,0x7c,0xc0, // 230 0xe6 'æ'
+  0x00,0x76,0xdc,0x18,0x18,0x18,0x18,0x00, // 231 0xe7 'ç'
+  0x7e,0x18,0x3c,0x66,0x66,0x3c,0x18,0x7e, // 232 0xe8 'è'
+  0x38,0x6c,0xc6,0xfe,0xc6,0x6c,0x38,0x00, // 233 0xe9 'é'
+  0x38,0x6c,0xc6,0xc6,0x6c,0x6c,0xee,0x00, // 234 0xea 'ê'
+  0x0e,0x18,0x0c,0x3e,0x66,0x66,0x3c,0x00, // 235 0xeb 'ë'
+  0x00,0x00,0x7e,0xdb,0xdb,0x7e,0x00,0x00, // 236 0xec 'ì'
+  0x06,0x0c,0x7e,0xdb,0xdb,0x7e,0x60,0xc0, // 237 0xed 'í'
+  0x1e,0x30,0x60,0x7e,0x60,0x30,0x1e,0x00, // 238 0xee 'î'
+  0x00,0x7c,0xc6,0xc6,0xc6,0xc6,0xc6,0x00, // 239 0xef 'ï'
+  0x00,0xfe,0x00,0xfe,0x00,0xfe,0x00,0x00, // 240 0xf0 'ð'
+  0x18,0x18,0x7e,0x18,0x18,0x00,0x7e,0x00, // 241 0xf1 'ñ'
+  0x30,0x18,0x0c,0x18,0x30,0x00,0x7e,0x00, // 242 0xf2 'ò'
+  0x0c,0x18,0x30,0x18,0x0c,0x00,0x7e,0x00, // 243 0xf3 'ó'
+  0x0e,0x1b,0x1b,0x18,0x18,0x18,0x18,0x18, // 244 0xf4 'ô'
+  0x18,0x18,0x18,0x18,0x18,0xd8,0xd8,0x70, // 245 0xf5 'õ'
+  0x00,0x18,0x00,0x7e,0x00,0x18,0x00,0x00, // 246 0xf6 'ö'
+  0x00,0x76,0xdc,0x00,0x76,0xdc,0x00,0x00, // 247 0xf7 '÷'
+  0x38,0x6c,0x6c,0x38,0x00,0x00,0x00,0x00, // 248 0xf8 'ø'
+  0x00,0x00,0x00,0x18,0x18,0x00,0x00,0x00, // 249 0xf9 'ù'
+  0x00,0x00,0x00,0x18,0x00,0x00,0x00,0x00, // 250 0xfa 'ú'
+  0x0f,0x0c,0x0c,0x0c,0xec,0x6c,0x3c,0x1c, // 251 0xfb 'û'
+  0x6c,0x36,0x36,0x36,0x36,0x00,0x00,0x00, // 252 0xfc 'ü'
+  0x78,0x0c,0x18,0x30,0x7c,0x00,0x00,0x00, // 253 0xfd 'ý'
+  0x00,0x00,0x3c,0x3c,0x3c,0x3c,0x00,0x00, // 254 0xfe 'þ'
+  0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00, // 255 0xff ' '
+
+};
+
 static const Uint8 *fontptr = gfxPrimitivesFontdata;
 
 static struct arccoordstype bgi_last_arc;
@@ -170,31 +445,34 @@ static struct palettetype pal;
 
 // utility functions
 
-static void initpalette    (void);
-static void putpixel_copy  (int, int, Uint32);
-static void putpixel_xor   (int, int, Uint32);
-static void putpixel_and   (int, int, Uint32);
-static void putpixel_or    (int, int, Uint32);
-static void putpixel_not   (int, int, Uint32);
-static void ff_putpixel    (int x, int);
-static Uint32 getpixel_raw (int, int);
+static void initpalette      (void);
+static void putpixel_copy    (int, int, Uint32);
+static void putpixel_xor     (int, int, Uint32);
+static void putpixel_and     (int, int, Uint32);
+static void putpixel_or      (int, int, Uint32);
+static void putpixel_not     (int, int, Uint32);
+static void ff_putpixel      (int x, int);
+static Uint32 getpixel_raw   (int, int);
 
-static void line_copy (int, int, int, int);
-static void line_xor  (int, int, int, int);
-static void line_and  (int, int, int, int);
-static void line_or   (int, int, int, int);
-static void line_not  (int, int, int, int);
-static void line_fill (int, int, int, int);
-static void _floodfill (int, int, int);
+static void line_copy        (int, int, int, int);
+static void line_xor         (int, int, int, int);
+static void line_and         (int, int, int, int);
+static void line_or          (int, int, int, int);
+static void line_not         (int, int, int, int);
+static void line_fill        (int, int, int, int);
+static void _floodfill       (int, int, int);
 
-static void line_fast  (int, int, int, int);
-static void updaterect (int, int, int, int);
+static void line_fast        (int, int, int, int);
+static void updaterect       (int, int, int, int);
+static void update	     (void);
+static void update_pixel     (int, int);
 
 static void unimplemented    (char *);
 static int  is_in_range      (int, int, int);
 static void swap_if_greater  (int *, int *);
 static void circle_bresenham (int, int, int);
 static int  octant           (int, int);
+static void refresh_window   (void);
 
 // -----
 
@@ -209,66 +487,73 @@ static void unimplemented (char *msg)
 
 void _graphfreemem (void *ptr, unsigned int size)
 {
+
   unimplemented ("_graphfreemem");
+
 } // _graphfreemem ()
 
 // -----
 
 void _graphgetmem (unsigned int size)
 {
+
   unimplemented ("_graphgetmem");
+
 } // _graphgetmem ()
 
 // -----
 
 int installuserdriver (char *name, int (*detect)(void))
 {
+
   unimplemented ("installuserdriver");
   return 0;
+
 } // installuserdriver ()
 
 // -----
 
 int installuserfont (char *name)
 {
+
   unimplemented ("installuserfont");
   return 0;
+
 } // installuserfont ()
 
 // -----
 
 int registerbgidriver (void (*driver)(void))
 {
+
   unimplemented ("registerbgidriver");
   return 0;
+
 } // registerbgidriver ()
 
 // -----
 
 int registerbgifont (void (*font)(void))
 {
+
   unimplemented ("registerbgifont");
   return 0;
+
 } // registerbgifont ()
 
 // -----
 
 unsigned int setgraphbufsize (unsigned bufsize)
 {
+
   unimplemented ("setgraphbufsize");
   return 0;
+
 } // setgraphbufsize ()
 
 // -----
 
-// implemented stuff starts here
-
-static int is_in_range (int x, int x1, int x2)
-{
-  return (x >= x1 && x <= x2);
-}
-
-// -----
+// ----- implemented stuff starts here -----
 
 #define PI_CONV (3.1415926 / 180.0)
 
@@ -300,8 +585,7 @@ void arc (int x, int y, int stangle, int endangle, int radius)
                x + floor (0.5 + (radius * cos ((angle+1) * PI_CONV))),
                y - floor (0.5 + (radius * sin ((angle+1) * PI_CONV))));
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // arc ()
 
@@ -314,6 +598,9 @@ void bar3d (int left, int top, int right, int bottom, int depth, int topflag)
 
   Uint32 tmp, tmpcolor;
 
+  swap_if_greater (&left, &right);
+  swap_if_greater (&top, &bottom);
+
   tmp = bgi_fg_color;
 
   if (EMPTY_FILL == bgi_fill_style.pattern)
@@ -325,18 +612,17 @@ void bar3d (int left, int top, int right, int bottom, int depth, int topflag)
   bar (left, top, right, bottom);
   setcolor (tmp); // outline
   if (depth > 0) {
-    line_fast (left, top, left + depth, top - depth);
-    line_fast (left + depth, top - depth, right + depth, top - depth);
+    if (topflag) {
+      line_fast (left, top, left + depth, top - depth);
+      line_fast (left + depth, top - depth, right + depth, top - depth);
+    }
     line_fast (right, top, right + depth, top - depth);
     line_fast (right, bottom, right + depth, bottom - depth);
     line_fast (right + depth, bottom - depth, right + depth, top - depth);
   }
   rectangle (left, top, right, bottom);
 
-  // topflag - what should I do with it?
-
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // bar3d ()
 
@@ -372,8 +658,7 @@ void bar (int left, int top, int right, int bottom)
   setcolor (tmp);
   bgi_line_style.thickness = tmpthickness;
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // bar ()
 
@@ -382,6 +667,7 @@ void bar (int left, int top, int right, int bottom)
 int ALPHA_VALUE (int color)
 {
   // Returns the alpha (transparency) component of an ARGB color.
+
   return ((palette[BGI_COLORS + TMP_COLORS + color] >> 24) & 0xFF);
 
 } // ALPHA_VALUE ()
@@ -390,7 +676,8 @@ int ALPHA_VALUE (int color)
 
 int RED_VALUE (int color)
 {
-  // return the red component of 'color' in the extended palette
+  // Returns the red component of 'color' in the extended palette
+
   return ((palette[BGI_COLORS + TMP_COLORS + color] >> 16) & 0xFF);
 
 } // RED_VALUE ()
@@ -399,7 +686,8 @@ int RED_VALUE (int color)
 
 int GREEN_VALUE (int color)
 {
-  // return the green component of 'color' in the extended palette
+  // Returns the green component of 'color' in the extended palette
+
   return ((palette[BGI_COLORS + TMP_COLORS + color] >> 8) & 0xFF);
 
 } // GREEN_VALUE ()
@@ -408,7 +696,8 @@ int GREEN_VALUE (int color)
 
 int BLUE_VALUE (int color)
 {
-  // Returns the blue component of an ARGB color.
+  // Returns the blue component 'color' in the extended palette
+
   return (palette[BGI_COLORS + TMP_COLORS + color] & 0xFF);
 
 } // BLUE_VALUE ()
@@ -441,8 +730,7 @@ static void circle_bresenham (int x, int y, int radius)
 
   } while (xx < 0);
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // circle_bresenham ();
 
@@ -477,8 +765,7 @@ void cleardevice (void)
       bgi_activepage[current_window][y * (bgi_maxx + 1) + x] =
         palette[bgi_bg_color];
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // cleardevice ()
 
@@ -498,8 +785,7 @@ void clearviewport (void)
       bgi_activepage[current_window][y * (bgi_maxx + 1) + x] =
         palette[bgi_bg_color];
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // clearviewport ()
 
@@ -508,6 +794,11 @@ void clearviewport (void)
 void closegraph (void)
 {
   // Closes the graphics system.
+
+  // waits for update callback to finish
+
+  refresh_needed = NOPE;
+  SDL_Delay (500);
 
   for (int i = 0; i < num_windows; i++)
     if (YEAH == active_windows[i]) {
@@ -518,9 +809,11 @@ void closegraph (void)
 
   // free visual pages - causes segmentation fault!
   // for (int page = 0; page < bgi_np; page++)
-  //  SDL_FreeSurface (bgi_vpage[page]);
-
-  SDL_Quit ();
+  //   SDL_FreeSurface (bgi_vpage[page]);
+  // SDL_UnlockMutex (update_mutex);
+  // Only calls SDL_Quit if not running on fullscreen
+  if (SDL_FULLSCREEN != bgi_gm)
+    SDL_Quit ();
 
 } // closegraph ()
 
@@ -566,8 +859,7 @@ void delay (int msec)
   Uint32
     stop;
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
   stop = SDL_GetTicks () + msec;
 
@@ -590,6 +882,7 @@ void detectgraph (int *graphdriver, int *graphmode)
 
   *graphdriver = SDL;
   *graphmode = SDL_FULLSCREEN;
+
 } // detectgraph ()
 
 // -----
@@ -607,8 +900,7 @@ void drawpoly (int numpoints, int *polypoints)
   line_fast (polypoints[2*n], polypoints[2*n + 1],
              polypoints[0], polypoints[1]);
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // drawpoly ()
 
@@ -651,18 +943,17 @@ void ellipse (int x, int y, int stangle, int endangle,
     return;
   }
 
-  // needed?
+  // really needed?
   bgi_last_arc.x = x;
   bgi_last_arc.y = y;
 
   for (angle = stangle; angle < endangle; angle++)
     line_fast (x + (xradius * cos (angle * PI_CONV)),
                y - (yradius * sin (angle * PI_CONV)),
-               x + (xradius * cos ((angle+1) * PI_CONV)),
-               y - (yradius * sin ((angle+1) * PI_CONV)));
+               x + (xradius * cos ((angle + 1) * PI_CONV)),
+               y - (yradius * sin ((angle + 1) * PI_CONV)));
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // ellipse ()
 
@@ -780,8 +1071,7 @@ void _ellipse (int cx, int cy, int xradius, int yradius)
     }
   }
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // _ellipse ()
 
@@ -866,19 +1156,20 @@ void fillellipse (int cx, int cy, int xradius, int yradius)
   // outline
 
   _ellipse (cx, cy, xradius, yradius);
-  if (! bgi_fast_mode)
-    refresh ();
 
-} // _ellipse ()
+  update ();
+
+} // fillellipse ()
 
 // -----
 
-// helper function for fillpoly ()
-
 static int intcmp (const void *n1, const void *n2)
 {
+  // helper function for fillpoly ()
+
   return (*(const int *) n1) - (*(const int *) n2);
-}
+
+} // intcmp ()
 
 // -----
 
@@ -960,10 +1251,10 @@ void fillpoly (int numpoints, int *polypoints)
   setcolor (tmp);
   drawpoly (numpoints, polypoints);
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // fillpoly ()
+
 
 // -----
 
@@ -1112,7 +1403,7 @@ void _floodfill (int x, int y, int border)
 
   } // while
 
-} // floodfill ()
+} // _floodfill ()
 
 // -----
 
@@ -1168,8 +1459,7 @@ void floodfill (int x, int y, int border)
       _floodfill (x, y, border);
   }
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // floodfill ()
 
@@ -1196,16 +1486,19 @@ void getarccoords (struct arccoordstype *arccoords)
   arccoords->ystart = bgi_last_arc.ystart;
   arccoords->xend = bgi_last_arc.xend;
   arccoords->yend = bgi_last_arc.yend;
+
 } // getarccoords ()
 
 // -----
 
 void getaspectratio (int *xasp, int *yasp)
 {
-  // Retrieves the current graphics mode’s aspect ratio.
+  // Retrieves the current graphics mode's aspect ratio.
+  // Irrelevant on modern hardware.
 
   *xasp = 10000;
   *yasp = 10000;
+
 } // getaspectratio ()
 
 // -----
@@ -1215,12 +1508,13 @@ int getbkcolor (void)
   // Returns the current background color.
 
   return bgi_bg_color;
+
 } // getbkcolor ()
 
 // -----
 
 // this function should be simply named "getch", but this name
-// causes a bug in Mingw.
+// causes a bug in MSYS2.
 // "getch" is defined as a macro in SDL_bgi.h
 
 int bgi_getch (void)
@@ -1232,7 +1526,7 @@ int bgi_getch (void)
     key, type;
 
   if (window_is_hidden)
-    return (getchar());
+    return (getchar ());
 
   do {
     key = getevent ();
@@ -1258,6 +1552,7 @@ int bgi_getch (void)
 
   // we should never get here...
   return 0;
+
 } // bgi_getch ()
 
 // -----
@@ -1267,30 +1562,38 @@ int getcolor (void)
   // Returns the current drawing (foreground) color.
 
   return bgi_fg_color;
+
 } // getcolor ()
 
 // -----
 
 int getcurrentwindow (void)
 {
+  // Returns the ID of current window
+
   return current_window;
+
 } // getcurrentwindow ()
 
 // -----
 
 struct palettetype *getdefaultpalette (void)
 {
+  // Returns the default palette
+
   return &pal;
+
 } // getdefaultpalette ()
 
 // -----
 
 char *getdrivername (void)
 {
-  // Returns a pointer to a string containing the name of the current
-  // graphics driver.
+  // Returns a pointer to a string containing the name
+  //  of the current graphics driver.
 
   return ("SDL_bgi");
+
 } // getdrivername ()
 
 // -----
@@ -1305,7 +1608,8 @@ int getevent (void)
   // wait for an event
   while (1) {
 
-    while (SDL_PollEvent(&event))
+    // while (SDL_PollEvent (&event))
+    while (SDL_WaitEvent (&event))
 
       switch (event.type) {
 
@@ -1315,7 +1619,7 @@ int getevent (void)
 
         case SDL_WINDOWEVENT_SHOWN:
         case SDL_WINDOWEVENT_EXPOSED:
-          refresh ();
+          refresh_window ();
           break;
 
         case SDL_WINDOWEVENT_CLOSE:
@@ -1354,8 +1658,11 @@ int getevent (void)
 
       default:
         ;
-      }
-  }
+
+      } // switch (event.type)
+
+  } // while (1)
+
 } // getevent ()
 
 // -----
@@ -1381,6 +1688,7 @@ void getfillsettings (struct fillsettingstype *fillinfo)
 
   fillinfo->pattern = bgi_fill_style.pattern;
   fillinfo->color = bgi_fill_color;
+
 } // getfillsettings ()
 
 // -----
@@ -1390,6 +1698,7 @@ int getgraphmode (void)
   // Returns the current graphics mode.
 
   return bgi_gm;
+
 } // getgraphmode ()
 
 // -----
@@ -1415,6 +1724,7 @@ void getimage (int left, int top, int right, int bottom, void *bitmap)
   for (y = top + vp.top; y <= bottom + vp.top; y++)
     for (x = left + vp.left; x <= right + vp.left; x++)
       tmp [i++] = getpixel_raw (x, y);
+
 } // getimage ()
 
 // -----
@@ -1427,6 +1737,7 @@ void getlinesettings (struct linesettingstype *lineinfo)
   lineinfo->linestyle = bgi_line_style.linestyle;
   lineinfo->upattern = bgi_line_style.upattern;
   lineinfo->thickness = bgi_line_style.thickness;
+
 } // getlinesettings ();
 
 // -----
@@ -1439,6 +1750,7 @@ int getmaxcolor (void)
     return MAXCOLORS;
   else
     return PALETTE_SIZE;
+
 } // getmaxcolor ()
 
 // -----
@@ -1448,6 +1760,7 @@ int getmaxmode (void)
   // Returns the maximum mode number for the current driver.
 
   return SDL_FULLSCREEN;
+
 } // getmaxmode ()
 
 // -----
@@ -1457,6 +1770,7 @@ int getmaxx ()
   // Returns the maximum x screen coordinate.
 
   return bgi_maxx;
+
 } // getmaxx ()
 
 // -----
@@ -1466,14 +1780,15 @@ int getmaxy ()
   // Returns the maximum y screen coordinate.
 
   return bgi_maxy;
+
 } // getmaxy ()
 
 // -----
 
 char *getmodename (int mode_number)
 {
-  // Returns a pointer to a string containing the name of the
-  // specified graphics mode.
+  // Returns a pointer to a string containing
+  // the name of the specified graphics mode.
 
   switch (mode_number) {
 
@@ -1543,6 +1858,7 @@ void getmoderange (int graphdriver, int *lomode, int *himode)
   // return dummy values
   *lomode = 0;
   *himode = 0;
+
 } // getmoderange ()
 
 // -----
@@ -1567,14 +1883,28 @@ int getpalettesize (struct palettetype *palette)
 
   // !!! BUG - don't ignore the parameter
   return BGI_COLORS + TMP_COLORS + PALETTE_SIZE;
+
 } // getpalettesize ()
 
 // -----
 
 static Uint32 getpixel_raw (int x, int y)
 {
+  // Returns a pixel as Uint32 value
+
   return bgi_activepage[current_window][y * (bgi_maxx + 1) + x];
+
 } // getpixel_raw ()
+
+// -----
+
+static int is_in_range (int x, int x1, int x2)
+{
+  // Utility function for getpixel ()
+
+  return (x >= x1 && x <= x2);
+
+} // is_in_range ()
 
 // -----
 
@@ -1619,20 +1949,22 @@ void gettextsettings (struct textsettingstype *texttypeinfo)
   texttypeinfo->charsize = bgi_txt_style.charsize;
   texttypeinfo->horiz = bgi_txt_style.horiz;
   texttypeinfo->vert = bgi_txt_style.vert;
+
 } // gettextsettings ()
 
 // -----
 
 void getviewsettings (struct viewporttype *viewport)
 {
-  // Fills the viewporttype structure pointed to by viewport with
-  // information about the current viewport.
+  // Fills the viewporttype structure pointed to by viewport
+  // with information about the current viewport.
 
   viewport->left = vp.left;
   viewport->top = vp.top;
   viewport->right = vp.right;
   viewport->bottom = vp.bottom;
   viewport->clip = vp.clip;
+
 } // getviewsettings ()
 
 // -----
@@ -1642,24 +1974,27 @@ int getvisualpage (void)
   // Returns the visual page number.
 
   return (bgi_vp);
+
 } // getvisualpage ()
 
 // -----
 
 int getx (void)
 {
-  // Returns the current viewport’s x coordinate.
+  // Returns the current viewport's x coordinate.
 
   return bgi_cp_x;
+
 } // getx ()
 
 // -----
 
 int gety (void)
 {
-  // Returns the current viewport’s y coordinate.
+  // Returns the current viewport's y coordinate.
 
   return bgi_cp_y;
+
 } // gety ()
 
 // -----
@@ -1670,6 +2005,7 @@ char *grapherrormsg (int errorcode)
   // errorcode, returned by graphresult(). Actually, it does nothing.
 
   return NULL;
+
 } // grapherrormsg ()
 
 // -----
@@ -1729,6 +2065,7 @@ int graphresult (void)
   // it does nothing.
 
   return grOk;
+
 } // graphresult ()
 
 // -----
@@ -1740,6 +2077,7 @@ unsigned imagesize (int left, int top, int right, int bottom)
 
   return 2 * sizeof(Uint32) + // witdth, height
     (right - left + 1) * (bottom - top + 1) * sizeof (Uint32);
+
 } // imagesize ()
 
 // -----
@@ -1812,6 +2150,11 @@ void initgraph (int *graphdriver, int *graphmode, char *pathtodriver)
 
   } // switch
 
+  // old programs take it for granted
+
+  cleardevice ();
+  refresh_window ();
+
 } // initgraph ()
 
 // -----
@@ -1822,6 +2165,7 @@ void initpalette (void)
 
   for (i = BLACK; i < WHITE + 1; i++)
     palette[i] = bgi_palette[i];
+
 } // initpalette ()
 
 // -----
@@ -1836,7 +2180,22 @@ void initwindow (int width, int height)
 
   static int
     first_run = YEAH,    // first run of initwindow()
-    fullscreen = -1;     // fullscreen window already created
+    fullscreen = -1;     // fullscreen window already created?
+
+  // the mutex is used by update()
+  if (!update_mutex)
+    update_mutex = SDL_CreateMutex ();
+  if (!update_mutex) {
+    SDL_Log ("SDL_CreateMutex() failed: %s", SDL_GetError ());
+    showerrorbox ("SDL_CreateMutex() failed");
+    fprintf (stderr, "Automatic refresh not available.\n");
+    // don't exit - slow and fast modes are still available
+  }
+
+  if (0 != SDL_LockMutex (update_mutex)) {
+    SDL_Log ("SDL_LockMutex() failed: %s", SDL_GetError ());
+    showerrorbox ("SDL_LockMutex() failed");
+  }
 
   SDL_DisplayMode mode =
   { SDL_PIXELFORMAT_UNKNOWN, 0, 0, 0, 0 };
@@ -1844,8 +2203,9 @@ void initwindow (int width, int height)
   if (YEAH == first_run) {
     first_run = NOPE;
      // initialise SDL2
-    if (SDL_Init (SDL_INIT_VIDEO) != 0) {
-      SDL_Log ("SDL_Init failed: %s", SDL_GetError());
+    if (SDL_Init (SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
+      SDL_Log ("SDL_Init() failed: %s", SDL_GetError ());
+      showerrorbox ("SDL_Init() failed");
       exit (1);
     }
     // initialise active_windows[]
@@ -1855,13 +2215,15 @@ void initwindow (int width, int height)
 
   // any display available?
   if ((display_count = SDL_GetNumVideoDisplays ()) < 1) {
-    SDL_Log ("SDL_GetNumVideoDisplays returned: %i\n", display_count);
+    SDL_Log ("SDL_GetNumVideoDisplays() returned: %i\n", display_count);
+    showerrorbox ("SDL_GetNumVideoDisplays() failed");
     exit (1);
   }
 
   // get display mode
   if (SDL_GetDisplayMode (0, 0, &mode) != 0) {
-    SDL_Log ("SDL_GetDisplayMode failed: %s", SDL_GetError());
+    SDL_Log ("SDL_GetDisplayMode() failed: %s", SDL_GetError ());
+    showerrorbox ("SDL_GetDisplayMode() failed");
     exit (1);
   }
 
@@ -1923,7 +2285,7 @@ void initwindow (int width, int height)
     }
   }
 
-  bgi_win[current_window] = 
+  bgi_win[current_window] =
     SDL_CreateWindow (bgi_win_title,
                       window_x,
                       window_y,
@@ -1932,30 +2294,31 @@ void initwindow (int width, int height)
                       window_flags);
   // is the window OK?
   if (NULL == bgi_win[current_window]) {
-    printf ("Could not create window: %s\n", SDL_GetError ());
+    SDL_Log ("Could not create window: %s\n", SDL_GetError ());
     return;
   }
 
   // window ok; create renderer
   bgi_rnd[current_window] =
     SDL_CreateRenderer (bgi_win[current_window], -1,
-                         // slow but guaranteed to exist
+			// slow but guaranteed to exist
                         SDL_RENDERER_SOFTWARE);
 
   if (NULL == bgi_rnd[current_window]) {
-    printf ("Could not create renderer: %s\n", SDL_GetError ());
+    SDL_Log ("Could not create renderer: %s\n", SDL_GetError ());
     return;
   }
 
-  // last, create the texture
+  // finally, create the texture
   bgi_txt[current_window] =
     SDL_CreateTexture (bgi_rnd[current_window],
                        SDL_PIXELFORMAT_ARGB8888,
-                       SDL_TEXTUREACCESS_TARGET,
+		       SDL_TEXTUREACCESS_STREAMING,
+                       // SDL_TEXTUREACCESS_TARGET,
                        bgi_maxx + 1,
                        bgi_maxy + 1);
   if (NULL == bgi_txt[current_window]) {
-    printf ("Could not create texture: %s\n", SDL_GetError ());
+    SDL_Log ("Could not create texture: %s\n", SDL_GetError ());
     return;
   }
 
@@ -1965,6 +2328,7 @@ void initwindow (int width, int height)
       SDL_CreateRGBSurface (0, mode.w, mode.h, 32, 0, 0, 0, 0);
     if (NULL == bgi_vpage[page]) {
       SDL_Log ("Could not create surface for visual page %d.", page);
+      showerrorbox ("Could not create surface for visual page");
       break;
     }
     else
@@ -1982,24 +2346,50 @@ void initwindow (int width, int height)
 
   graphdefaults ();
 
+  // check the environment variable 'SDL_BGI_RATE'
+  // and act accordingly
+
+  char *speed = getenv ("SDL_BGI_RATE");
+
+  if (NULL == speed) // variable does not exist
+    speed = "compatible";
+  else {
+
+    if (0 == strcmp ("auto", speed))
+      sdlbgiauto ();
+
+    refresh_rate = atoi (speed);
+    if (0 != refresh_rate) // implies auto mode
+      sdlbgiauto ();
+  }
+
+  // any other value of SDL_BGI_RATE triggers
+  // "compatible" mode by default
+
+  SDL_UnlockMutex (update_mutex);
+
 } // initwindow ()
 
 // -----
 
 int IS_BGI_COLOR (int color)
 {
-  // Returns 1 if the current color is a standard BGI color 
+  // Returns 1 if the current color is a standard BGI color
   // (not ARGB); the color argument is redundant
+
   return ! bgi_argb_mode;
+
 } // IS_BGI_COLOR ()
 
 // -----
 
 int IS_RGB_COLOR (int color)
 {
-  // Returns 1 if the current color is a standard BGI color 
+  // Returns 1 if the current color is a standard BGI color
   // (not ARGB); the color argument is redundant
+
   return bgi_argb_mode;
+
 } // IS_RGB_COLOR ()
 
 // -----
@@ -2012,14 +2402,13 @@ int kbhit (void)
   SDL_Event event;
   SDL_Keycode key;
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
   if (YEAH == key_pressed) { // a key was pressed during delay()
     key_pressed = NOPE;
     return YEAH;
   }
-  
+
   if (SDL_PollEvent (&event)) {
     if (SDL_KEYDOWN == event.type) {
       key = event.key.keysym.sym;
@@ -2048,8 +2437,10 @@ int kbhit (void)
     else
       SDL_PushEvent (&event); // don't disrupt the mouse
   }
+
   return NOPE;
-}
+
+} // kbhit ()
 
 // -----
 
@@ -2251,7 +2642,7 @@ void line_not (int x1, int y1, int x2, int y2)
 
 void line_fill (int x1, int y1, int x2, int y2)
 {
-  // line routin used for filling
+  // line function used for filling
 
   int
     dx = abs (x2 - x1),
@@ -2284,7 +2675,7 @@ void line_fill (int x1, int y1, int x2, int y2)
 
 static int octant (int x, int y)
 {
-  // returns the octant where x, y lies.
+  // Returns the octant where x, y lies; used by line().
 
   if (x >= 0) { // octants 1, 2, 7, 8
 
@@ -2410,8 +2801,7 @@ void line (int x1, int y1, int x2, int y2)
 
   } // if (THICK_WIDTH...)
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // line ()
 
@@ -2419,6 +2809,8 @@ void line (int x1, int y1, int x2, int y2)
 
 void line_fast (int x1, int y1, int x2, int y2)
 {
+  // Draws a line in fast mode
+
   int
     fastmode = bgi_fast_mode;
 
@@ -2438,6 +2830,7 @@ void linerel (int dx, int dy)
   line (bgi_cp_x, bgi_cp_y, bgi_cp_x + dx, bgi_cp_y + dy);
   bgi_cp_x += dx;
   bgi_cp_y += dy;
+
 } // linerel ()
 
 // -----
@@ -2449,6 +2842,7 @@ void lineto (int x, int y)
   line (bgi_cp_x, bgi_cp_y, x, y);
   bgi_cp_x = x;
   bgi_cp_y = y;
+
 } // lineto ()
 
 // -----
@@ -2491,13 +2885,13 @@ int mouseclick (void)
 
 // -----
 
-int ismouseclick (int kind)
+int ismouseclick (int btn)
 {
-  // Returns 1 if the 'kind' mouse button was clicked.
+  // Returns 1 if the 'btn' mouse button was clicked.
 
   SDL_PumpEvents ();
 
-  switch (kind) {
+  switch (btn) {
 
   case SDL_BUTTON_LEFT:
     return (SDL_GetMouseState (&bgi_mouse_x, &bgi_mouse_y) & SDL_BUTTON(1));
@@ -2512,7 +2906,9 @@ int ismouseclick (int kind)
     break;
 
   }
+
   return NOPE;
+
 } // ismouseclick ()
 
 // -----
@@ -2524,6 +2920,7 @@ void getmouseclick (int kind, int *x, int *y)
 
   *x = bgi_mouse_x;
   *y = bgi_mouse_y;
+
 } // getmouseclick ()
 
 // -----
@@ -2533,6 +2930,7 @@ int mousex (void)
   // Returns the X coordinate of the last mouse click.
 
   return bgi_mouse_x - vp.left;
+
 } // mousex ()
 
 // -----
@@ -2542,6 +2940,7 @@ int mousey (void)
   // Returns the Y coordinate of the last mouse click.
 
   return bgi_mouse_y - vp.top;
+
 } // mousey ()
 
 // -----
@@ -2552,6 +2951,7 @@ void moverel (int dx, int dy)
 
   bgi_cp_x += dx;
   bgi_cp_y += dy;
+
 } // moverel ()
 
 // -----
@@ -2562,13 +2962,15 @@ void moveto (int x, int y)
 
   bgi_cp_x = x;
   bgi_cp_y = y;
+
 } // moveto ()
 
 // -----
 
-void _bar (int left, int top, int right, int bottom)
+static void _bar (int left, int top, int right, int bottom)
 {
-  // service routine
+  // Used by drawchar
+
   int tmp, y;
 
   // like bar (), but uses bgi_fg_color
@@ -2579,11 +2981,12 @@ void _bar (int left, int top, int right, int bottom)
     line_fast (left, y, right, y);
 
   setcolor (tmp);
+
 } // _bar ()
 
 // -----
 
-void drawchar (unsigned char ch)
+static void drawchar (unsigned char ch)
 {
   // used by outtextxy ()
 
@@ -2639,6 +3042,7 @@ void outtext (char *textstring)
   if ( (HORIZ_DIR == bgi_txt_style.direction) &&
        (LEFT_TEXT == bgi_txt_style.horiz))
     bgi_cp_x += textwidth (textstring);
+
 } // outtext ()
 
 // -----
@@ -2715,8 +3119,7 @@ void outtextxy (int x, int y, char *textstring)
 
   bgi_line_style.thickness = tmp;
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // outtextxy ()
 
@@ -2759,10 +3162,9 @@ void pieslice (int x, int y, int stangle, int endangle, int radius)
              y - (radius * sin (angle * PI_CONV)) / 2,
              bgi_fg_color);
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
-} // arc ()
+} // pieslice ()
 
 // -----
 
@@ -2770,22 +3172,24 @@ void putimage (int left, int top, void *bitmap, int op)
 {
   // Puts the bit image pointed to by bitmap onto the screen.
 
-  Uint32 bitmap_w, bitmap_h, *tmp;
-  int i = 2, x, y;
+  Uint32
+    bitmap_w, bitmap_h, *tmp;
+  int
+    i = 2, x, y;
 
   tmp = bitmap;
 
   // get width and height info from bitmap
   memcpy (&bitmap_w, tmp, sizeof (Uint32));
   memcpy (&bitmap_h, tmp + 1, sizeof (Uint32));
-  
+
   // put bitmap to the screen
   for (int yy = 0; yy < bitmap_h; yy++)
     for (int xx = 0; xx < bitmap_w; xx++) {
 
       x = left + vp.left + xx;
       y = top + vp.top + yy;
-	
+
       switch (op) {
 
       case COPY_PUT:
@@ -2807,13 +3211,12 @@ void putimage (int left, int top, void *bitmap, int op)
       case NOT_PUT:
         putpixel_not (x, y, tmp[i++]);
         break;
-      
+
       } // switch
-    
+
     } // for x
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // putimage ()
 
@@ -2821,7 +3224,7 @@ void putimage (int left, int top, void *bitmap, int op)
 
 void _putpixel (int x, int y)
 {
-  // like putpixel (), but not updated
+  // like putpixel (), but not immediately displayed
 
   // viewport range is taken care of by this function only,
   // since all others use it to draw.
@@ -2958,7 +3361,7 @@ void putpixel_not (int x, int y, Uint32 pixel)
 
 void putpixel (int x, int y, int color)
 {
-  // Plots a point at (x,y) in the color defined by color.
+  // Plots a point at (x,y) in the color defined by 'color'.
 
   int tmpcolor;
 
@@ -3005,8 +3408,7 @@ void putpixel (int x, int y, int color)
 
   } // switch
 
-  if (! bgi_fast_mode)
-    updaterect (x, y, x, y);
+  update_pixel (x, y);
 
 } // putpixel ()
 
@@ -3028,7 +3430,8 @@ void readimagefile (char *bitmapname, int x1, int y1, int x2, int y2)
   // load bitmap
   bm_surface = SDL_LoadBMP (bitmapname);
   if (NULL == bm_surface) {
-    printf ("SDL_LoadBMP error: %s\n", SDL_GetError ());
+    SDL_Log ("SDL_LoadBMP() error: %s\n", SDL_GetError ());
+    showerrorbox ("SDL_LoadBMP() error");
     return;
   }
 
@@ -3059,24 +3462,24 @@ void readimagefile (char *bitmapname, int x1, int y1, int x2, int y2)
 
   // get SDL surface from current window
   tmp_surface = SDL_GetWindowSurface (bgi_win[current_window]);
-  
+
   // blit bitmap surface to current surface
   SDL_BlitScaled (bm_surface,
                   &src_rect,
                   tmp_surface,
                   &dest_rect);
 
-  // copy pixel data from the new surface
+  // copy pixel data from the new surface to the active page
   pixels = tmp_surface->pixels;
-  
+
   for (int y = dest_rect.y; y < dest_rect.y + dest_rect.h; y++)
     for (int x = dest_rect.x; x < dest_rect.x + dest_rect.w; x++)
-      bgi_activepage[current_window][y * (bgi_maxx + 1) + x] = 
+      bgi_activepage[current_window][y * (bgi_maxx + 1) + x] =
     pixels[y * (bgi_maxx + 1) + x] | 0xff000000;
-  
-  refresh ();
+
+  refresh_window ();
   SDL_FreeSurface (bm_surface);
-  
+
 } // readimagefile ()
 
 // -----
@@ -3090,8 +3493,7 @@ void rectangle (int x1, int y1, int x2, int y2)
   line_fast (x2, y2, x1, y2);
   line_fast (x1, y2, x1, y1);
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // rectangle ()
 
@@ -3101,9 +3503,25 @@ void refresh (void)
 {
   // Updates the screen.
 
-  updaterect (0, 0, bgi_maxx, bgi_maxy);
+  if (update_mutex)
+    SDL_LockMutex (update_mutex);
+
+  refresh_window ();
+
+  if (update_mutex)
+    SDL_UnlockMutex (update_mutex);
 
 } // refresh ()
+
+// -----
+
+void refresh_window (void)
+{
+  // Updates the screen.
+
+  updaterect (0, 0, bgi_maxx, bgi_maxy);
+
+} // refresh_window ()
 
 // -----
 
@@ -3118,22 +3536,115 @@ void restorecrtmode (void)
 
 // -----
 
+// callback for sdlbgiauto ()
+
+static Uint32 updatecallback (Uint32 interval, void *param)
+{
+  if (update_mutex)
+    SDL_LockMutex (update_mutex);
+
+  if (refresh_needed)
+    refresh_window ();
+
+  refresh_needed = NOPE;
+
+  if (update_mutex)
+    SDL_UnlockMutex (update_mutex);
+
+  return interval;
+
+} // updatecallback ()
+
+// -----
+
+void update (void)
+{
+  // Conditionally refreshes the screen or schedule it
+
+  if (update_mutex)
+    SDL_LockMutex (update_mutex);
+
+  if (! bgi_fast_mode)
+    refresh_window ();
+  else
+    refresh_needed = YEAH;
+
+  if (update_mutex)
+    SDL_UnlockMutex (update_mutex);
+
+} // update ()
+
+// -----
+
+void update_pixel (int x, int y)
+{
+  // Updates a single pixel
+
+  if (update_mutex)
+    SDL_LockMutex (update_mutex);
+
+  if (! bgi_fast_mode)
+    updaterect (x, y, x, y);
+  else
+    refresh_needed = YEAH;
+
+  if (update_mutex)
+    SDL_UnlockMutex (update_mutex);
+
+} // update_pixel ()
+
+// -----
+
+void sdlbgiauto ()
+{
+  // Triggers "auto refresh mode", i.e. refresh() is performed
+  // automatically on a separate thread.
+
+  Uint32
+    interval;
+
+  if (0 == refresh_rate) {
+    // refresh rate not specified by the user;
+    // then, let's use the display refresh rate
+    SDL_DisplayMode
+      display_mode;
+    SDL_GetDisplayMode (0, 0, &display_mode);
+    // milliseconds between screen refresh
+    refresh_rate = display_mode.refresh_rate;
+
+    // fallback to 30hz if everything else fails
+    if (0 == refresh_rate)
+      refresh_rate = 30;
+  }
+
+  interval = (Uint32) 1000.0 / refresh_rate;
+
+  // install a timer to periodically update the screen
+  SDL_AddTimer (interval, updatecallback, NULL);
+  bgi_fast_mode = YEAH;
+
+} // sdlbgiauto ()
+
+// -----
+
 void sdlbgifast (void)
 {
-  // Triggers “fast mode”, i.e. refresh() is needed to
+  // Triggers "fast mode", i.e. refresh() is needed to
   // display graphics.
 
   bgi_fast_mode = YEAH;
+
 } // sdlbgifast ()
 
 // -----
 
 void sdlbgislow (void)
 {
-  // Triggers “slow mode”, i.e. refresh() is not needed to
+  // Triggers "slow mode", i.e. refresh() is not needed to
   // display graphics.
 
   bgi_fast_mode = NOPE;
+
 } // sdlbgislow ()
 
 // -----
@@ -3178,8 +3689,7 @@ void sector (int x, int y, int stangle, int endangle,
              y - (yradius * sin (angle * PI_CONV)) / 2,
              tmpcolor);
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // sector ()
 
@@ -3191,7 +3701,7 @@ void setactivepage (int page)
 
   if (! bgi_fast_mode)
     bgi_blendmode = SDL_BLENDMODE_NONE; // like in Turbo C
-    
+
   if (page > -1 && page < bgi_np + 1) {
     bgi_ap = page;
     bgi_activepage[current_window] = bgi_vpage[bgi_ap]->pixels;
@@ -3210,6 +3720,7 @@ void setallpalette (struct palettetype *palette)
   for (i = 0; i <= MAXCOLORS; i++)
     if (palette->colors[i] != -1)
       setpalette (i, palette->colors[i]);
+
 } // setallpalette ()
 
 // -----
@@ -3233,7 +3744,7 @@ void setalpha (int col, Uint8 alpha)
   tmp = tmp >> 8;
   palette[bgi_fg_color] = ((Uint32)alpha << 24) | tmp;
 
-} // setcoloralpha ()
+} // setalpha ()
 
 // -----
 
@@ -3241,8 +3752,9 @@ void setaspectratio (int xasp, int yasp)
 {
   // Changes the default aspect ratio of the graphics.
 
-  // ignored
+  // Actually, it does nothing.
   return;
+
 } // setaspectratio ()
 
 // -----
@@ -3261,6 +3773,7 @@ void setbkcolor (int col)
     bgi_argb_mode = NOPE;
     bgi_bg_color = col;
   }
+
 } // setbkcolor ()
 
 // -----
@@ -3271,6 +3784,7 @@ void setbkrgbcolor (int index)
   // n-th color index in the ARGB palette.
 
   bgi_bg_color = BGI_COLORS + TMP_COLORS + index;
+
 } // setbkrgbcolor ()
 
 // -----
@@ -3280,6 +3794,7 @@ void setblendmode (int blendmode)
   // Sets the blending mode; SDL_BLENDMODE_NONE or SDL_BLENDMODE_BLEND
 
   bgi_blendmode = blendmode;
+
 } // setblendmode ()
 
 // -----
@@ -3298,6 +3813,7 @@ void setcolor (int col)
     bgi_argb_mode = NOPE;
     bgi_fg_color = col;
   }
+
 } // setcolor ()
 
 // -----
@@ -3326,6 +3842,23 @@ void setcurrentwindow (int id)
 
 // -----
 
+static Uint8 mirror_bits (Uint8 n)
+{
+  // Used by setfillpattern()
+
+  Uint8
+    ret = 0;
+
+  for (Uint8 i = 0; i < 8; i++)
+    if ((n & (1 << i)) != 0)
+      ret += (1 << (7 - i));
+
+  return ret;
+
+} // mirror_bits ()
+
+// -----
+
 void setfillpattern (char *upattern, int color)
 {
   // Sets a user-defined fill pattern.
@@ -3333,7 +3866,7 @@ void setfillpattern (char *upattern, int color)
   int i;
 
   for (i = 0; i < 8; i++)
-    fill_patterns[USER_FILL][i] = (Uint8) *upattern++;
+    fill_patterns[USER_FILL][i] = mirror_bits ((Uint8) *upattern++);
 
   // COLOR () set up the BGI_COLORS + 3 color
   if (-1 == color) {
@@ -3404,6 +3937,7 @@ void setpalette (int colornum, int color)
   // Changes the standard palette colornum to color.
 
   palette[colornum] = bgi_palette[color];
+
 } // setpalette ()
 
 // -----
@@ -3414,6 +3948,7 @@ void setrgbcolor (int index)
   // in the ARGB palette.
 
   bgi_fg_color = BGI_COLORS + TMP_COLORS + index;
+
 } // setrgbcolor ()
 
 // -----
@@ -3425,6 +3960,7 @@ void setrgbpalette (int colornum, int red, int green, int blue)
 
   palette[BGI_COLORS + TMP_COLORS + colornum] =
     0xff000000 | red << 16 | green << 8 | blue;
+
 } // setrgbpalette ()
 
 // -----
@@ -3435,6 +3971,7 @@ void settextjustify (int horiz, int vert)
 
   bgi_txt_style.horiz = horiz;
   bgi_txt_style.vert = vert;
+
 } // settextjustify ()
 
 // -----
@@ -3494,8 +4031,7 @@ void setvisualpage (int page)
     bgi_visualpage[current_window] = bgi_vpage[bgi_vp]->pixels;
   }
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
 } // setvisualpage ()
 
@@ -3503,8 +4039,10 @@ void setvisualpage (int page)
 
 void setwinoptions (char *title, int x, int y, Uint32 flags)
 {
-  if (strlen (title) > BGI_WINTITLE_LEN)
+  if (strlen (title) > BGI_WINTITLE_LEN) {
     fprintf (stderr, "BGI window title name too long.\n");
+    showerrorbox ("BGI window title name too long.");
+  }
   else
     if (0 != strlen (title))
       strcpy (bgi_win_title, title);
@@ -3539,12 +4077,26 @@ void setwritemode (int mode)
 
 // -----
 
+void showerrorbox (const char *message)
+{
+  // Opens an error box
+
+  SDL_ShowSimpleMessageBox (SDL_MESSAGEBOX_ERROR,
+			    "Error", message, NULL);
+
+} // showerrorbox ()
+
+// -----
+
 void swapbuffers (void)
 {
-  int oldv = getvisualpage( );
-  int olda = getactivepage( );
+  // Swaps current visual and active pages.
+
+  int oldv = getvisualpage ();
+  int olda = getactivepage ();
   setvisualpage (olda);
   setactivepage (oldv);
+
 } // swapbuffers ()
 
 // -----
@@ -3554,6 +4106,7 @@ int textheight (char *textstring)
   // Returns the height in pixels of a string.
 
   return bgi_font_mag_y * bgi_font_height;
+
 } // textheight ()
 
 // -----
@@ -3563,19 +4116,25 @@ int textwidth (char *textstring)
   // Returns the height in pixels of a string.
 
   return (strlen (textstring) * bgi_font_width * bgi_font_mag_x);
+
 } // textwidth ()
 
 // -----
 
 void updaterect (int x1, int y1, int x2, int y2)
 {
-  // Updates a rectangle on the screen. Suffers from SDL2 bug.
+  // Updates a rectangle on the screen. This version uses
+  // texture streaming.
 
+  int
+    x, y,
+    pitch = (bgi_maxx + 1) * sizeof (Uint32),
+    semipitch;
+  void
+    *pixels;
   SDL_Rect
     src_rect, dest_rect;
-  int
-    pitch = (bgi_maxx + 1) * sizeof (Uint32);
-  
+
   swap_if_greater (&x1, &x2);
   swap_if_greater (&y1, &y2);
 
@@ -3583,39 +4142,56 @@ void updaterect (int x1, int y1, int x2, int y2)
   src_rect.y = y1;
   src_rect.w = x2 - x1 + 1;
   src_rect.h = y2 - y1 + 1;
+  dest_rect.x = x1;
+  dest_rect.y = y1;
+  dest_rect.w = x2 - x1 + 1;
+  dest_rect.h = y2 - y1 + 1;
 
-  // this doesn't work:
-  // dest_rect.x = x1;
-  // dest_rect.y = y1;
-  // dest_rect.w = x2 - x1 + 1;
-  // dest_rect.h = y2 - y1 + 1;
+  if (SDL_LockTexture (bgi_txt[current_window],
+		       NULL, &pixels, &pitch) != 0) {
+    SDL_Log ("SDL_LockTexture() failed: %s", SDL_GetError ());
+    showerrorbox ("SDL_LockTexture() failed");
+    exit (1);
+  }
 
-  // this works: but is THIS the expected behaviour?
-  dest_rect.x = 0;
-  dest_rect.y = 0;
-  dest_rect.w = x2 + 1;
-  dest_rect.h = y2 + 1;
+  // whole texture:
+  /* memcpy (pixels, bgi_visualpage[current_window], */
+  /* 	  pitch * (bgi_maxy + 1)); */
 
-  SDL_UpdateTexture (bgi_txt[current_window],
-                     &dest_rect,
-                     bgi_visualpage[current_window],
-                     pitch);
-  SDL_SetTextureBlendMode (bgi_txt[current_window], bgi_blendmode);
-  SDL_RenderCopy (bgi_rnd[current_window],
-                  bgi_txt[current_window],
-                  &src_rect,
-                  &src_rect);
+  x = x1;
+  semipitch = x * sizeof (Uint32);
+
+  // copy pixel data from bgi_visualpage
+  for (y = y1; y < y2 + 1; y++)
+    memcpy (pixels + y * pitch + semipitch,
+	    (void *) bgi_visualpage[current_window] +
+	    pitch * y + semipitch,
+	    (x2 - x1 + 1) * sizeof (Uint32));
+
+  SDL_UnlockTexture (bgi_txt[current_window]);
+  if (0 != SDL_SetTextureBlendMode
+      (bgi_txt[current_window], bgi_blendmode)) {
+    SDL_Log ("SDL_SetTextureBlendMode() failed: %s", SDL_GetError ());
+    showerrorbox ("SDL_SetTextureBlendMode() failed");
+  }
+  
+  if (0 != SDL_RenderCopy (bgi_rnd[current_window],
+			   bgi_txt[current_window],
+			   &src_rect, &dest_rect)) {
+    SDL_Log ("SDL_RenderCopy() failed: %s", SDL_GetError ());
+    showerrorbox ("SDL_RenderCopy() failed");
+  }
   SDL_RenderPresent (bgi_rnd[current_window]);
 
-} // updaterect ()
+} // updaterect()
 
 // -----
 
 void writeimagefile (char *filename,
                      int left, int top, int right, int bottom)
 {
-  // Writes a .bmp file from the screen rectangle defined by
-  // left, top, right, bottom.
+  // Writes a .bmp file from the screen rectangle
+  // defined by left, top, right, bottom.
 
   SDL_Surface
     *dest;
@@ -3635,7 +4211,8 @@ void writeimagefile (char *filename,
 
   dest = SDL_CreateRGBSurface (0, rect.w, rect.h, 32, 0, 0, 0, 0);
   if (NULL == dest) {
-    SDL_Log ("dest SDL_CreateRGBSurface failed: %s", SDL_GetError ());
+    SDL_Log ("SDL_CreateRGBSurface() failed: %s", SDL_GetError ());
+    showerrorbox ("SDL_CreateRGBSurface() failed");
     return;
   }
 
@@ -3662,8 +4239,7 @@ int xkbhit (void)
 
   SDL_Event event;
 
-  if (! bgi_fast_mode)
-    refresh ();
+  update ();
 
   if (YEAH == xkey_pressed) { // a key was pressed during delay()
     xkey_pressed = NOPE;
@@ -3682,6 +4258,7 @@ int xkbhit (void)
       SDL_PushEvent (&event); // don't disrupt the mouse
   }
   return NOPE;
-}
 
-// --- end of file SDL_bgi.c
+} // xkbhit ()
+
+// --- End of file SDL_bgi.c

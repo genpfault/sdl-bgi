@@ -21,11 +21,11 @@ in the same directory as the program.
 ## Installing the Code::Blocks Binaries
 
 Let's assume that you installed CodeBlocks in `C:\CodeBlocks` and SDL2
-in `C:\SDL2-2.0.8`. Change the following instructions as needed for
+in `C:\SDL2-2.0.9`. Change the following instructions as needed for
 your installation.
 
 Copy `src/graphics.h` to `C:\CodeBlocks\MinGW\include`,
-`src/SDL_bgi.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2`,
+`src/SDL_bgi.h` to `C:\SDL2-2.0.9\i686-w64-mingw32\include\SDL2`,
 and `bin/CodeBlocks/SDL_bgi.dll` to `C:\CodeBlocks\MinGW\bin`.
 
 To see how to compile programs, please see `howto_CodeBlocks.md`.
@@ -34,11 +34,11 @@ To see how to compile programs, please see `howto_CodeBlocks.md`.
 ## Installing the Dev-C++ Binaries
 
 Let's assume that you installed Dev-C++ `C:\DevCpp` and SDL2
-in `C:\SDL2-2.0.8`. Change the following instructions as needed for
+in `C:\SDL2-2.0.9`. Change the following instructions as needed for
 your installation.
 
-Copy `src/graphics.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include`,
-`src/SDL_bgi.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2`,
+Copy `src/graphics.h` to `C:\SDL2-2.0.9\i686-w64-mingw32\include`,
+`src/SDL_bgi.h` to `C:\SDL2-2.0.9\i686-w64-mingw32\include\SDL2`,
 and `bin/DevCpp/SDL_bgi.dll` to `C:\DevCpp\MinGW64\bin`.
 
 To see how to compile programs, please see `howto_DevCpp.md`.

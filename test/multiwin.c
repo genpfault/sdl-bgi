@@ -31,6 +31,7 @@ int main (int argc, char *argv[])
 
   setwinoptions ("First Window", 10, 10, -1);
   initgraph (&gd, &gm, "");
+  cleardevice ();
   outtextxy (0, 0, "Click or press a key for a SECOND window");
   circle (50, 100, 50);
   win1 = getcurrentwindow ();
@@ -43,6 +44,7 @@ int main (int argc, char *argv[])
   
   setwinoptions ("Second Window", 10, 200 + 50, -1);
   initgraph (&gd, &gm, "");
+  cleardevice ();
   setcolor (RED);
   outtextxy (0, 0, "Click or press a key for a THIRD window");
   circle (100, 100, 50);
@@ -55,6 +57,7 @@ int main (int argc, char *argv[])
   gm = SDL_640x480;
   setwinoptions ("Third Window", 320 + 50, 10, -1);
   initgraph (&gd, &gm, "");
+  cleardevice ();
   setcolor (GREEN);
   outtextxy (0, 0, "Press a key to switch back to the FIRST window");
   circle (150, 100, 50);
@@ -76,10 +79,13 @@ int main (int argc, char *argv[])
   outtextxy (0, 20, "Shutting down...");
   
   delay (1000);
+  printf ("Shutting down window %d\n", win3);
   closewindow (win3);
   delay (1000);
+  printf ("Shutting down window %d\n", win2);
   closewindow (win2);
   delay (1000);
+  printf ("Shutting down window %d\n", win1);
   closewindow (win1);
   
   return 0;

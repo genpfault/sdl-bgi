@@ -4,6 +4,9 @@
  * gcc -o dla dla.c -lSDL_bgi -lSDL2
  * 
  * Diffusion limited aggregation.
+ * Try to run this program with and without 'auto mode',
+ * that is setting and unsetting the environment variable
+ * SDL_BGI_RATE=auto
  * 
  * By Guido Gonzato, May 2015.
  * 
@@ -62,18 +65,42 @@ int main (int argc, char *argv[])
   cleardevice ();
   iterations = 0;
   
+  // set up a palette
+
+  // initialise it to black
+  for (x = 0; x < PALETTE_SIZE; x++)
+    setrgbpalette (x, 0, 0, 0);
+  
+  // blue fading to white
+  for (x = 0; x < 128; x++)
+    setrgbpalette (x, 2*x, 2*x, 255);
+
+  // white fading to yellow
+  for (x = 128; x < 256; x++)
+    setrgbpalette (x, 255, 255, 255 - x);
+  
+  // yellow fading to red
+  for (x = 256; x < 512; x++)
+    setrgbpalette (x, 255, 512 - x, 0);
+  
+  // red fading to black
+  for (x = 512; x < 1024; x += 2)
+    setrgbpalette (x, 1024 - 2*x, 0, 0);
+  
+  // the window is full after ~ 500k iterations.
+  
   while (! stop) {
     
     // lay a particle
     random_walk ();
-    refresh ();
     
     if (iterations % 5000) {
       if (xkbhit ())
 	stop = 1;
     }
   }
-  
+
+  printf ("Iterations computed: %lu\n", iterations);
   closegraph ();
   
 }
@@ -157,9 +184,11 @@ void random_walk (void)
     
   } while (! done);
   
-  color = 1 + iterations % 5000;
-  // setcolor (COLOR (128 + color, 255 - color, 128 + color) );
-  putpixel (x, y, COLOR (128 + color, 255 - color, 128 + color) );
+  color = iterations / 150;
+  if (color > 1024)
+    color = 1024;
+  setrgbcolor (color);
+  _putpixel (x, y);
   
 }
 

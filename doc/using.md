@@ -18,19 +18,20 @@ modern SDL graphics. You don't want a slow library!
 Compiling programs
 ------------------
 
-To compile a program (GNU/Linux, OS X):
+To compile a C or C++ program in GNU/Linux or macOS you may use the
+`gcc` or `clang` compiler:
 
     $ gcc -o program program.c -lSDL_bgi -lSDL2
 
-To compile a program (MSYS2 + mingw-w64):
+To compile a program in MSYS2 + mingw-w64:
 
     $ gcc -o program.exe program.c -lmingw32 -L/mingw64/bin \
         -lSDL_bgi -lSDL2main -lSDL2 # -mwindows
 
-The `-mwindows` creates a window-only program, i.e. a terminal is not
-started. **Beware:** functions provided by `stdio.h` will not work if
-you don't start a terminal. Your program will have to rely on mouse
-input only!
+The `-mwindows` switch creates a window-only program, i.e. a terminal
+is not started. **Beware:** functions provided by `stdio.h` will not
+work if you don't start a terminal. Your program will have to rely on
+mouse input only!
 
 Code::Blocks users should read the file `howto_CodeBlocks.md`.
 
@@ -40,10 +41,10 @@ Windows users **must** declare the `main()` function as:
 
     int main (int argc, char *argv[])
 
-even if `argc` and `argv` will not be used. Your program will not
-compile if you use a different `main()` definition (i.e. `int main
-(void)`), because of conflict with the `WinMain()` definition.
-Please consult <https://wiki.libsdl.org/FAQWindows> for details.
+even if `argc` and `argv` are not used. Your program will not compile
+if you use a different `main()` definition (i.e. `int main (void)`),
+because of conflict with the `WinMain()` definition. Please consult
+<https://wiki.libsdl.org/FAQWindows> for details.
 
 Most old programs that use the original BGI library should compile
 unmodified. For instance,
@@ -51,11 +52,14 @@ unmodified. For instance,
     int gd = DETECT, gm;
     initgraph (&gd, &gm, "");
 
-will open an 800x600 window, mimicking SVGA graphics. Very basic
-`dos.h` and `conio.h` are provided in the `test/` directory; they're
-good enough to compile the original `bgidemo.c` (not provided: it's
-not FOSS) unmodified. Please note that non-BGI functions such a
-`gotoxy()` are *not* implemented.
+opens an 800x600 window, mimicking SVGA graphics. Minimal `dos.h`
+and `conio.h` are provided in the `test/` directory; they're good
+enough to compile the original `bgidemo.c` (not provided: it's not
+FOSS) unmodified.
+
+Please note that non-BGI functions are *not* implemented. If you need
+`conio.h` for GNU/Linux, please see the ncurses-based implementation
+<https://github.com/nowres/conio-for-linux>.
 
 To specify the window size, you can use the new SDL driver:
 
@@ -85,8 +89,8 @@ presence and write programs that employ `SDL_bgi` extensions; please
 have a look at the test program `fern.c`.
 
 
-Screen update
--------------
+Screen refresh
+--------------
 
 The only real difference between the original BGI and `SDL_bgi` is the
 way the screen is refreshed. In BGI, every graphics element drawn on
@@ -99,17 +103,26 @@ You can choose whether to open the graphics system using
 `initgraph()`, which toggles BGI compatibility on and forces a screen
 refresh after every graphics command, or using `initwindow()` that
 leaves you in charge of refreshing the screen when needed, using the
-new function `refresh()`. The second method is *much* faster and is 
-preferable.
+new function `refresh()`.
+
+The first method is fully compatible with the original BGI, but it
+also painfully slow. An experimental feature is 'auto mode': if the
+environment variable `SDL_BGI_RATE` is set to `auto`, screen refresh
+is automatically performed; this is **much** faster than the default.
+This variable may also contain a refresh rate; e.g. 60. Unfortunately,
+auto mode may not work on some NVIDIA graphic cards.
 
 As a tradeoff between performance and speed, a screen refresh is also
 performed by `getch()`, `kbhit()`, and `delay()`. Functions
-`sdlbgifast(void)` and `sdlbgislow(void)` are also available. They
-trigger fast and slow mode, respectively.
+`sdlbgifast(void)`, `sdlbgislow(void)`, and `sdlbgiauto(void)` are
+also available. They trigger fast, slow, and auto mode, respectively.
 
 Documentation and sample BGI programs are available at this address:
-<http://www.cs.colorado.edu/~main/cs1300/doc/bgi/>
-Nearly all programs can be compiled with `SDL_bgi`.
+<http://www.cs.colorado.edu/~main/cs1300/doc/bgi/> Nearly all programs
+can be compiled with `SDL_bgi`.
+
+The original Borland Turbo C manual is also available at
+<https://archive.org/details/bitsavers_borlandturReferenceGuide1988_19310204>.
 
 
 Avoid slow programs
@@ -200,12 +213,14 @@ accessible to the programmer:
     SDL_Renderer *bgi_renderer;
     SDL_Texture  *bgi_texture;
 
-and can be used by native SDL2 functions.
+and can be used by native SDL2 functions; see example in
+`test/sdlbgidemo.c`.
 
 - `void initwindow(int width, int height)` lets you open a window
 specifying its size.
 
-- `void detectgraph(int *gd, int *gm)` returns `SDL`, `SDL_FULLSCREEN`.
+- `void detectgraph(int *gd, int *gm)` returns `SDL`,
+`SDL_FULLSCREEN`.
 
 - `void setrgbpalette(int color, int r, int g, int b)` sets an
 additional palette containing RGB colours (up to `MAXRGBCOLORS` + 1).
@@ -216,24 +231,27 @@ the RGB equivalent of `setcolor(int col)` and `setbkcolor(int col)`.
 `col` is an allocated colour entry in the RGB palette.
 
 - `COLOR(int r, int g, int b)` can be used as an argument whenever a
-colour value is expected (e.g. `setcolor()` and other
-functions). It's an alternative to `setrgbcolor(int col)` and
-`setbkrgbcolor(int col)`. Allocating colours with `setrgbpalette()`
-and using `setrgbcolor()` is much faster, though.
+colour value is expected (e.g. `setcolor()` and other functions). It's
+an alternative to `setrgbcolor(int col)` and `setbkrgbcolor(int col)`.
+Allocating colours with `setrgbpalette()` and using `setrgbcolor()` is
+much faster, though.
 
 - `IS_BGI_COLOR(int c)` and `IS_RGB_COLOR(int c)` return 1 if the
 current colour is standard BGI or RGB, respectively. The argument is
 actually redundant.
 
-- `ALPHA_VALUE(int c)`, `RED_VALUE(int c)`, `GREEN_VALUE(int c)`,
-and `BLUE_VALUE(int c)` return the A, R, G, B component of an RGB
-colour in the extended palette.
+- `ALPHA_VALUE(int c)`, `RED_VALUE(int c)`, `GREEN_VALUE(int c)`, and
+`BLUE_VALUE(int c)` return the A, R, G, B component of an RGB colour
+in the extended palette.
 
 - `setalpha(int col, Uint8 alpha)` sets the alpha component of colour
 'col'.
 
 - `setblendmode(int blendmode)` sets the blending mode for screen
-refresh.
+refresh (`SDL_BLENDMODE_NONE` or `SDL_BLENDMODE_BLEND`).
+
+- `showerrorbox(const char *message)` opens a windows error message
+box with the specified message.
 
 - `void _putpixel(int x, int y)` is equivalent to `putpixel(int x, int
 y, int col)`, but uses the current drawing colour and the pixel is not
@@ -241,8 +259,9 @@ refreshed in slow mode.
 
 - `random(range)` is defined as macro: `rand()%range`
 
-- `int getch()` waits for a key and returns its ASCII code. Special keys
-and the SDL_QUIT event are also reported; please see `SDL_bgi.h`.
+- `int getch()` waits for a key and returns its ASCII code. Special
+keys and the `SDL_QUIT` event are also reported; please see
+`SDL_bgi.h`.
 
 - `void delay(msec)` waits for `msec` milliseconds.
 
@@ -260,8 +279,8 @@ WM_WHEELDOWN
 WM_MOUSEMOVE
 ````
 
-- `int mousex(void)` and `int mousey(void)` return the mouse coordinates
-of the last click.
+- `int mousex(void)` and `int mousey(void)` return the mouse
+coordinates of the last click.
 
 - `int ismouseclick(int btn)` returns 1 if the `btn` mouse button was
 clicked.
@@ -270,8 +289,8 @@ clicked.
 coordinates of the last button click expected by `ismouseclick()`.
 
 - `int getevent(void)` waits for a keypress or mouse click, and
-returns the code of the key or mouse button. It also catches
-and returns SDL_QUIT events.
+returns the code of the key or mouse button. It also catches and
+returns `SDL_QUIT` events.
 
 - `int event(void)` is a non-blocking version of `getevent()`.
 
@@ -286,11 +305,24 @@ system was opened with `initgraph()`. Calling `refresh()` is needed to
 display graphics.
 
 - `void sdlbgislow(void)` triggers "slow mode" even if the graphics
-system was opened with `initwindow()`. Calling `refresh()` is not needed.
+system was opened with `initwindow()`. Calling `refresh()` is not
+needed.
+
+- `void sdlbgiauto(void)` triggers automatic screen refresh. **Note**:
+it may not work on some graphics cards.
 
 - `void setwinoptions(char *title, int x, int y, Uint32 flags)` lets
 you specify the window title (default is `SDL_bgi`), window position,
-and SDL2 window flags OR'ed together.
+and some SDL2 window flags OR'ed together. In particular, you can get
+non-native fullscreen resolution with:
+
+````
+setwinoptions ("", -1, -1, SDL_WINDOW_FULLSCREEN);
+initwindow (800, 600);
+````
+
+- `void showerrorbox(char *msg)` opens an error message box with the
+specified message.
 
 - `void writeimagefile(char *filename, int left, int top, int right,
 int bottom)` writes a `.bmp` file from the screen rectangle defined by
@@ -305,7 +337,7 @@ Multiple Windows
 
 Subsequent calls to `initgraph()` make it possible to open several
 windows; only one of them is active (= being drawn on) at any given
-time, regardless of focus.
+time, regardless of mouse focus.
 
 Functions `setvisualpage()` and `setactivepage()` only work properly
 in single window mode.
@@ -330,19 +362,14 @@ Internet Archive:
 
 The `bgidemo.c` program demonstrates the capabilities of the BGI
 library. You can download it and compile it using `SDL_bgi`; in
-Windows, you will have to change its `main()` declaration.
+Windows, you will have to change its `main()` definition.
 
 
 Bugs & Issues
 -------------
 
-Drawing in BGI compatibility (slow) mode is much slower than it
-should, since `SDL_UpdateTexture()` doesn't work as expected: instead of
-refreshing an `SDL_Rect` correctly, it only works on entire textures. It
-looks like it's an SDL2 bug.
-
-Console routines such as `getch()` may hang in Mingw. As far as I can
-tell, it's a bug in Mingw console handling.
+Console routines such as `getch()` may hang or not work properly in
+MSYS2. As far as I can tell, it's a bug in MSYS2 console handling.
 
 Colours don't have the same RGB values as the original BGI colours.
 But they look better (IMHO).

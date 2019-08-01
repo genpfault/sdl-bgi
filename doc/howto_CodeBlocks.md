@@ -6,12 +6,12 @@ CodeBlocks; we will use `fern.c`, provided in the `test/` directory.
 
 Let's assume that CodeBlocks (complete with MinGW and TDM-GCC) is
 installed in `C:\CodeBlocks`, and that the SDL2 development libraries
-(MinGW) are installed in `C:\SDL2-2.0.8`. If you installed the
+(MinGW) are installed in `C:\SDL2-2.0.10`. If you installed the
 software in different directories, change the following instructions
 accordingly.
 
 The procedure was tested with CodeBlocks 17.12 and
-SDL2-devel-2.0.8-mingw.
+SDL2-devel-2.0.10-mingw.
 
 Links:
 
@@ -21,10 +21,10 @@ Links:
 
 - copy `SDL_bgi.dll` to `C:\CodeBlocks\MinGW\bin`
 
-- copy `C:\SDL2-2.0.8\i686-w64-mingw32\bin\SDL2.dll` to\
+- copy `C:\SDL2-2.0.10\i686-w64-mingw32\bin\SDL2.dll` to\
   `C:\CodeBlocks\MinGW\bin`
 
-- copy `SDL_bgi.h` to `C:\SDL2-2.0.8\i686-w64-mingw32\include\SDL2`
+- copy `SDL_bgi.h` to `C:\SDL2-2.0.10\i686-w64-mingw32\include\SDL2`
 
 - copy `graphics.h` to `C:\CodeBlocks\MinGW\include`
 
@@ -35,7 +35,7 @@ Links:
 - in the wizard, provide a project name (`fern`), pick a folder to
   create the project in, then click on `Next>`
 
-- in the next window, pick `C:\SDL2-2.0.8\i686-w64-mingw32`
+- in the next window, pick `C:\SDL2-2.0.10\i686-w64-mingw32`
 
 - in the next window, choose `Create "Release" configuration`,
   then click on `Finish`
@@ -47,7 +47,7 @@ Links:
 
 - from the menu `Project/Build options...` select the `Search
   directories` tab, click on `Add`, pick the directory\
-  `C:\SDL2-2.0.8\i686-w64-mingw32\include`, and select `No` when asked
+  `C:\SDL2-2.0.10\i686-w64-mingw32\include`, and select `No` when asked
   to `Keep this as a relative path?`. Click on `Ok`
 
 - from the menu `Project/Build options...` select the `Linker

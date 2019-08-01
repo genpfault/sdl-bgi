@@ -109,7 +109,7 @@ void init_sdlbgi (void)
   sdlbgifast ();
   maxx = getmaxx ();
   maxy = getmaxy ();
-} // initgraph ()
+} // init_sdlbgi ()
 
 // -----
 

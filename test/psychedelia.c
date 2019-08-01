@@ -56,12 +56,19 @@ int main (int argc, char **argv)
   d3 = 1;
   
   initwindow (800, 600);
+  
+  // let's not bother about refresh
+  sdlbgiauto ();
+  
   int stop = 0;
   
   do {
+    int
+      maxx = getmaxx (),
+      maxy = getmaxy ();
     
-    for (int y = 0; y < getmaxy (); y++) {
-      for (int x = 0; x < getmaxx (); x++) {
+    for (int y = 0; y < maxy; y++) {
+      for (int x = 0; x < maxx; x++) {
       
 	col = (int) (
 	  sinf (x / 50.) * k1 +
@@ -89,7 +96,8 @@ int main (int argc, char **argv)
       } // for x
     } // for y
     
-    refresh ();
+    // manual refresh would occur here
+    // refresh ();
 
     // change the parameters
     k1 += d1;

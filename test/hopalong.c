@@ -58,7 +58,7 @@ int main (int argc, char *argv[])
   outtextxy (0, 0, "Press a key or click to exit: ");
   
   xoffs = getmaxx () / 2;
-  yoffs = getmaxy () / 3;
+  yoffs = getmaxy () / 2;
   j = random (100);
   k = random (100);
   x = y = xx = xp = yp = r = 0.0;

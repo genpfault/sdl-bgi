@@ -1,6 +1,22 @@
 Changelog
 ---------
 
+v. 2.3.0, 2019-08-01
+
+- added 'auto mode': initgraph() performs automatic screen refresh
+  when the environment variable SDL_BGI_RATE is set to 'auto' or to
+  the desired refresh rate (e.g. 60). This can be used as an
+  alternative to 'slow mode', and it provides a huge performance
+  boost. The new function sdlbgiauto() is also available. BEWARE:
+  automatic refresh may not work on some NVIDIA graphics cards.
+  Patch provided by Marco Diego Aurélio Mesquita.
+- added compatibility with C++ programs
+- added showerrorbox()
+- improved compatibility in bar3d()
+- fixed bug in setfillpattern()
+- updated Makefiles for Windows (updated to SDL2-2.0.10)
+- documentation updates
+
 v. 2.2.4, 2018-11-15
 - added some graphics modes for better compatibility
   with old programs

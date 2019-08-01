@@ -225,6 +225,8 @@ void `readimagefile` (char \*filename, int x1, int y1, int x2, int y2);
 
 void `refresh` (void);
 
+void `sdlbgiauto` (void);
+
 void `sdlbgifast` (void);
 
 void `sdlbgislow` (void);
@@ -242,6 +244,8 @@ void `setrgbcolor` (int color);
 void `setrgbpalette` (int colornum, int red, int green, int blue); 
 
 void `setwinoptions` (char \*title, int x, int y, Uint32 flags);
+
+void `showerrorbox` (const char *message);
 
 void `swapbuffers` (void);
 

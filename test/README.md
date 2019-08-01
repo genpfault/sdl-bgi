@@ -7,6 +7,10 @@ This directory contains a few simple programs that show how to use
 `SDL_bgi`. Type `make` to compile them.
 
 
+- `bgidemo.c` is the original graphics demo for Turbo C 2.0 by
+Borland. It's now available at
+<https://archive.org/details/msdos_borland_turbo_c_2.01>.
+
 - `cellular.c` is a cellular automaton program. For more information,
 please see <http://mathworld.wolfram.com/CellularAutomaton.html>. Run
 it as `./cellular [rule]`, where `rule` is the generating rule (1-255).

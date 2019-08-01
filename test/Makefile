@@ -12,16 +12,18 @@ CFLAGS = -O2 -g -I. -Wall
 LIBS = -lSDL_bgi -lSDL2
 endif
 
-ifeq ($(PLATFORM),MINGW64_NT-6.1)
+ifeq ($(PLATFORM),Darwin)
+CFLAGS = -O2 -g -I. -I/library/Frameworks/SDL2.framework/Headers
+LIBS = -lSDL_bgi -framework SDL2
+endif
+
+# MSYS2 includes version number in uname - dumb idea indeed
+OS := $(shell uname -o)
+ifeq ($(OS),Msys)
 CFLAGS = -O2 -g -I. -I/mingw64/include/SDL2
 # -mconsole = open a console alongside the program
 # -mwindows = Windows-only program (no console)
 LIBS = -lmingw32 -L/mingw64/bin -lSDL_bgi -lSDL2main -lSDL2 # -mwindows
-endif
-
-ifeq ($(PLATFORM),Darwin)
-CFLAGS = -O2 -g -I. -I/library/Frameworks/SDL2.framework/Headers
-LIBS = -lSDL_bgi -framework SDL2
 endif
 
 PROGRAMS = cellular dla fern floodfilltest hopalong life \
@@ -29,9 +31,6 @@ PROGRAMS = cellular dla fern floodfilltest hopalong life \
 	   psychedelia sdlbgidemo simple turtledemo
 
 all: $(PROGRAMS)
-
-sdlbgidemo: sdlbgidemo.c 
-	$(CC) $(CFLAGS) -I. -o sdlbgidemo sdlbgidemo.c $(LIBS) -lm
 
 cellular: cellular.c 
 	$(CC) $(CFLAGS) -o cellular cellular.c $(LIBS)
@@ -71,6 +70,9 @@ plasma: plasma.c
 
 psychedelia: psychedelia.c 
 	$(CC) $(CFLAGS) -o psychedelia psychedelia.c $(LIBS) -lm
+
+sdlbgidemo: sdlbgidemo.c 
+	$(CC) $(CFLAGS) -I. -o sdlbgidemo sdlbgidemo.c $(LIBS) -lm
 
 simple: simple.c 
 	$(CC) $(CFLAGS) -o simple simple.c $(LIBS)

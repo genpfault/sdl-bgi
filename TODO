@@ -1,6 +1,8 @@
 TODO
 ----
 
+- make it c++ compatible?
+
 - implement getmaxheight(), getmaxwidth()?
 
 - add SDL_ttf TrueType fonts support?
